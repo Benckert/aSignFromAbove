@@ -169,6 +169,25 @@ export function reconcile(design: SignDesign): SignDesign {
   change('widthMm', w);
   change('heightMm', h);
 
+  /*
+    A circle of text has to fit on the board. Its radius is set independently
+    of the sign's size, so shrinking the board — or deepening the border —
+    would otherwise leave the ring hanging over the edge.
+  */
+  const area = safeArea(
+    next.shape,
+    next.widthMm,
+    next.heightMm,
+    decorationDepthMm(next.decoration),
+  );
+  const maxRadius = Math.max(Math.min(area.width, area.height) / 2, 10);
+  const ringed = next.texts.map((block) =>
+    block.wrap === 'circle' && block.circleRadiusMm > maxRadius
+      ? { ...block, circleRadiusMm: Math.floor(maxRadius) }
+      : block,
+  );
+  if (ringed.some((t, i) => t !== next.texts[i])) next = { ...next, texts: ringed };
+
   // No block carries more lines than a sign can wear.
   const trimmed = next.texts.map((block) => {
     const content = limitLines(block.content);

@@ -22,7 +22,8 @@
       "primary": "Draw your sign",
       "secondary": "See the gallery",
       "note": "No sign-up. Nothing committed.",
-      "process": "You draw, I come back with a price and a date, and I only start cutting once you have said yes. Nothing costs anything before that."
+      "process": "You draw, I come back with a price and a date, and I only start cutting once you have said yes. Nothing costs anything before that.",
+      "contact": "Get in touch"
     },
     "livePreview": {
       "label": "Oak sign",
@@ -46,12 +47,6 @@
       "title": "One person, one router",
       "lede": "A limited number of jobs at a time, so there is room to do them properly.",
       "cta": "About the workshop"
-    },
-    "cta": {
-      "title": "Something else in mind?",
-      "body": "Furniture, larger signs, or something you cannot quite describe yet.",
-      "button": "Get in touch",
-      "secondary": "See the gallery"
     }
   },
   "designer": {

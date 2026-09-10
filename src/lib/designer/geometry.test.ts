@@ -69,16 +69,37 @@ describe('arcTextPath', () => {
 });
 
 describe('circleTextPath', () => {
-  it('closes the circle', () => {
-    const d = circleTextPath(100, 100, 50);
-    expect(d.endsWith('Z')).toBe(true);
-    expect(d).not.toMatch(/NaN/);
+  it('is finite and well formed', () => {
+    expect(circleTextPath(100, 100, 50)).not.toMatch(/NaN|Infinity/);
   });
 
   it('starts at the bottom so centred text lands at the top', () => {
     // Centred text sits at 50 % of the path length; starting at the bottom of
     // a clockwise circle puts that halfway point at twelve o'clock.
     expect(circleTextPath(100, 100, 50).startsWith('M 100 150')).toBe(true);
+  });
+
+  it('uses two half-arcs rather than one self-closing arc', () => {
+    // A single arc that returns to its own start is degenerate per the SVG
+    // spec, and browsers lay text along it inconsistently — which put the
+    // lettering off the board entirely. Two halves are unambiguous.
+    const d = circleTextPath(100, 100, 50);
+    expect(d.match(/A /g)).toHaveLength(2);
+    expect(d).not.toContain('Z');
+  });
+
+  it('returns to its starting point', () => {
+    const d = circleTextPath(100, 100, 50);
+    expect(d.startsWith('M 100 150')).toBe(true);
+    expect(d.trim().endsWith('100 150')).toBe(true);
+  });
+
+  it('passes through the top at the halfway mark', () => {
+    expect(circleTextPath(100, 100, 50)).toContain('100 50');
+  });
+
+  it('survives a zero radius without producing a broken path', () => {
+    expect(circleTextPath(100, 100, 0)).not.toMatch(/NaN|Infinity/);
   });
 });
 

@@ -195,6 +195,45 @@ describe('reconcile', () => {
   });
 });
 
+describe('circle text', () => {
+  it('pulls a ring back inside a board it would overhang', () => {
+    const next = reconcile({
+      ...base(),
+      widthMm: 200,
+      heightMm: 200,
+      texts: [makeTextBlock({ content: 'Runt', wrap: 'circle', circleRadiusMm: 400 })],
+    });
+    expect(next.texts[0].circleRadiusMm).toBeLessThan(100);
+  });
+
+  it('leaves a ring that already fits alone', () => {
+    const design = {
+      ...base(),
+      widthMm: 300,
+      heightMm: 300,
+      shape: 'oval' as const,
+      decoration: { border: 'none' as const, insetMm: 10, corners: 'none' as const },
+      texts: [makeTextBlock({ content: 'Runt', wrap: 'circle', circleRadiusMm: 60 })],
+    };
+    expect(reconcile(design).texts[0].circleRadiusMm).toBe(60);
+  });
+
+  it('tightens the ring when a deep border is added', () => {
+    const plain = reconcile({
+      ...base(),
+      widthMm: 300,
+      heightMm: 300,
+      decoration: { border: 'none', insetMm: 10, corners: 'none' },
+      texts: [makeTextBlock({ content: 'Runt', wrap: 'circle', circleRadiusMm: 400 })],
+    });
+    const framed = reconcile({
+      ...plain,
+      decoration: { border: 'double', insetMm: 50, corners: 'none' },
+    });
+    expect(framed.texts[0].circleRadiusMm).toBeLessThan(plain.texts[0].circleRadiusMm);
+  });
+});
+
 describe('the line limit', () => {
   it('keeps a block within three lines', () => {
     const next = reconcile({

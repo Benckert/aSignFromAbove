@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Download, RotateCcw, ArrowRight, Loader2 } from 'lucide-react';
@@ -16,32 +16,30 @@ import { TextStep } from './steps/TextStep';
 import { ShapeStep } from './steps/ShapeStep';
 import { MaterialStep } from './steps/MaterialStep';
 import { DetailStep } from './steps/DetailStep';
-import { Button, ButtonLink } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { cx } from '@/lib/cx';
 
 /**
  * The designer.
  *
- * Three decisions shape this screen.
+ * Laid out as two panes that fill the viewport rather than as a page that
+ * scrolls. The sign is the subject of this screen, so it holds still and takes
+ * as much room as it can get; the only thing that moves is the column of
+ * controls beside it. Nothing about the board — its size, its shape, its
+ * proportions — changes the layout, because the preview draws into a frame of
+ * fixed ratio and centres the sign inside it.
  *
- * The controls are grouped into four steps rather than stacked in one long
- * column, so everything about the wording lives together and nobody scrolls
- * past a border-inset slider to reach the text field.
+ * The tabs sit at the top of the controls, with the examples. They were under
+ * the title on the other side of the screen, a long way from anything they
+ * govern.
  *
- * There is no warnings panel. The store reconciles every edit against what the
- * machine and the timber can do, so an unbuildable sign cannot be configured.
- *
- * And the header stays put. The title, the examples and the step tabs are one
- * sticky block under the site header: on a tool people scroll inside for
- * several minutes, losing the tabs off the top means scrolling back up to
- * change subject.
+ * The page below this is the footer and nothing else. On a phone the two panes
+ * stack: the sign pins to the top and the controls scroll beneath it.
  */
 
 const STEPS = ['text', 'shape', 'material', 'detail'] as const;
 type Step = (typeof STEPS)[number];
-
-/** Height of the site header, which everything sticky here sits beneath. */
-const HEADER = '4rem';
 
 export function Designer() {
   const t = useTranslations('designer');
@@ -55,28 +53,6 @@ export function Designer() {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  /*
-    The preview pins directly beneath the title-and-tabs block, so it needs to
-    know how tall that block actually is. That height is not a constant: the
-    example chips wrap onto a second row on a narrow screen, and the title
-    scales with the viewport. Measuring it and publishing the result as a
-    custom property is what keeps the two stacked correctly at every width,
-    rather than a magic number that is right at exactly one of them.
-  */
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
-
-  useLayoutEffect(() => {
-    const node = headerRef.current;
-    if (!node) return;
-    const observer = new ResizeObserver(([entry]) =>
-      setHeaderHeight(entry.contentRect.height),
-    );
-    observer.observe(node);
-    setHeaderHeight(node.getBoundingClientRect().height);
-    return () => observer.disconnect();
-  }, []);
-
   // Read before any effect writes to storage, so a first-time visitor is not
   // told their work was restored.
   const hadSaved = useRef<boolean | null>(null);
@@ -87,9 +63,7 @@ export function Designer() {
   useEffect(() => {
     void useDesigner.persist.rehydrate();
     if (!hadSaved.current) return;
-    toast(t('restored'), {
-      action: { label: t('restoredAction'), onClick: () => reset() },
-    });
+    toast(t('restored'), { action: { label: t('restoredAction'), onClick: () => reset() } });
     // Runs once on mount; the translations and reset action are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -113,26 +87,81 @@ export function Designer() {
     }
   }
 
+  /*
+    The two-pane, nothing-else-scrolls layout is a wide-screen arrangement. On
+    a phone there is no room for two panes, so the page scrolls as normal and
+    the sign pins to the top instead — a fixed viewport height there would trap
+    the controls inside a box shorter than they are.
+  */
   return (
-    <div className="shell pb-28 pt-5 lg:pb-12 lg:pt-8">
-      {/*
-        Title, examples and tabs travel together and stay under the site
-        header. On a phone the preview pins beneath them, so the whole of the
-        top of the screen is the sign and the way around it.
-      */}
-      <div
-        ref={headerRef}
-        className="sticky z-40 -mx-5 bg-surface/95 px-5 pb-px backdrop-blur-md md:-mx-8 md:px-8 lg:mx-0 lg:px-0"
-        style={{ top: HEADER }}
+    <div className="lg:flex lg:h-[calc(100dvh-4rem)] lg:overflow-hidden">
+      {/* ── The sign. Holds still and takes the room. ─────────────────── */}
+      <section
+        className={cx(
+          'relative flex flex-col border-rule bg-surface-2',
+          // On a phone it pins under the header; on a wide screen it is simply
+          // the left half and never scrolls at all.
+          'sticky top-16 z-30 border-b px-4 pb-3 pt-3',
+          'lg:static lg:min-w-0 lg:flex-1 lg:border-b-0 lg:border-r lg:p-6 xl:p-8',
+        )}
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pb-3 pt-3">
-          <h1 className="display text-[clamp(1.4rem,2.6vw,1.85rem)]">{t('title')}</h1>
+        <div className="relative lg:min-h-0 lg:flex-1">
+          {/* A pool of warm light behind the board, so it sits in a lit recess
+              rather than on a flat panel. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(90% 70% at 50% 40%, color-mix(in oklab, var(--color-oak) 13%, transparent) 0%, transparent 65%)',
+            }}
+          />
+          <SignPreview
+            design={design}
+            svgRef={svgRef}
+            label={t('preview.aria', {
+              wood: wood.name[locale === 'en' ? 'en' : 'sv'],
+              width: design.widthMm,
+              height: design.heightMm,
+            })}
+            className="relative mx-auto h-[26vh] w-full sm:h-[32vh] lg:h-full"
+          />
+        </div>
+
+        <div className="mt-2 flex shrink-0 items-center justify-between gap-3">
+          <span className="spec truncate">
+            {design.widthMm} × {design.heightMm} mm · {wood.name[locale === 'en' ? 'en' : 'sv']}
+          </span>
+          <span className="flex shrink-0 gap-0.5">
+            <IconButton label={t('preview.download')} onClick={download} disabled={downloading}>
+              {downloading ? (
+                <Loader2 size={15} aria-hidden className="animate-spin" />
+              ) : (
+                <Download size={15} aria-hidden />
+              )}
+            </IconButton>
+            <IconButton
+              label={t('reset')}
+              onClick={() => {
+                if (window.confirm(t('resetConfirm'))) reset();
+              }}
+            >
+              <RotateCcw size={15} aria-hidden />
+            </IconButton>
+          </span>
+        </div>
+      </section>
+
+      {/* ── The controls. The only thing that scrolls. ────────────────── */}
+      <section className="flex flex-col lg:min-h-0 lg:w-[26rem] lg:shrink-0 xl:w-[29rem]">
+        <div className="shrink-0 border-b border-rule bg-surface px-4 pt-3 lg:px-6">
+          <h1 className="display text-[1.25rem] leading-none">{t('title')}</h1>
 
           {/*
             One scrolling row on a narrow screen rather than two wrapped rows:
-            every row here pushes the sign further down the phone.
+            every row here pushes the sign further up the phone.
           */}
-          <div className="no-scrollbar -mx-5 flex w-[calc(100%+2.5rem)] items-baseline gap-x-2 overflow-x-auto px-5 sm:mx-0 sm:w-auto sm:flex-wrap sm:overflow-visible sm:px-0">
+          <div className="no-scrollbar -mx-4 mt-2.5 flex items-baseline gap-x-2 overflow-x-auto px-4 lg:-mx-6 lg:px-6">
             <span className="shrink-0 text-[0.75rem] text-ink-3">{t('examples')}</span>
             {PRESETS.map((preset) => (
               <button
@@ -145,105 +174,45 @@ export function Designer() {
               </button>
             ))}
           </div>
-        </div>
 
-        {/*
-          overflow-x-auto on its own gave this row a vertical scrollbar, arrows
-          and all, because the active-tab underline sits a pixel below the box.
-          Clipping the vertical axis and hiding the bar removes it.
-        */}
-        <div
-          role="tablist"
-          aria-label={t('title')}
-          className="no-scrollbar flex gap-1 overflow-x-auto overflow-y-hidden border-b border-rule"
-        >
-          {STEPS.map((id) => {
-            const selected = step === id;
-            return (
-              <button
-                key={id}
-                role="tab"
-                type="button"
-                aria-selected={selected}
-                onClick={() => setStep(id)}
-                className={cx(
-                  'relative shrink-0 px-3 pb-2.5 pt-1.5 text-[0.875rem] transition',
-                  selected ? 'font-medium text-ink' : 'text-ink-3 hover:text-ink-2',
-                )}
-              >
-                {t(`steps.${id}`)}
-                <span
+          {/*
+            overflow-x-auto alone gave this row a vertical scrollbar, arrows and
+            all, because the active-tab underline sits a pixel below the box.
+            Clipping the vertical axis and hiding the bar removes it.
+          */}
+          <div
+            role="tablist"
+            aria-label={t('title')}
+            className="no-scrollbar -mx-4 mt-2 flex gap-1 overflow-x-auto overflow-y-hidden px-4 lg:-mx-6 lg:px-6"
+          >
+            {STEPS.map((id) => {
+              const selected = step === id;
+              return (
+                <button
+                  key={id}
+                  role="tab"
+                  type="button"
+                  aria-selected={selected}
+                  onClick={() => setStep(id)}
                   className={cx(
-                    'absolute inset-x-2 bottom-0 h-0.5 rounded-full transition',
-                    selected ? 'bg-oak' : 'bg-transparent',
+                    'relative shrink-0 px-3 pb-2.5 pt-1.5 text-[0.875rem] transition',
+                    selected ? 'font-medium text-ink' : 'text-ink-3 hover:text-ink-2',
                   )}
-                />
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-5 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1fr)_26rem]">
-        {/* ── Preview ───────────────────────────────────────────────────── */}
-        <div
-          className="sticky z-30 -mx-5 bg-surface/95 px-5 pb-3 pt-3 backdrop-blur-md md:-mx-8 md:px-8 lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:backdrop-blur-none"
-          style={{ top: `calc(${HEADER} + ${headerHeight}px)` }}
-        >
-          {/* The board sits in a lit recess rather than on a flat card: an
-              inset ground, a lifted rim, and a pool of warm light behind it. */}
-          <div className="relative overflow-hidden rounded-lg border border-rule-strong bg-surface p-3 shadow-lift sm:p-5 lg:p-7">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, var(--color-oak) 12%, transparent) 0%, transparent 60%)',
-              }}
-            />
-            <span className="pointer-events-none absolute inset-0 shadow-[var(--shadow-inset)]" aria-hidden="true" />
-            <span className="relative block">
-            <SignPreview
-              design={design}
-              svgRef={svgRef}
-              label={t('preview.aria', {
-                wood: wood.name[locale === 'en' ? 'en' : 'sv'],
-                width: design.widthMm,
-                height: design.heightMm,
-              })}
-              className="mx-auto h-[22vh] w-full max-w-full sm:h-[30vh] lg:h-auto lg:max-h-[48vh]"
-            />
-            </span>
-          </div>
-
-          <div className="mt-2.5 hidden items-center justify-between gap-3 lg:flex">
-            <span className="spec">
-              {design.widthMm} × {design.heightMm} mm · {wood.name[locale === 'en' ? 'en' : 'sv']}
-            </span>
-            <span className="flex gap-1">
-              <Button size="sm" variant="quiet" onClick={download} disabled={downloading}>
-                {downloading ? (
-                  <Loader2 size={14} aria-hidden className="animate-spin" />
-                ) : (
-                  <Download size={14} aria-hidden />
-                )}
-                {t('preview.download')}
-              </Button>
-              <Button
-                size="sm"
-                variant="quiet"
-                onClick={() => {
-                  if (window.confirm(t('resetConfirm'))) reset();
-                }}
-              >
-                <RotateCcw size={13} aria-hidden /> {t('reset')}
-              </Button>
-            </span>
+                >
+                  {t(`steps.${id}`)}
+                  <span
+                    className={cx(
+                      'absolute inset-x-2 bottom-0 h-0.5 rounded-full transition',
+                      selected ? 'bg-oak' : 'bg-transparent',
+                    )}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* ── Controls ──────────────────────────────────────────────────── */}
-        <div className="mt-5 lg:mt-0">
+        <div className="px-4 pb-32 pt-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-6 lg:pb-6">
           {step === 'text' && <TextStep />}
           {step === 'shape' && <ShapeStep />}
           {step === 'material' && <MaterialStep />}
@@ -254,11 +223,11 @@ export function Designer() {
             <OrderButton orderable={orderable} />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── Phone: price and the way forward, always reachable ─────────── */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 backdrop-blur-md lg:hidden">
-        <div className="shell flex items-center gap-3 py-2.5">
+        <div className="flex items-center gap-3 px-4 py-2.5">
           <span className="min-w-0 flex-1">
             <span className="label block">{t('mobile.priceLabel')}</span>
             <span className="display block truncate text-[1.25rem] leading-tight">

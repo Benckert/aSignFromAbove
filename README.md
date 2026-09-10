@@ -110,6 +110,18 @@ size slider from the bit, the face and the board. If you loosen a
 widening what customers can order — a test guards against ratings that would
 make a face unreachable altogether.
 
+## The designer's layout
+
+Two panes filling the viewport, not a page that scrolls. The sign holds still
+and takes as much room as it can get; the only thing that moves is the column
+of controls beside it, and the page itself scrolls by exactly the height of the
+footer. Nothing about the board changes the layout either — the preview draws
+into a frame of fixed ratio and centres the sign inside it, so a 300 × 300
+plaque and a 1200 × 300 plank occupy the same box.
+
+Below `lg` there is no room for two panes, so the page scrolls normally and the
+sign pins to the top instead.
+
 ## Themes
 
 Two, and both are dark: a warm mid-brown default and a deeper night variant.
@@ -124,7 +136,7 @@ choice before first paint, which is what stops the page flashing the wrong one.
 
 | Route (sv / en) | What it is |
 | --- | --- |
-| `/` | Hero with the live sign, and one invitation to get in touch |
+| `/` | Hero with the live sign, and an envelope for anything that is not a sign |
 | `/designa-skylt` · `/en/design-your-sign` | The designer |
 | `/mobler` · `/en/furniture` | Gallery |
 | `/kontakt` · `/en/contact` | Contact **and** custom work, one form |

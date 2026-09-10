@@ -180,7 +180,7 @@ export const PRESETS: Preset[] = [
           capHeightMm: 22,
           letterSpacing: 0.16,
           wrap: 'circle',
-          circleRadiusMm: 108,
+          circleRadiusMm: 98,
           x: 0.5,
           y: 0.5,
         }),

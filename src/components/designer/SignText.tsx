@@ -22,15 +22,13 @@ interface Props {
   /** The area the text is allowed to occupy, in mm. */
   area: { x: number; y: number; width: number; height: number };
   capRatios: Record<string, number>;
-  /** Unique per preview, kept for callers that scope other defs by it. */
-  uid: string;
   fill: string;
   filter?: string;
   /** Draws a faint box round the block, to show what is being edited. */
   selected?: boolean;
 }
 
-export function SignText({ block, area, capRatios, uid, fill, filter, selected }: Props) {
+export function SignText({ block, area, capRatios, fill, filter, selected }: Props) {
   /*
     Path ids come from React's own useId rather than from the block's id.
 

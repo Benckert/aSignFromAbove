@@ -22,7 +22,8 @@
       "primary": "Rita din skylt",
       "secondary": "Se galleriet",
       "note": "Ingen registrering. Du binder dig inte till något.",
-      "process": "Du ritar, jag hör av mig med pris och tid, och först när du sagt ja börjar jag fräsa. Inget kostar något innan dess."
+      "process": "Du ritar, jag hör av mig med pris och tid, och först när du sagt ja börjar jag fräsa. Inget kostar något innan dess.",
+      "contact": "Kontakta mig"
     },
     "livePreview": {
       "label": "Skylt i ek",
@@ -46,12 +47,6 @@
       "title": "En person, en fräs",
       "lede": "Ett begränsat antal beställningar i taget, för att hinna göra dem ordentligt.",
       "cta": "Om verkstaden"
-    },
-    "cta": {
-      "title": "Något annat i tankarna?",
-      "body": "Möbler, större skyltar, eller något du inte riktigt vet hur du ska beskriva än.",
-      "button": "Hör av dig",
-      "secondary": "Se galleriet"
     }
   },
   "designer": {

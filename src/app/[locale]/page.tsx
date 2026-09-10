@@ -1,13 +1,12 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Hero } from '@/components/home/Hero';
-import { CallToAction } from '@/components/home/CallToAction';
 import { carvingFontVariables } from '@/config/carving-fonts.loader';
 
 /**
  * The front page: a sign, a way into the tool that made it, one sentence on
- * what happens next, and one invitation to talk if a sign is not the thing.
+ * what happens next, and an envelope for anyone whose thing is not a sign.
  *
- * Two sections. It began as six.
+ * One section. It began as six.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -17,7 +16,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     // The hero draws a real sign, so it needs the carving faces.
     <div className={carvingFontVariables}>
       <Hero />
-      <CallToAction />
     </div>
   );
 }

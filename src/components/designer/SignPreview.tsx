@@ -134,7 +134,6 @@ export function SignPreview({
           block={block}
           area={area}
           capRatios={capRatios}
-          uid={uid}
           fill={carveFill}
           filter={carveFilter}
           selected={activeTextId === block.id}
@@ -172,7 +171,6 @@ export function SignPreview({
                 block={block}
                 area={area}
                 capRatios={capRatios}
-                uid={`${uid}c`}
                 fill="#000"
               />
             ))}

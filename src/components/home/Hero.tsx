@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/Button';
+import { IconLink } from '@/components/ui/IconLink';
 import { HeroSign } from './HeroSign';
 
 /**
@@ -12,6 +13,11 @@ import { HeroSign } from './HeroSign';
  * headline underneath does not. It is gone, along with the four numbered steps
  * that followed: what those four boxes were really saying is one sentence, so
  * it is now one sentence.
+ *
+ * The third action in the row is a symbol rather than a third worded button.
+ * There was a full-width panel further down the page inviting people to get in
+ * touch; it took a screen to say what an envelope says here, next to the
+ * buttons someone is already looking at.
  */
 export function Hero() {
   const t = useTranslations('home.hero');
@@ -33,6 +39,9 @@ export function Hero() {
             <ButtonLink href="/furniture" variant="quiet" size="lg">
               {t('secondary')}
             </ButtonLink>
+            <IconLink href="/contact" label={t('contact')}>
+              <Mail size={18} aria-hidden />
+            </IconLink>
           </div>
 
           {/* The whole "how it works" section, said properly and once. */}

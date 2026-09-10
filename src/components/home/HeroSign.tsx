@@ -107,13 +107,14 @@ const SCENES: SignDesign[] = [
         capHeightMm: 20,
         letterSpacing: 0.18,
         wrap: 'circle',
-        circleRadiusMm: 108,
+        circleRadiusMm: 98,
       }),
       makeTextBlock({
         content: 'Est.\n1998',
         fontId: 'baskerville',
-        capHeightMm: 20,
+        capHeightMm: 18,
         lineHeight: 1.5,
+        y: 0.56,
       }),
     ],
   },
@@ -240,27 +241,20 @@ export function HeroSign({ label }: { label: string }) {
           ))}
         </div>
 
-        {/* Only offered while there is something to pause. Once someone has
-            taken manual control the automatic advance is finished, and a
-            pause button for a stopped thing is noise. */}
-        {!manual && !reducedMotion && (
+        {/*
+          Symbol only. Pause and play are the two most universally understood
+          marks there are, and a word beside them buys nothing but width. The
+          label survives as the accessible name and the hover title.
+        */}
+        {!reducedMotion && (
           <button
             type="button"
-            onClick={() => setManual(true)}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-[0.75rem] text-ink-3 transition hover:text-ink"
+            onClick={() => setManual((v) => !v)}
+            aria-label={manual ? t('play') : t('pause')}
+            title={manual ? t('play') : t('pause')}
+            className="ml-auto grid h-8 w-8 place-items-center rounded-sm text-ink-3 transition hover:bg-surface-3 hover:text-ink"
           >
-            <Pause size={12} aria-hidden />
-            {t('pause')}
-          </button>
-        )}
-        {manual && !reducedMotion && (
-          <button
-            type="button"
-            onClick={() => setManual(false)}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-[0.75rem] text-ink-3 transition hover:text-ink"
-          >
-            <Play size={12} aria-hidden />
-            {t('play')}
+            {manual ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>
         )}
       </div>

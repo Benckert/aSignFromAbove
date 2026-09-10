@@ -161,16 +161,28 @@ export function arcTextPath(
 /**
  * A full circle for text to run around.
  *
+ * Built from two half-arcs rather than one arc that returns to its own start.
+ *
+ * That distinction is not stylistic. An elliptical arc whose endpoints
+ * coincide is degenerate by the SVG specification, and the near-coincident
+ * version — ending a hair away from the start to dodge that rule — is treated
+ * inconsistently: laying text along it put the lettering far below the board
+ * instead of around the rim. Two unambiguous half-circles avoid the question
+ * entirely and are what every drawing program emits.
+ *
  * It starts at the bottom and runs clockwise, which puts the halfway point at
  * twelve o'clock. Centred text is placed at 50 % of a path's length, so this is
  * what makes a centred label sit squarely at the top — and because the path is
  * travelling left-to-right at that point, the letters read the right way up.
  */
 export function circleTextPath(cx: number, cy: number, r: number): string {
+  const radius = Math.max(r, 0.1);
   return [
-    `M ${cx} ${cy + r}`,
-    `A ${r} ${r} 0 1 1 ${cx - 0.001} ${cy + r}`,
-    'Z',
+    `M ${cx} ${cy + radius}`,
+    // Bottom to top, passing the left side.
+    `A ${radius} ${radius} 0 0 1 ${cx} ${cy - radius}`,
+    // Top back to bottom, passing the right side.
+    `A ${radius} ${radius} 0 0 1 ${cx} ${cy + radius}`,
   ].join(' ');
 }
 
