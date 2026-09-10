@@ -112,15 +112,26 @@ make a face unreachable altogether.
 
 ## The designer's layout
 
-Two panes filling the viewport, not a page that scrolls. The sign holds still
-and takes as much room as it can get; the only thing that moves is the column
-of controls beside it, and the page itself scrolls by exactly the height of the
-footer. Nothing about the board changes the layout either — the preview draws
-into a frame of fixed ratio and centres the sign inside it, so a 300 × 300
-plaque and a 1200 × 300 plank occupy the same box.
+One scrollbar — the document's. The preview is `position: sticky`, so it holds
+its place while the controls travel past it, and the page ends where the
+controls do.
 
-Below `lg` there is no room for two panes, so the page scrolls normally and the
-sign pins to the top instead.
+An earlier version gave the controls their own scroll container inside a
+viewport-height shell. It kept the sign in view, but at the cost of a second
+scrollbar, a wheel that did different things over different halves of the
+screen, and a page that would not answer End or Page Down. Sticky gets the same
+result out of the browser's own scrolling.
+
+Nothing about the board changes the layout either — the preview draws into a
+frame of fixed ratio and centres the sign inside it, so a 300 × 300 plaque and
+a 1200 × 300 plank occupy the same box.
+
+Two details worth knowing if you touch it. The flex row is `items-start`,
+because a stretched flex child cannot be sticky — it is already as tall as the
+row and has nowhere to travel. And the controls header is sticky only at `lg`
+and above: on a phone it sits directly beneath the sticky preview, and two
+sticky siblings at the same offset stack on each other, which would slide the
+tabs under the sign.
 
 ## Themes
 

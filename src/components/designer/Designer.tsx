@@ -23,19 +23,25 @@ import { cx } from '@/lib/cx';
 /**
  * The designer.
  *
- * Laid out as two panes that fill the viewport rather than as a page that
- * scrolls. The sign is the subject of this screen, so it holds still and takes
- * as much room as it can get; the only thing that moves is the column of
- * controls beside it. Nothing about the board — its size, its shape, its
- * proportions — changes the layout, because the preview draws into a frame of
- * fixed ratio and centres the sign inside it.
+ * The page scrolls, and the sign stays put.
  *
- * The tabs sit at the top of the controls, with the examples. They were under
- * the title on the other side of the screen, a long way from anything they
- * govern.
+ * There is one scrollbar — the document's. The preview is sticky, so it holds
+ * its place under the header while the controls travel past it, and the page
+ * ends where the controls do. An earlier version gave the controls their own
+ * scroll container inside a viewport-height shell; it kept the sign in view,
+ * but at the cost of a second scrollbar, a wheel that did different things
+ * over different halves of the screen, and a page that would not respond to
+ * End or Page Down. Sticky gets the same result out of the browser's own
+ * scrolling.
  *
- * The page below this is the footer and nothing else. On a phone the two panes
- * stack: the sign pins to the top and the controls scroll beneath it.
+ * Nothing about the board — its size, its shape, its proportions — changes the
+ * layout, because the preview draws into a frame of fixed ratio and centres
+ * the sign inside it.
+ *
+ * The title, examples and tabs sit at the top of the controls and are sticky
+ * in their own right, so the way between steps is always in reach. On a phone
+ * there is no second column: the sign pins to the top and everything else
+ * flows beneath it.
  */
 
 const STEPS = ['text', 'shape', 'material', 'detail'] as const;
@@ -87,22 +93,20 @@ export function Designer() {
     }
   }
 
-  /*
-    The two-pane, nothing-else-scrolls layout is a wide-screen arrangement. On
-    a phone there is no room for two panes, so the page scrolls as normal and
-    the sign pins to the top instead — a fixed viewport height there would trap
-    the controls inside a box shorter than they are.
-  */
   return (
-    <div className="lg:flex lg:h-[calc(100dvh-4rem)] lg:overflow-hidden">
+    // items-start matters: a stretched flex child cannot be sticky, because it
+    // is already as tall as the row and has nowhere to travel.
+    <div className="lg:flex lg:items-start">
       {/* ── The sign. Holds still and takes the room. ─────────────────── */}
       <section
         className={cx(
           'relative flex flex-col border-rule bg-surface-2',
-          // On a phone it pins under the header; on a wide screen it is simply
-          // the left half and never scrolls at all.
+          // Sticky at both sizes, just at different heights: a band across the
+          // top of a phone, a full-height column beside the controls on a wide
+          // screen.
           'sticky top-16 z-30 border-b px-4 pb-3 pt-3',
-          'lg:static lg:min-w-0 lg:flex-1 lg:border-b-0 lg:border-r lg:p-6 xl:p-8',
+          'lg:top-16 lg:h-[calc(100dvh-4rem)] lg:min-w-0 lg:flex-1 lg:self-start',
+          'lg:border-b-0 lg:border-r lg:p-6 xl:p-8',
         )}
       >
         <div className="relative lg:min-h-0 lg:flex-1">
@@ -153,8 +157,14 @@ export function Designer() {
       </section>
 
       {/* ── The controls. The only thing that scrolls. ────────────────── */}
-      <section className="flex flex-col lg:min-h-0 lg:w-[26rem] lg:shrink-0 xl:w-[29rem]">
-        <div className="shrink-0 border-b border-rule bg-surface px-4 pt-3 lg:px-6">
+      <section className="flex flex-col lg:w-[26rem] lg:shrink-0 xl:w-[29rem]">
+        {/*
+          Sticky only where it has a column of its own. On a phone this sits
+          directly below the sticky preview, and two sticky siblings at the
+          same offset simply stack on top of each other — the tabs would slide
+          under the sign and vanish. There they scroll with the controls.
+        */}
+        <div className="z-20 border-b border-rule bg-surface/95 px-4 pt-3 backdrop-blur-md lg:sticky lg:top-16 lg:px-6">
           <h1 className="display text-[1.25rem] leading-none">{t('title')}</h1>
 
           {/*
@@ -212,7 +222,7 @@ export function Designer() {
           </div>
         </div>
 
-        <div className="px-4 pb-32 pt-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-6 lg:pb-6">
+        <div className="px-4 pb-32 pt-4 lg:px-6 lg:pb-10">
           {step === 'text' && <TextStep />}
           {step === 'shape' && <ShapeStep />}
           {step === 'material' && <MaterialStep />}
