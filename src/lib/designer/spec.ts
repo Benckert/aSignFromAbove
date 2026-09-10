@@ -39,12 +39,6 @@ const FINISH_LABEL: Record<string, string> = {
   oilPaint: 'Färgfyllda bokstäver + hårdvaxolja',
 };
 
-const PLACEMENT_LABEL: Record<string, string> = {
-  indoor: 'Inomhus',
-  sheltered: 'Skyddat utomhus (under tak)',
-  outdoor: 'Utomhus, oskyddat',
-};
-
 const HANGING_LABEL: Record<string, string> = {
   none: 'Ingen upphängning',
   keyhole: 'Nyckelhål på baksidan',
@@ -93,7 +87,6 @@ export function describeDesign(design: SignDesign): string {
   lines.push(`  Form            ${SHAPE_LABEL[design.shape]}`);
   lines.push(`  Kant            ${EDGE_LABEL[design.edge]}`);
   lines.push(`  Träslag         ${wood.name.sv} (${wood.latin})`);
-  lines.push(`  Placering       ${PLACEMENT_LABEL[design.placement]}`);
   lines.push('');
 
   lines.push('BEARBETNING');

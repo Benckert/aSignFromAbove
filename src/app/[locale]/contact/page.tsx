@@ -38,7 +38,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         <aside className="flex flex-col gap-7">
           <dl className="flex flex-col gap-4">
             <div>
-              <dt className="spec">{t('email')}</dt>
+              <dt className="label">{t('email')}</dt>
               <dd className="mt-1">
                 <a
                   href={`mailto:${site.contact.email}`}
@@ -50,7 +50,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             </div>
             {site.contact.phone && (
               <div>
-                <dt className="spec">{t('phone')}</dt>
+                <dt className="label">{t('phone')}</dt>
                 <dd className="mt-1">
                   <a
                     href={`tel:${site.contact.phone.replace(/\s/g, '')}`}
@@ -62,7 +62,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               </div>
             )}
             <div>
-              <dt className="spec">{t('address')}</dt>
+              <dt className="label">{t('address')}</dt>
               <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-2">
                 {site.contact.address.street}
                 <br />
@@ -80,7 +80,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
           {/* Required to be directly accessible under Swedish e-commerce law. */}
           <div className="border-t border-rule pt-5">
-            <h2 className="spec mb-3">{t('business.title')}</h2>
+            <h2 className="label mb-3">{t('business.title')}</h2>
             <dl className="flex flex-col gap-2 text-[0.8125rem]">
               <div className="flex justify-between gap-3">
                 <dt className="text-ink-3">{t('business.org')}</dt>

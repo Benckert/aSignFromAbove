@@ -1,7 +1,7 @@
 import { CARVING_FONTS, getFont, type CarvingFont } from '@/config/carving-fonts';
-import { WOODS, type Wood, type WoodId } from '@/config/woods';
+import { WOODS, type Wood } from '@/config/woods';
 import { BITS, MACHINE } from '@/config/router-profile';
-import type { CarveMethod, Finish, Placement, SignDesign, TextBlock } from './types';
+import type { CarveMethod, Finish, SignDesign, TextBlock } from './types';
 import { safeArea } from './geometry';
 
 /**
@@ -18,38 +18,37 @@ import { safeArea } from './geometry';
  * constraints mean anything they can reach is something the workshop can make.
  *
  * The one cost is that a choice made earlier can be invalidated by a choice
- * made later — pick walnut, then pick outdoors. `reconcile` below handles that
- * by correcting the design rather than blocking the second choice, because the
- * thing the customer just touched is the thing they meant.
+ * made later — pick a delicate face, then pick a cutting method it cannot take.
+ * `reconcile` below handles that by correcting the earlier choice rather than
+ * blocking the new one, because the thing just touched is the thing meant.
+ *
+ * Note what is deliberately *not* constrained: timber against weather. Whether
+ * a sign lives indoors or out is a question about the customer's house, not
+ * about the machine, and asking it bought one more decision for every visitor
+ * in order to help a few. The timbers say how they age, and the finish choice
+ * is where that decision actually gets made.
  */
 
-/* ── Cutting methods ──────────────────────────────────────────────────── */
+/* ── Cutting methods, timbers and finishes ───────────────────────────── */
 
-export function availableMethods(placement: Placement): CarveMethod[] {
-  // Raised letters hold water on their top faces, so they are not offered for
-  // a sign that lives out in the weather.
-  return placement === 'outdoor'
-    ? ['vcarve', 'pocket']
-    : ['vcarve', 'pocket', 'raised'];
+/**
+ * All three cuts, every timber and every finish are always on offer.
+ *
+ * These stay as functions rather than being inlined at their call sites: they
+ * are the seam where a genuine restriction would go if one ever appeared (a
+ * timber out of stock, a bit away being sharpened), and the interface already
+ * reads from them.
+ */
+export function availableMethods(): CarveMethod[] {
+  return ['vcarve', 'pocket', 'raised'];
 }
 
-/* ── Timbers ──────────────────────────────────────────────────────────── */
-
-export function availableWoods(placement: Placement): Wood[] {
-  if (placement === 'indoor') return WOODS;
-  // Under cover is gentler than full exposure, but both need a timber that
-  // tolerates moving air and damp.
-  return WOODS.filter((w) => w.outdoorSuitable);
+export function availableWoods(): Wood[] {
+  return WOODS;
 }
 
-/* ── Finishes ─────────────────────────────────────────────────────────── */
-
-export function availableFinishes(placement: Placement): Finish[] {
-  // Bare timber outdoors is a legitimate choice and greys handsomely, so it
-  // stays. Everything on offer works in every position.
-  return placement === 'outdoor'
-    ? ['oil', 'paint', 'oilPaint', 'raw']
-    : ['raw', 'oil', 'paint', 'oilPaint'];
+export function availableFinishes(): Finish[] {
+  return ['raw', 'oil', 'paint', 'oilPaint'];
 }
 
 /* ── Faces ────────────────────────────────────────────────────────────── */
@@ -129,8 +128,8 @@ export function capHeightRange(
  * Brings a design back inside the rules after a change that broke them.
  *
  * Called on every edit. It always preserves the field the customer just
- * touched and adjusts whatever that made impossible — moving a sign outdoors
- * swaps the timber rather than refusing the move.
+ * touched and adjusts whatever that made impossible — switching to a cut a
+ * face cannot take swaps the face rather than refusing the cut.
  *
  * Returns the same object when nothing needed changing, so React can skip the
  * re-render.
@@ -140,20 +139,6 @@ export function reconcile(design: SignDesign): SignDesign {
   const change = <K extends keyof SignDesign>(key: K, value: SignDesign[K]) => {
     if (next[key] !== value) next = { ...next, [key]: value };
   };
-
-  // Timber must suit where the sign will live.
-  const woods = availableWoods(next.placement);
-  if (!woods.some((w) => w.id === next.woodId)) {
-    change('woodId', (woods[0]?.id ?? 'ek') as WoodId);
-  }
-
-  // Method must suit where the sign will live.
-  const methods = availableMethods(next.placement);
-  if (!methods.includes(next.method)) change('method', methods[0]);
-
-  // Finish must be on offer.
-  const finishes = availableFinishes(next.placement);
-  if (!finishes.includes(next.finish)) change('finish', finishes[0]);
 
   // Every face in use must suit the method.
   const fonts = availableFonts(next.method);

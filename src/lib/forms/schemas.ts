@@ -106,7 +106,6 @@ export const signDesignSchema = z.object({
   shape: z.enum(['rect', 'rounded', 'arch', 'oval']),
   edge: z.enum(['square', 'chamfer', 'roundover']),
   woodId: z.enum(['furu', 'al', 'bjork', 'ask', 'ek', 'lonn', 'valnot']),
-  placement: z.enum(['indoor', 'sheltered', 'outdoor']),
   method: z.enum(['vcarve', 'pocket', 'raised']),
   finish: z.enum(['raw', 'oil', 'paint', 'oilPaint']),
   paintColour: z.string().regex(/^#[0-9a-fA-F]{6}$/),

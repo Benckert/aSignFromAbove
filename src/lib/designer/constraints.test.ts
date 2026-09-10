@@ -11,37 +11,24 @@ import {
 import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
 import { getFont } from '@/config/carving-fonts';
 import { BITS, MACHINE } from '@/config/router-profile';
+import { WOODS } from '@/config/woods';
 
 const base = () => defaultDesign();
 
-describe('availableWoods', () => {
-  it('offers everything indoors', () => {
-    expect(availableWoods('indoor').length).toBeGreaterThan(2);
+describe('the always-available catalogues', () => {
+  it('offers every timber', () => {
+    expect(availableWoods().length).toBe(WOODS.length);
   });
 
-  it('offers only weather-tolerant timbers outdoors', () => {
-    for (const wood of availableWoods('outdoor')) expect(wood.outdoorSuitable).toBe(true);
+  it('offers all three cuts and all four finishes', () => {
+    expect(availableMethods()).toHaveLength(3);
+    expect(availableFinishes()).toHaveLength(4);
   });
 
-  it('never returns an empty list', () => {
-    for (const p of ['indoor', 'sheltered', 'outdoor'] as const) {
-      expect(availableWoods(p).length).toBeGreaterThan(0);
-    }
-  });
-});
-
-describe('availableMethods', () => {
-  it('drops raised lettering outdoors, where it would hold water', () => {
-    expect(availableMethods('outdoor')).not.toContain('raised');
-    expect(availableMethods('indoor')).toContain('raised');
-  });
-});
-
-describe('availableFinishes', () => {
-  it('always offers something', () => {
-    for (const p of ['indoor', 'sheltered', 'outdoor'] as const) {
-      expect(availableFinishes(p).length).toBeGreaterThan(0);
-    }
+  it('offers at least one timber that survives outdoors', () => {
+    // Not a constraint any more, but the catalogue still has to be able to
+    // answer someone who wants a sign for a gatepost.
+    expect(availableWoods().some((w) => w.outdoorSuitable)).toBe(true);
   });
 });
 
@@ -132,22 +119,6 @@ describe('reconcile', () => {
     }
   });
 
-  it('swaps an indoor timber when the sign moves outdoors', () => {
-    const next = reconcile({ ...base(), woodId: 'valnot', placement: 'outdoor' });
-    expect(next.placement).toBe('outdoor');
-    expect(next.woodId).not.toBe('valnot');
-    expect(availableWoods('outdoor').some((w) => w.id === next.woodId)).toBe(true);
-  });
-
-  it('leaves a weather-tolerant timber alone outdoors', () => {
-    expect(reconcile({ ...base(), woodId: 'ek', placement: 'outdoor' }).woodId).toBe('ek');
-  });
-
-  it('drops raised lettering when the sign moves outdoors', () => {
-    const next = reconcile({ ...base(), method: 'raised', placement: 'outdoor' });
-    expect(next.method).not.toBe('raised');
-  });
-
   it('replaces a face that does not suit a newly chosen method', () => {
     const withPlayfair = { ...base(), texts: [makeTextBlock({ fontId: 'playfair', content: 'Hej' })] };
     const next = reconcile({ ...withPlayfair, method: 'pocket' });
@@ -194,8 +165,14 @@ describe('reconcile', () => {
     expect(next.decoration.insetMm).toBeLessThan(50);
   });
 
+  it('keeps every timber available whatever else is chosen', () => {
+    // Timber is no longer constrained by anything, so walnut must survive a
+    // change that would once have swapped it out.
+    expect(reconcile({ ...base(), woodId: 'valnot', method: 'raised' }).woodId).toBe('valnot');
+  });
+
   it('is idempotent — reconciling twice changes nothing more', () => {
-    const once = reconcile({ ...base(), woodId: 'valnot', placement: 'outdoor', widthMm: 9000 });
+    const once = reconcile({ ...base(), woodId: 'valnot', method: 'pocket', widthMm: 9000 });
     expect(reconcile(once)).toBe(once);
   });
 
@@ -203,15 +180,14 @@ describe('reconcile', () => {
     // A deliberately incoherent starting point.
     const next = reconcile({
       ...base(),
-      placement: 'outdoor',
       woodId: 'valnot',
       method: 'raised',
       widthMm: 4000,
       texts: [makeTextBlock({ fontId: 'playfair', content: 'Hej', capHeightMm: 1 })],
     });
-    expect(availableWoods(next.placement).some((w) => w.id === next.woodId)).toBe(true);
-    expect(availableMethods(next.placement)).toContain(next.method);
-    expect(availableFinishes(next.placement)).toContain(next.finish);
+    expect(availableWoods().some((w) => w.id === next.woodId)).toBe(true);
+    expect(availableMethods()).toContain(next.method);
+    expect(availableFinishes()).toContain(next.finish);
     expect(availableFonts(next.method).some((f) => f.id === next.texts[0].fontId)).toBe(true);
     expect(next.widthMm).toBeLessThanOrEqual(MACHINE.workAreaMm.width);
   });

@@ -280,7 +280,7 @@ export function OrderForm() {
 
         {/* What they are about to send. */}
         <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
-          <h2 className="spec">{t('summary')}</h2>
+          <h2 className="label">{t('summary')}</h2>
           <div className="rounded-lg border border-rule bg-surface-2 p-4">
             {hydrated && (
               <SignPreview

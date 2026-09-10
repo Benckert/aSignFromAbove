@@ -12,6 +12,7 @@ import { measureBlockWidthMm, measureCapRatios } from '@/lib/designer/measure';
 import { Field, inputClass } from '@/components/ui/Field';
 import { Segmented, Slider } from '@/components/ui/Controls';
 import { Button } from '@/components/ui/Button';
+import { PlacementGrid } from '@/components/ui/PlacementGrid';
 import { cx } from '@/lib/cx';
 
 /**
@@ -97,7 +98,7 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
   return (
     <div className="rounded-md border border-rule bg-surface-2 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="spec">{t('text.blockLabel', { n: index + 1 })}</span>
+        <span className="label">{t('text.blockLabel', { n: index + 1 })}</span>
         {design.texts.length > 1 && (
           <button
             type="button"
@@ -231,16 +232,46 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
           </Field>
         )}
 
-        <Field label={t('text.positionY')} readout={`${Math.round(block.y * 100)} %`}>
-          {(props) => (
-            <Slider
-              {...props}
-              value={block.y}
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(y) => patch({ y })}
-            />
+        <Field label={t('text.position')}>
+          {() => (
+            <div className="flex flex-col gap-3">
+              <PlacementGrid
+                label={t('text.position')}
+                x={block.x}
+                y={block.y}
+                aspect={design.widthMm / design.heightMm}
+                onChange={(position) => patch(position)}
+              />
+
+              {/* The sliders stay for the millimetre-level cases the nine
+                  points cannot reach. */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label={t('text.positionX')} readout={`${Math.round(block.x * 100)} %`}>
+                  {(props) => (
+                    <Slider
+                      {...props}
+                      value={block.x}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onChange={(x) => patch({ x })}
+                    />
+                  )}
+                </Field>
+                <Field label={t('text.positionY')} readout={`${Math.round(block.y * 100)} %`}>
+                  {(props) => (
+                    <Slider
+                      {...props}
+                      value={block.y}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onChange={(y) => patch({ y })}
+                    />
+                  )}
+                </Field>
+              </div>
+            </div>
           )}
         </Field>
       </div>

@@ -210,7 +210,7 @@ export function Designer() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 backdrop-blur-sm lg:hidden">
         <div className="shell flex items-center gap-3 py-2.5">
           <span className="min-w-0 flex-1">
-            <span className="spec block">{t('mobile.priceLabel')}</span>
+            <span className="label block">{t('mobile.priceLabel')}</span>
             <span className="display block truncate text-[1.25rem] leading-tight">
               {formatOre(price.totalOre, locale)}
             </span>

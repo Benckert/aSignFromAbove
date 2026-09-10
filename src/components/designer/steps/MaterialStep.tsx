@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { getWood } from '@/config/woods';
 import { useDesigner } from '@/lib/designer/store';
 import { availableFinishes, availableMethods, availableWoods } from '@/lib/designer/constraints';
-import type { CarveMethod, Finish, Placement } from '@/lib/designer/types';
+import type { CarveMethod, Finish } from '@/lib/designer/types';
 import type { WoodId } from '@/config/woods';
 import { Field } from '@/components/ui/Field';
 import { Segmented, SwatchGrid } from '@/components/ui/Controls';
@@ -13,10 +13,10 @@ import { cx } from '@/lib/cx';
 /**
  * Timber, cut and finish.
  *
- * Where the sign will live comes first, because it decides everything below
- * it: choose outdoors and the timbers that will not survive simply leave the
- * list, along with raised lettering, which holds water. Nothing is greyed out
- * with an explanation — the choices on offer are the choices that work.
+ * There is no indoors/outdoors question here. It looked like useful guidance
+ * and was really one more decision imposed on everyone to catch a few cases —
+ * and the answer it produced was already implied by the finish. Each timber
+ * says how it ages instead, which is the part a customer actually weighs.
  */
 
 const PAINT_COLOURS = [
@@ -35,30 +35,13 @@ export function MaterialStep() {
   const set = useDesigner((s) => s.set);
 
   const wood = getWood(design.woodId);
-  const woods = availableWoods(design.placement);
-  const methods = availableMethods(design.placement);
-  const finishes = availableFinishes(design.placement);
+  const woods = availableWoods();
+  const methods = availableMethods();
+  const finishes = availableFinishes();
   const painted = design.finish === 'paint' || design.finish === 'oilPaint';
 
   return (
     <div className="flex flex-col gap-5">
-      <Field
-        label={t('size.placement')}
-        hint={design.placement !== 'indoor' ? t('wood.filtered') : undefined}
-      >
-        {() => (
-          <Segmented<Placement>
-            label={t('size.placement')}
-            value={design.placement}
-            options={(['indoor', 'sheltered', 'outdoor'] as const).map((placement) => ({
-              value: placement,
-              label: t(`placements.${placement}`),
-            }))}
-            onChange={(placement) => set({ placement })}
-          />
-        )}
-      </Field>
-
       <Field label={t('wood.label')}>
         {() => (
           <SwatchGrid

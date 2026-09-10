@@ -34,7 +34,7 @@ export function LegalDocument({
       <header className="max-w-2xl">
         <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">{title}</h1>
         <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-2">{lede}</p>
-        <p className="spec mt-5">{updated}</p>
+        <p className="mt-5 text-[0.75rem] text-ink-3">{updated}</p>
       </header>
 
       <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14">

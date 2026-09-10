@@ -4,9 +4,14 @@ import { ButtonLink } from '@/components/ui/Button';
 import { HeroSign } from './HeroSign';
 
 /**
- * The front page opens on the thing the site is for, and the only emphasised
- * action is the one that leads into the design tool. Everything else on this
- * page is deliberately quieter than this block.
+ * The front page opens on the thing the site is for.
+ *
+ * What used to sit above the headline was a small uppercase monospaced label
+ * reading "sign carving and furniture making" — the kind of thing that appears
+ * on every template built in the last five years and tells a reader nothing the
+ * headline underneath does not. It is gone, along with the four numbered steps
+ * that followed: what those four boxes were really saying is one sentence, so
+ * it is now one sentence.
  */
 export function Hero() {
   const t = useTranslations('home.hero');
@@ -14,11 +19,10 @@ export function Hero() {
 
   return (
     <section className="border-b border-rule">
-      <div className="shell grid items-center gap-10 py-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-20">
+      <div className="shell grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14 lg:py-20">
         <div>
-          <p className="spec">{t('eyebrow')}</p>
-          <h1 className="display mt-3 text-[clamp(2.1rem,5.4vw,3.5rem)]">{t('title')}</h1>
-          <p className="mt-4 max-w-[42ch] text-[1.0625rem] leading-relaxed text-ink-2">
+          <h1 className="display text-[clamp(2.1rem,5.4vw,3.5rem)]">{t('title')}</h1>
+          <p className="mt-5 max-w-[40ch] text-[1.0625rem] leading-relaxed text-ink-2">
             {t('lede')}
           </p>
 
@@ -31,12 +35,15 @@ export function Hero() {
             </ButtonLink>
           </div>
 
-          <p className="mt-4 text-[0.8125rem] text-ink-3">{t('note')}</p>
+          {/* The whole "how it works" section, said properly and once. */}
+          <p className="mt-8 max-w-[44ch] border-t border-rule pt-5 text-[0.9375rem] leading-relaxed text-ink-3">
+            {t('process')}
+          </p>
         </div>
 
-        <figure className="lg:-mr-8">
+        <figure className="lg:-mr-6">
           <HeroSign label={p('label')} />
-          <figcaption className="mt-3 text-center text-[0.8125rem] text-ink-3 lg:text-left lg:pl-4">
+          <figcaption className="mt-3 text-[0.8125rem] text-ink-3 lg:pl-4">
             {p('caption')}
           </figcaption>
         </figure>

@@ -40,7 +40,6 @@ export function defaultDesign(): SignDesign {
     shape: 'rounded',
     edge: 'chamfer',
     woodId: DEFAULT_WOOD,
-    placement: 'indoor',
     method: 'vcarve',
     finish: 'oil',
     paintColour: '#1d1813',
@@ -101,7 +100,6 @@ export const PRESETS: Preset[] = [
       heightMm: 260,
       shape: 'arch',
       woodId: 'ek',
-      placement: 'sheltered',
       decoration: { border: 'double', insetMm: 14, corners: 'diamond' },
       texts: [
         makeTextBlock({
@@ -136,7 +134,6 @@ export const PRESETS: Preset[] = [
       shape: 'rect',
       edge: 'chamfer',
       woodId: 'furu',
-      placement: 'outdoor',
       method: 'vcarve',
       finish: 'paint',
       paintColour: '#26312a',

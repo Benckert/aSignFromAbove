@@ -39,7 +39,7 @@ export function Footer() {
           <p className="mt-3 max-w-[26ch] text-[0.8125rem] leading-relaxed text-ink-3">
             {site.brand.tagline[locale === 'en' ? 'en' : 'sv']}
           </p>
-          <p className="spec mt-4">{t('madeIn')}</p>
+          <p className="mt-4 text-[0.75rem] text-ink-3">{t('madeIn')}</p>
         </div>
 
         <FooterColumn title={t('sections.explore')}>
@@ -104,7 +104,7 @@ export function Footer() {
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="spec mb-3">{title}</h2>
+      <h2 className="label mb-3">{title}</h2>
       <ul className="flex flex-col gap-2">{children}</ul>
     </div>
   );

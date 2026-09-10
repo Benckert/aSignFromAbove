@@ -66,7 +66,6 @@ const SCENES: SignDesign[] = [
     method: 'vcarve',
     finish: 'paint',
     paintColour: '#26312a',
-    placement: 'outdoor',
     decoration: { border: 'inset', insetMm: 16, corners: 'none' },
     texts: [
       makeTextBlock({ content: 'Sjöstugan', fontId: 'oswald', capHeightMm: 54, y: 0.44 }),

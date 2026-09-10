@@ -5,31 +5,27 @@ import { Moon, Sun } from 'lucide-react';
 import { cx } from '@/lib/cx';
 
 /**
- * Dark and light.
+ * Workshop light, or after dark.
  *
- * The site is dark by default. A visitor who prefers otherwise switches here
- * and the choice is remembered on their own device — that single value in
+ * Both themes are dark — this is not a light/dark switch, it is a choice
+ * between a warm mid-brown ground and the same room with the lamps down.
+ * There is no white page on this site.
+ *
+ * The choice is remembered on the visitor's own device. That single value in
  * localStorage is the only thing this site stores about a reader, it holds
- * nothing but the word `dark` or `light`, and it is described in the cookie
+ * nothing but the word `warm` or `night`, and it is described in the cookie
  * policy. Under ePrivacy it is storage strictly necessary for a preference the
  * user themselves asked for, so it needs no consent banner.
  *
- * The matching no-flash script in `ThemeScript` applies the stored choice
- * before the first paint, so the page never starts in the wrong theme and
- * lurches.
+ * The theme lives on the <html> element, put there by the no-flash script
+ * before React exists, which makes it external state — hence
+ * useSyncExternalStore rather than mirroring it into a useState that would
+ * render once with a guess and then correct itself.
  */
 
 export const THEME_KEY = 'asfa.theme';
-type Theme = 'dark' | 'light';
+type Theme = 'warm' | 'night';
 
-/**
- * The theme lives on the <html> element, put there by the no-flash script
- * before React exists. That makes it external state, so it is read with
- * useSyncExternalStore rather than mirrored into a useState — which would mean
- * rendering once with a guess and then correcting it.
- *
- * The server snapshot is 'dark' because that is what the document ships with.
- */
 const THEME_EVENT = 'asfa:themechange';
 
 function subscribe(onChange: () => void): () => void {
@@ -38,14 +34,14 @@ function subscribe(onChange: () => void): () => void {
 }
 
 function getSnapshot(): Theme {
-  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  return document.documentElement.getAttribute('data-theme') === 'night' ? 'night' : 'warm';
 }
 
 export function ThemeToggle({ className, label }: { className?: string; label: string }) {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, () => 'dark' as Theme);
+  const theme = useSyncExternalStore(subscribe, getSnapshot, () => 'warm' as Theme);
 
   function toggle() {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    const next: Theme = theme === 'warm' ? 'night' : 'warm';
     document.documentElement.setAttribute('data-theme', next);
     try {
       localStorage.setItem(THEME_KEY, next);
@@ -66,7 +62,7 @@ export function ThemeToggle({ className, label }: { className?: string; label: s
       )}
       aria-label={label}
     >
-      {theme === 'dark' ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
+      {theme === 'warm' ? <Moon size={16} aria-hidden /> : <Sun size={16} aria-hidden />}
     </button>
   );
 }
@@ -74,12 +70,11 @@ export function ThemeToggle({ className, label }: { className?: string; label: s
 /**
  * Applies the stored theme before the browser paints.
  *
- * This has to be a blocking inline script: anything deferred, or anything that
- * waits for React, runs after the first paint and produces a visible flash of
- * the wrong theme. It is deliberately tiny and touches nothing but one
- * attribute.
+ * Has to be a blocking inline script: anything deferred runs after the first
+ * paint and produces a visible flash of the wrong theme. It touches nothing
+ * but one attribute.
  */
 export function ThemeScript() {
-  const script = `try{var t=localStorage.getItem('${THEME_KEY}');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}`;
+  const script = `try{var t=localStorage.getItem('${THEME_KEY}');document.documentElement.setAttribute('data-theme',t==='night'?'night':'warm')}catch(e){document.documentElement.setAttribute('data-theme','warm')}`;
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }

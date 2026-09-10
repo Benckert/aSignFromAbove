@@ -36,7 +36,7 @@ export function PriceCard({ price, compact }: { price: PriceBreakdown; compact?:
   return (
     <div className={cx('rounded-md border border-rule-strong bg-surface-2', compact ? 'p-3' : 'p-4')}>
       <div className="flex items-end justify-between gap-3">
-        <span className="spec">{t('total')}</span>
+        <span className="label">{t('total')}</span>
         <span className="text-right">
           <span className="display block text-[1.75rem] leading-none text-ink">
             {formatOre(price.totalOre, locale)}

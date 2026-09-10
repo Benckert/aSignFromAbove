@@ -90,9 +90,6 @@ export interface Decoration {
 
 export type Hanging = 'none' | 'keyhole' | 'rope' | 'posts';
 
-/** Where the sign will live. Decides which timbers and finishes are sensible. */
-export type Placement = 'indoor' | 'sheltered' | 'outdoor';
-
 /** The complete state of one sign. Everything the workshop needs to cut it. */
 export interface SignDesign {
   widthMm: number;
@@ -101,7 +98,6 @@ export interface SignDesign {
   shape: SignShape;
   edge: EdgeProfile;
   woodId: WoodId;
-  placement: Placement;
   method: CarveMethod;
   finish: Finish;
   /** Hex colour used when `finish` fills the letters with paint. */

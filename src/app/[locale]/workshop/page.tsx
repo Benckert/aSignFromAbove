@@ -43,7 +43,7 @@ export default async function WorkshopPage({ params }: { params: Promise<{ local
         </div>
 
         <aside>
-          <h2 className="spec mb-4">{t('principles.title')}</h2>
+          <h2 className="label mb-4">{t('principles.title')}</h2>
           <ul className="flex flex-col gap-5">
             {principles.map((item) => (
               <li key={item.title} className="border-t border-rule pt-4">

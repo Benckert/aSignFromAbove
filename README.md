@@ -11,10 +11,15 @@ workshop can actually cut from.
 It has no warnings panel, on purpose. Rather than letting someone configure an
 unbuildable sign and then explaining why it will not work, the tool only ever
 offers choices that can be made: faces that do not suit the chosen cut are not
-in the list, timbers that will not survive outdoors leave it the moment the sign
-is destined for outdoors, and the text-size slider runs from what the bit can
-physically cut to what still fits the board. Choosing something that
-invalidates an earlier choice corrects the earlier one instead of refusing.
+in the list, and the text-size slider runs from what the bit can physically cut
+to what still fits the board. Choosing something that invalidates an earlier
+choice corrects the earlier one instead of refusing.
+
+What it does *not* constrain is timber against weather. Whether a sign lives
+indoors or out is a question about the customer's house rather than about the
+machine, and asking it cost every visitor a decision in order to help a few —
+the finish choice is where that judgement actually gets made. Each timber says
+how it ages instead.
 
 > **The business details are placeholders.** Name, address, organisation number,
 > VAT number and email addresses are marked `TODO` in `src/config/site.ts` and
@@ -104,6 +109,14 @@ size slider from the bit, the face and the board. If you loosen a
 `minCapHeightMm` or a `suitability` rating in the font catalogue, you are
 widening what customers can order — a test guards against ratings that would
 make a face unreachable altogether.
+
+## Themes
+
+Two, and both are dark: a warm mid-brown default and a deeper night variant.
+There is no white page on this site. They are the same tokens with different
+values — `:root` for the warm one, `:root[data-theme="night"]` for the other —
+so components are written once. A blocking inline script applies the stored
+choice before first paint, which is what stops the page flashing the wrong one.
 
 ---
 
