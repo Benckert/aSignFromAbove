@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useDesigner } from '@/lib/designer/store';
 import { priceSign } from '@/lib/designer/pricing';
@@ -41,6 +41,7 @@ export function OrderForm() {
   const [hydrated, setHydrated] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [reference, setReference] = useState<string | null>(null);
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
@@ -207,7 +208,7 @@ export function OrderForm() {
           </Field>
 
           {delivery === 'ship' && (
-            <Field label={t('fields.address')} hint={t('fields.addressHint')}>
+            <Field label={t('fields.address')}>
               {(props) => (
                 <textarea
                   {...props}
@@ -231,22 +232,46 @@ export function OrderForm() {
             )}
           </Field>
 
-          {/* The withdrawal-right exemption, stated before the order goes and
-              acknowledged separately — not buried in the terms. */}
+          {/*
+            The withdrawal-right exemption, stated before the order goes and
+            acknowledged separately rather than buried in the terms.
+
+            The statute behind it now sits behind a toggle. Consent still has
+            to be informed, so the sentence that carries the actual meaning is
+            always visible and the full explanation is one click away and
+            always in the DOM — what is folded is the detail, not the point.
+          */}
           <div className="rounded-md border border-oak/30 bg-oak-wash p-4">
-            <h2 className="text-[0.9375rem] font-semibold text-ink">{t('withdrawal.title')}</h2>
-            <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-2">
+            <Checkbox
+              checked={Boolean(withdrawal)}
+              onChange={(v) => setValue('withdrawalAcknowledged', v as true, { shouldValidate: true })}
+              invalid={Boolean(errors.withdrawalAcknowledged)}
+            >
+              {t('withdrawal.acknowledge')}
+            </Checkbox>
+
+            <button
+              type="button"
+              onClick={() => setWithdrawalOpen((v) => !v)}
+              aria-expanded={withdrawalOpen}
+              aria-controls="withdrawal-detail"
+              className="mt-2 ml-6.5 inline-flex items-center gap-1 text-[0.75rem] text-oak-deep transition hover:text-ink"
+            >
+              {t('withdrawal.more')}
+              <ChevronDown
+                size={12}
+                aria-hidden
+                className={cx('transition-transform', withdrawalOpen && 'rotate-180')}
+              />
+            </button>
+
+            <p
+              id="withdrawal-detail"
+              hidden={!withdrawalOpen}
+              className="ml-6.5 mt-2 text-[0.75rem] leading-relaxed text-ink-2"
+            >
               {t('withdrawal.body')}
             </p>
-            <div className="mt-3 border-t border-rule pt-3">
-              <Checkbox
-                checked={Boolean(withdrawal)}
-                onChange={(v) => setValue('withdrawalAcknowledged', v as true, { shouldValidate: true })}
-                invalid={Boolean(errors.withdrawalAcknowledged)}
-              >
-                {t('withdrawal.acknowledge')}
-              </Checkbox>
-            </div>
           </div>
 
           <ConsentBlock
@@ -271,7 +296,7 @@ export function OrderForm() {
             variant="primary"
             size="lg"
             disabled={status === 'sending' || !orderable}
-            className="mt-1 sm:self-start"
+            className="mt-1 mb-8 sm:self-start"
           >
             {status === 'sending' && <Loader2 size={16} aria-hidden className="animate-spin" />}
             {status === 'sending' ? t('submitting') : t('submit')}

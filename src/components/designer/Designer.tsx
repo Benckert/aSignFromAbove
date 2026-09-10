@@ -66,10 +66,25 @@ export function Designer() {
     hadSaved.current = typeof window !== 'undefined' && hasSavedDesign();
   }
 
+  /*
+    Announced once, however many times this effect runs.
+
+    React's StrictMode deliberately invokes mount effects twice in development
+    to surface exactly this class of bug — a side effect that is not safe to
+    repeat. Raising a toast is one: the guard below made it two on every reload
+    while developing. The explicit toast id is a second line of defence, since
+    sonner replaces a toast that reuses an id rather than stacking another.
+  */
+  const announcedRestore = useRef(false);
+
   useEffect(() => {
     void useDesigner.persist.rehydrate();
-    if (!hadSaved.current) return;
-    toast(t('restored'), { action: { label: t('restoredAction'), onClick: () => reset() } });
+    if (!hadSaved.current || announcedRestore.current) return;
+    announcedRestore.current = true;
+    toast(t('restored'), {
+      id: 'design-restored',
+      action: { label: t('restoredAction'), onClick: () => reset() },
+    });
     // Runs once on mount; the translations and reset action are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -222,7 +237,14 @@ export function Designer() {
           </div>
         </div>
 
-        <div className="px-4 pb-32 pt-4 lg:px-6 lg:pb-10">
+        {/*
+          A generous run-off below the last control. Two reasons: it reads as
+          the end of the column, and it keeps the sticky preview pinned through
+          an over-scroll — the sign only starts to travel once the containing
+          block runs out, so ending the column flush with the button made a
+          stray flick of the wheel nudge it out of place.
+        */}
+        <div className="px-4 pb-40 pt-4 lg:px-6 lg:pb-[26rem]">
           {step === 'text' && <TextStep />}
           {step === 'shape' && <ShapeStep />}
           {step === 'material' && <MaterialStep />}

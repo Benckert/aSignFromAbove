@@ -255,8 +255,7 @@
       "delivery": "Leverans",
       "deliveryPickup": "Hämtas i verkstaden",
       "deliveryShip": "Skickas",
-      "address": "Adress",
-      "addressHint": "Behövs bara för att räkna ut frakten."
+      "address": "Adress"
     },
     "consent": {
       "label": "Jag godkänner att mina uppgifter används för att hantera min förfrågan.",
@@ -271,7 +270,8 @@
     "withdrawal": {
       "title": "Om ångerrätt",
       "body": "En skylt som ritas efter dina uppgifter är en specialtillverkad vara. Enligt 2 kap. 11 § lagen om distansavtal och avtal utanför affärslokaler gäller därför inte den vanliga 14-dagars ångerrätten när tillverkningen väl har börjat. Fram till dess att du bekräftar beställningen kan du avbryta när som helst, utan kostnad.",
-      "acknowledge": "Jag har läst och förstått att en specialtillverkad skylt inte omfattas av ångerrätt när tillverkningen börjat."
+      "acknowledge": "Jag har läst och förstått att en specialtillverkad skylt inte omfattas av ångerrätt när tillverkningen börjat.",
+      "more": "Vad betyder det?"
     },
     "submit": "Skicka förfrågan",
     "submitting": "Skickar …",

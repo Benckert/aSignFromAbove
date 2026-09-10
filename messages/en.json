@@ -255,8 +255,7 @@
       "delivery": "Delivery",
       "deliveryPickup": "Collect from the workshop",
       "deliveryShip": "Ship it",
-      "address": "Address",
-      "addressHint": "Only needed to work out the carriage."
+      "address": "Address"
     },
     "consent": {
       "label": "I agree that my details may be used to handle my enquiry.",
@@ -271,7 +270,8 @@
     "withdrawal": {
       "title": "About the right of withdrawal",
       "body": "A sign drawn to your specification is a custom-made item. Under chapter 2, section 11 of the Swedish Distance Contracts Act, the usual 14-day right of withdrawal therefore does not apply once making has begun. Up until you confirm the order you can call it off at any time, at no cost.",
-      "acknowledge": "I have read and understood that a custom-made sign carries no right of withdrawal once making has begun."
+      "acknowledge": "I have read and understood that a custom-made sign carries no right of withdrawal once making has begun.",
+      "more": "What does that mean?"
     },
     "submit": "Send the enquiry",
     "submitting": "Sending …",
