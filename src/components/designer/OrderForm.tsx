@@ -8,7 +8,7 @@ import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useDesigner } from '@/lib/designer/store';
 import { priceSign } from '@/lib/designer/pricing';
-import { validateDesign, hasBlockingWarning } from '@/lib/designer/validation';
+import { isOrderable } from '@/lib/designer/constraints';
 import { exportSvg, svgToPng } from '@/lib/designer/export';
 import { signOrderContactSchema, type SignOrderContactInput } from '@/lib/forms/schemas';
 import { site } from '@/config/site';
@@ -49,8 +49,7 @@ export function OrderForm() {
   }, []);
 
   const price = priceSign(design);
-  const warnings = validateDesign(design);
-  const blocked = hasBlockingWarning(warnings);
+  const orderable = isOrderable(design);
 
   const {
     register,
@@ -271,7 +270,7 @@ export function OrderForm() {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={status === 'sending' || blocked}
+            disabled={status === 'sending' || !orderable}
             className="mt-1 sm:self-start"
           >
             {status === 'sending' && <Loader2 size={16} aria-hidden className="animate-spin" />}

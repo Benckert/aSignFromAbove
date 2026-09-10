@@ -20,70 +20,63 @@
     "hero": {
       "eyebrow": "Skylt- och möbelsnickeri",
       "title": "Skyltar frästa i massivt trä",
-      "lede": "Jag gör en skylt i taget i verkstaden — namnet på huset, stugan eller företaget. Rita din egen här nedanför och se exakt hur den blir innan du beställer något.",
+      "lede": "Rita din egen och se exakt hur den blir. Priset räknas fram medan du ritar.",
       "primary": "Rita din skylt",
-      "secondary": "Se vad jag har gjort",
-      "note": "Ingen registrering. Priset räknas fram medan du ritar."
+      "secondary": "Se möblerna",
+      "note": "Ingen registrering. Du binder dig inte till något."
     },
     "livePreview": {
-      "label": "Skylt i ek, 400 × 220 mm, V-fräst text",
-      "caption": "Så här ser förhandsvisningen ut. Den uppdateras medan du ändrar."
+      "label": "Skylt i ek",
+      "caption": "Uppdateras medan du ändrar."
     },
     "how": {
       "title": "Så går det till",
-      "lede": "Fyra steg, och inget av dem kostar något förrän vi är överens.",
       "steps": [
         {
           "n": "01",
           "title": "Rita",
-          "body": "Välj storlek, träslag och text i ritverktyget. Du ser skylten växa fram medan du ändrar, och priset räknas om direkt."
+          "body": "Välj mått, trä och text."
         },
         {
           "n": "02",
           "title": "Skicka",
-          "body": "När du är nöjd skickar du ritningen till mig. Du binder dig inte till något — det är ett underlag för att prata vidare."
+          "body": "Ritningen kommer till mig. Ingen beställning än."
         },
         {
           "n": "03",
           "title": "Bekräfta",
-          "body": "Jag hör av mig inom ett par dagar med eventuella frågor och en bekräftelse på pris och leveranstid. Först då är det en beställning."
+          "body": "Jag svarar med pris och tid inom ett par dagar."
         },
         {
           "n": "04",
-          "title": "Fräs och lämna",
-          "body": "Skylten fräses, slipas och ytbehandlas för hand. Du får en bild innan den skickas."
+          "title": "Hämta",
+          "body": "Fräst, slipad och oljad för hand."
         }
       ]
     },
-    "materials": {
-      "eyebrow": "Material",
-      "title": "Sju träslag, inga fanerskivor",
-      "lede": "Allt fräses i massivt trä. Vilket slag du väljer avgör både hur skylten åldras och hur skarp texten blir — hårda slag håller finare detaljer, mjuka är billigare och lever mer.",
-      "cta": "Läs mer om träslagen i ritverktyget"
-    },
     "furniture": {
       "eyebrow": "Möbler",
-      "title": "Och en och annan möbel",
-      "lede": "Vid sidan av skyltarna bygger jag möbler på beställning. Inga standardmodeller och ingen katalog — varje sak ritas för sin plats och sin ägare, och görs bara en gång.",
+      "title": "Möbler på beställning",
+      "lede": "Ritas för sin plats och görs en gång. Ingen katalog.",
       "cta": "Se möblerna"
     },
     "custom": {
-      "eyebrow": "Något annat",
-      "title": "Sådant som inte får plats i ritverktyget",
-      "lede": "Skyltar större än fräsen, sammansatta bokstäver, infälld metall, en möbel som ska passa ett rum som inte är rätvinkligt. Beskriv vad du tänker dig så hör jag av mig.",
-      "cta": "Beskriv ditt projekt"
+      "eyebrow": "Annat",
+      "title": "Något som inte får plats här",
+      "lede": "Större skyltar, möbler, reparationer. Beskriv vad du tänker dig.",
+      "cta": "Beskriv projektet"
     },
     "maker": {
       "eyebrow": "Verkstaden",
-      "title": "En person, en fräs, ingen brådska",
-      "lede": "Det här är inte en fabrik. Jag tar emot ett begränsat antal beställningar i taget för att hinna göra dem ordentligt, och säger hellre nej än levererar något jag inte skulle vilja ha själv.",
-      "cta": "Mer om verkstaden"
+      "title": "En person, en fräs",
+      "lede": "Ett begränsat antal beställningar i taget, för att hinna göra dem ordentligt.",
+      "cta": "Om verkstaden"
     }
   },
   "designer": {
     "title": "Rita din skylt",
     "lede": "Ändra vad du vill — förhandsvisningen och priset följer med. Ingenting skickas förrän du väljer att göra det.",
-    "restored": "Vi tog upp skylten du höll på med. Den sparades bara här i din webbläsare.",
+    "restored": "Vi tog upp där du slutade.",
     "restoredAction": "Börja om istället",
     "preview": {
       "label": "Förhandsvisning av skylten",
@@ -96,10 +89,6 @@
       "actual": "Faktisk storlek",
       "actualHint": "Jämför med något du har till hands",
       "close": "Stäng"
-    },
-    "presets": {
-      "title": "Börja från",
-      "hint": "Byter ut allt du ändrat hittills."
     },
     "sections": {
       "shape": "Storlek och form",
@@ -117,8 +106,7 @@
       "presets": "Vanliga storlekar",
       "shape": "Form",
       "edge": "Kant",
-      "placement": "Var ska den sitta?",
-      "maxHint": "Största skylt jag kan göra i ett stycke är {width} × {height} mm."
+      "placement": "Var ska den sitta?"
     },
     "shapes": {
       "rect": "Rak",
@@ -141,17 +129,15 @@
       "hardness": "Hårdhet",
       "outdoor": "Tål utomhusbruk",
       "indoorOnly": "Endast inomhus",
-      "pricePerDm2": "Materialpris"
+      "pricePerDm2": "Materialpris",
+      "filtered": "Visar bara träslag och metoder som tål väder."
     },
     "text": {
       "blockLabel": "Textrad {n}",
       "content": "Text",
-      "contentHint": "Tryck retur för att byta rad.",
       "placeholder": "Skriv något …",
       "font": "Stil",
       "capHeight": "Textstorlek",
-      "fitToWidth": "Fyll bredden",
-      "capHeightHint": "Höjden på en stor bokstav.",
       "lineHeight": "Radavstånd",
       "letterSpacing": "Bokstavsavstånd",
       "align": "Justering",
@@ -168,17 +154,7 @@
       "edit": "Redigera",
       "done": "Klar",
       "empty": "Tom rad",
-      "capsOnly": "Stilen har bara versaler.",
-      "fontsTitle": "Om stilarna",
-      "fontsLede": "Alla stilar går att skära. Vissa klarar det bättre än andra — det står vid varje.",
-      "suitability": {
-        "excellent": "Utmärkt",
-        "good": "Bra",
-        "caution": "Kräver omsorg"
-      },
-      "suitabilityFor": "Passar den valda skärmetoden",
-      "minSize": "Funkar från {mm} mm",
-      "strokeWidth": "Tunnaste linjen blir ca {mm} mm"
+      "capsOnly": "Stilen har bara versaler."
     },
     "wraps": {
       "straight": "Rak",
@@ -237,7 +213,7 @@
     },
     "artwork": {
       "title": "Egen bild",
-      "lede": "Har du en logotyp eller en teckning som SVG-fil kan den fräsas in. Den blir en form i träet, inte en bild — färger och gråtoner försvinner.",
+      "lede": "En SVG-fil kan fräsas in som en form i träet.",
       "upload": "Välj SVG-fil",
       "replace": "Byt fil",
       "remove": "Ta bort bild",
@@ -245,7 +221,6 @@
       "rotation": "Vridning",
       "positionX": "Från vänster",
       "positionY": "Från överkant",
-      "adds": "Lägger till {amount} för uppritning.",
       "errors": {
         "tooLarge": "Filen är för stor. Håll dig under 512 kB — en ren vektorfil är nästan alltid mycket mindre.",
         "notSvg": "Det där ser inte ut som en SVG-fil.",
@@ -269,20 +244,14 @@
       "subtotal": "Summa exkl. moms",
       "minimum": "Minsta orderbelopp tillämpat.",
       "machineTime": "ca {minutes} min i maskinen",
-      "fixed": "Priset är fast för den här skylten. Frakt tillkommer och räknas ut när adressen är känd.",
+      "fixed": "Fast pris. Frakt tillkommer.",
       "leadTime": "Leveranstid {min}–{max} veckor från bekräftad beställning."
     },
-    "warnings": {
-      "title": "Att tänka på",
-      "blocking": "Går inte att göra",
-      "warning": "Kan bli sämre än du tänkt",
-      "note": "Bra att veta",
-      "none": "Inget att anmärka på. Skylten går att göra som den ser ut."
-    },
     "order": {
-      "cta": "Gå vidare med den här skylten",
+      "cta": "Gå vidare",
       "ctaBlocked": "Rätta till punkterna ovan först",
-      "reassure": "Nästa steg är dina kontaktuppgifter. Det är fortfarande ingen beställning."
+      "reassure": "Nästa steg är dina kontaktuppgifter. Det är fortfarande ingen beställning.",
+      "ctaEmpty": "Skriv en text först"
     },
     "reset": "Börja om",
     "resetConfirm": "Vill du börja om från början? Det du ritat försvinner.",
@@ -290,11 +259,17 @@
       "edit": "Ändra",
       "close": "Klar",
       "priceLabel": "Pris"
+    },
+    "steps": {
+      "text": "Text",
+      "shape": "Storlek",
+      "material": "Trä och yta",
+      "detail": "Detaljer"
     }
   },
   "order": {
     "title": "Skicka ritningen",
-    "lede": "Fyll i hur jag når dig så hör jag av mig med en bekräftelse. Det här är ännu inte en beställning — inget är bindande förrän vi båda sagt ja.",
+    "lede": "Fyll i hur jag når dig. Det är ännu inte en beställning.",
     "summary": "Din skylt",
     "changeDesign": "Ändra ritningen",
     "fields": {
@@ -341,7 +316,7 @@
   },
   "furniture": {
     "title": "Möbler",
-    "lede": "Varje möbel här är gjord en gång, för en bestämd plats och en bestämd person. Det finns ingen katalog att beställa ur — det här är exempel på vad som gjorts, för att visa hur jag arbetar.",
+    "lede": "Gjorda en gång, för en bestämd plats. Exempel, inte en katalog.",
     "empty": "Här kommer bilder på möbler efterhand som de blir klara.",
     "filterAll": "Allt",
     "details": {
@@ -372,10 +347,10 @@
   },
   "custom": {
     "title": "Specialbeställning",
-    "lede": "För sådant som inte går att rita i verktyget: möbler, stora skyltar, sammansatta arbeten, eller något du inte riktigt vet hur du ska beskriva ännu.",
+    "lede": "För det som inte går att rita i verktyget.",
     "priceNote": {
       "title": "Om pris",
-      "body": "Jag sätter inget pris här. Ett specialarbete går inte att räkna ut från ett formulär utan att jag vet vad det faktiskt innebär — så vi pratar först, och sedan får du ett pris att ta ställning till. Att fråga kostar ingenting och binder dig inte till något."
+      "body": "Ett specialarbete går inte att räkna ut från ett formulär. Vi pratar först, sedan får du ett pris. Att fråga binder dig inte."
     },
     "fields": {
       "kind": "Vad gäller det?",
@@ -418,9 +393,7 @@
     "lede": "En person, en fräs och ett antal handverktyg.",
     "body": [
       "Jag gör skyltar och möbler på beställning. Det är hela verksamheten. Inga anställda, ingen butik, inget lager — allt som lämnar verkstaden är gjort för någon som frågat efter just det.",
-      "Skyltarna fräses i en CNC-fräs, vilket låter industriellt men inte är det. Maskinen skär bokstäverna; jag ritar dem, väljer virket, spänner upp det, byter fräsar, slipar för hand och behandlar ytan. En skylt tar en halv till en hel dag från att virket plockas fram till att den är torr och klar.",
-      "Möblerna görs helt för hand, med maskinerna som hjälp där de gör mest nytta. De ritas alltid tillsammans med den som ska ha dem, och de görs en gång.",
-      "Jag tar emot ett begränsat antal beställningar åt gången. Det betyder att du ibland får vänta, och att jag ibland säger nej till något jag inte hinner göra ordentligt. Det är ett medvetet val."
+      "Skyltarna fräses i en CNC-fräs, vilket låter industriellt men inte är det. Maskinen skär bokstäverna; jag ritar dem, väljer virket, spänner upp det, byter fräsar, slipar för hand och behandlar ytan. En skylt tar en halv till en hel dag från att virket plockas fram till att den är torr och klar."
     ],
     "principles": {
       "title": "Vad du kan räkna med",
@@ -436,10 +409,6 @@
         {
           "title": "Ärliga besked",
           "body": "Om det du önskar inte kommer bli bra säger jag det innan, inte efter. Ibland innebär det att jag föreslår något annat än det du bad om."
-        },
-        {
-          "title": "Tid att göra rätt",
-          "body": "Jag lovar hellre fyra veckor och håller det än lovar en och missar."
         }
       ]
     }

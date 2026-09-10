@@ -1,20 +1,16 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { Hero } from '@/components/home/Hero';
 import { Steps } from '@/components/home/Steps';
-import { Timbers } from '@/components/home/Timbers';
-import { Teaser } from '@/components/home/Teaser';
-import { FurniturePeek } from '@/components/home/FurniturePeek';
+import { Elsewhere } from '@/components/home/Elsewhere';
 import { carvingFontVariables } from '@/config/carving-fonts.loader';
 
 /**
- * The front page.
+ * The front page: a sign, a way into the tool that made it, four short lines
+ * on what happens next, and a quiet row pointing at everything else.
  *
- * The order is deliberate: show the thing, explain that trying it costs
- * nothing, show the materials, then the other work, and only then talk about
- * the person. Nothing here asks for an email address, and the only repeated
- * call to action is the design tool — which is free to use and commits nobody
- * to anything.
+ * It used to carry a timber grid and three full-width sections as well. Those
+ * said things the design tool says better, to a visitor who had not yet been
+ * given a reason to care.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -25,43 +21,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <div className={carvingFontVariables}>
       <Hero />
       <Steps />
-      <Timbers />
-      <HomeTeasers />
+      <Elsewhere />
     </div>
-  );
-}
-
-function HomeTeasers() {
-  const furniture = useTranslations('home.furniture');
-  const custom = useTranslations('home.custom');
-  const maker = useTranslations('home.maker');
-
-  return (
-    <>
-      <Teaser
-        eyebrow={furniture('eyebrow')}
-        title={furniture('title')}
-        lede={furniture('lede')}
-        href="/furniture"
-        cta={furniture('cta')}
-        aside={<FurniturePeek />}
-      />
-      <Teaser
-        eyebrow={custom('eyebrow')}
-        title={custom('title')}
-        lede={custom('lede')}
-        href="/custom"
-        cta={custom('cta')}
-      />
-      <Teaser
-        eyebrow={maker('eyebrow')}
-        title={maker('title')}
-        lede={maker('lede')}
-        href="/workshop"
-        cta={maker('cta')}
-        bordered={false}
-      />
-    </>
   );
 }
 

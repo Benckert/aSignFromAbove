@@ -52,8 +52,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 0.9,
     outdoorSuitable: true,
     note: {
-      sv: 'Ljus och levande med tydliga årsringar och kvistar. Billigast av alla och helt ärligt trä — men mjukt, så fina detaljer blir aldrig lika skarpa som i ett hårdare slag.',
-      en: 'Pale and lively, with clear growth rings and knots. The cheapest option and an honest timber — but soft, so fine detail never comes out as crisp as it does in a harder species.',
+      sv: 'Ljus och kvistig. Billigast, och mjuk — fina detaljer blir aldrig helt skarpa.',
+      en: 'Pale and knotty. The cheapest, and soft — fine detail never comes out quite crisp.',
     },
   },
   {
@@ -67,8 +67,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 0.85,
     outdoorSuitable: false,
     note: {
-      sv: 'Jämn, nästan flammig ton utan att grenen tar över. Fräser sig ovanligt rent för att vara mjukt, vilket gör den till ett bra val när texten är liten. Inomhus.',
-      en: 'An even, faintly flamed tone that never fights the lettering. Cuts unusually cleanly for a soft timber, which makes it a good choice when the text is small. Indoors only.',
+      sv: 'Jämn och lugn ton. Fräser sig ovanligt rent för att vara mjuk.',
+      en: 'An even, quiet tone. Cuts unusually cleanly for a soft timber.',
     },
   },
   {
@@ -82,8 +82,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 1.0,
     outdoorSuitable: false,
     note: {
-      sv: 'Tät och finfibrig med nästan osynlig ådring. Den ljusaste ytan i urvalet och den som håller finast kanter — välj den när skylten har mycket text. Inomhus.',
-      en: 'Dense and fine-fibred, with almost invisible grain. The palest surface here and the one that holds the finest edges — choose it when the sign carries a lot of text. Indoors only.',
+      sv: 'Tät och nästan utan ådring. Håller finast kanter av alla.',
+      en: 'Dense and almost grainless. Holds the finest edges of any here.',
     },
   },
   {
@@ -97,8 +97,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 1.15,
     outdoorSuitable: false,
     note: {
-      sv: 'Ljus botten med kraftig, rak ådring som ger skylten rörelse. Sega fibrer som klarar en tydlig fasad kant utan att flisa. Inomhus.',
-      en: 'A pale ground with strong, straight grain that gives the sign movement. Tough fibres that take a crisp chamfered edge without chipping. Indoors only.',
+      sv: 'Ljus botten med kraftig, rak ådring. Sega fibrer som inte flisar.',
+      en: 'A pale ground with strong, straight grain. Tough fibres that resist chipping.',
     },
   },
   {
@@ -112,8 +112,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 1.25,
     outdoorSuitable: true,
     note: {
-      sv: 'Det trä de flesta menar när de säger att något ska hålla. Öppna porer, varm ton och en kärnved som klarar sig ute i decennier obehandlad. Tyngst att fräsa, och värt det.',
-      en: 'The timber most people mean when they say something should last. Open pores, a warm tone, and a heartwood that survives outdoors untreated for decades. The heaviest to cut, and worth it.',
+      sv: 'Öppna porer och varm ton. Klarar sig ute i decennier obehandlad.',
+      en: 'Open pores and a warm tone. Survives outdoors untreated for decades.',
     },
   },
   {
@@ -127,8 +127,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 1.2,
     outdoorSuitable: false,
     note: {
-      sv: 'Nästan gräddvit och mycket jämn. Hårt nog att bära hårfina serifer, vilket gör den till det enda riktigt trygga underlaget för de finaste stilarna. Inomhus.',
-      en: 'Almost cream-white and very even. Hard enough to carry hairline serifs, which makes it the one genuinely safe ground for the finest faces here. Indoors only.',
+      sv: 'Nästan gräddvit och mycket jämn. Hård nog för de finaste stilarna.',
+      en: 'Almost cream-white and very even. Hard enough for the finest faces.',
     },
   },
   {
@@ -142,8 +142,8 @@ export const WOODS: Wood[] = [
     machiningFactor: 1.1,
     outdoorSuitable: false,
     note: {
-      sv: 'Mörk, chokladbrun och den enda importen i listan. En ljus text mot valnöt är den mest kontrastrika kombinationen som går att göra utan färg. Dyrast — och det syns. Inomhus.',
-      en: 'Dark, chocolate-brown, and the one import on this list. Light lettering against walnut is the strongest contrast achievable without any paint at all. The most expensive — and it shows. Indoors only.',
+      sv: 'Mörk och chokladbrun. Störst kontrast mot ljus text, utan färg.',
+      en: 'Dark and chocolate-brown. The strongest contrast with pale lettering, without paint.',
     },
   },
 ];

@@ -27,34 +27,34 @@
 @theme {
   /* — Surfaces ————————————————————————————————————— */
   /* An unlit workbench: warm, brown-black, never blue-grey. */
-  --color-surface: #17130f;
+  --color-surface: #262019;
   /* A board laid on the bench. */
-  --color-surface-2: #1f1a15;
+  --color-surface-2: #2e2820;
   /* Raised again — panels, the designer's tool rail, pressed controls. */
-  --color-surface-3: #2a231b;
+  --color-surface-3: #3a322a;
 
   /* — Ink ————————————————————————————————————————— */
   /* Not white. Unbleached paper under a warm lamp. */
-  --color-ink: #f3ece0;
-  --color-ink-2: #c2b6a4;
-  --color-ink-3: #8d8171;
+  --color-ink: #f6f1e7;
+  --color-ink-2: #cec4b3;
+  --color-ink-3: #a19686;
 
   /* — Lines ——————————————————————————————————————— */
-  --color-rule: #342d24;
-  --color-rule-strong: #4c4234;
+  --color-rule: #423a30;
+  --color-rule-strong: #574c3f;
 
   /* — Accents ————————————————————————————————————— */
   /* Planed oak under a coat of oil. The primary accent. */
   --color-oak: #c78a48;
   --color-oak-deep: #e0a869;
-  --color-oak-wash: #2f2418;
+  --color-oak-wash: #3a2e1e;
   /* Deep forest, for quieter emphasis and anything that went right. */
   --color-moss: #6f8c70;
   --color-moss-deep: #a2bfa3;
-  --color-moss-wash: #1d2720;
+  --color-moss-wash: #26312a;
   /* Iron oxide, for genuine problems only. */
   --color-rust: #d97c64;
-  --color-rust-wash: #2f1d18;
+  --color-rust-wash: #3a251e;
 
   /* — Type ———————————————————————————————————————— */
   --font-display: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
@@ -72,8 +72,8 @@
   /* — Depth ——————————————————————————————————————— */
   /* On a dark ground, depth reads through a lifted edge more than a cast
      shadow, so each surface carries a hairline of light along its top. */
-  --shadow-sheet: 0 1px 0 0 rgb(255 246 230 / 0.04) inset, 0 2px 8px rgb(0 0 0 / 0.35);
-  --shadow-lift: 0 1px 0 0 rgb(255 246 230 / 0.06) inset, 0 10px 30px rgb(0 0 0 / 0.45);
+  --shadow-sheet: 0 1px 0 0 rgb(255 246 230 / 0.05) inset, 0 1px 4px rgb(0 0 0 / 0.18);
+  --shadow-lift: 0 1px 0 0 rgb(255 246 230 / 0.07) inset, 0 8px 22px rgb(0 0 0 / 0.26);
 
   /* — Motion —————————————————————————————————————— */
   --ease-wood: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -155,8 +155,8 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    /* On the dark ground the grain has to add light rather than remove it. */
-    opacity: 0.5;
+    /* Barely there — enough to stop the ground looking like flat paint. */
+    opacity: 0.22;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
   }
@@ -168,7 +168,7 @@
   }
 
   :root[data-theme='light'] body::before {
-    opacity: 0.4;
+    opacity: 0.3;
     mix-blend-mode: multiply;
   }
 
@@ -215,19 +215,19 @@
   /* Headline treatment: optical sizing large, tracking pulled in. */
   .display {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.021em;
-    line-height: 1.04;
+    font-weight: 400;
+    letter-spacing: -0.014em;
+    line-height: 1.12;
     font-variation-settings:
-      'SOFT' 24,
+      'SOFT' 30,
       'WONK' 1,
-      'opsz' 108;
+      'opsz' 96;
   }
 
   /* Body copy that should read like a person wrote it. */
   .prose-workshop {
-    max-width: 62ch;
-    line-height: 1.68;
+    max-width: 58ch;
+    line-height: 1.62;
     color: var(--color-ink-2);
   }
   .prose-workshop p + p {

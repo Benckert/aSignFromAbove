@@ -8,6 +8,14 @@ shape, type the wording, choose a face and how it is cut, and watch the sign
 being drawn as you go. It produces a fixed price and a specification the
 workshop can actually cut from.
 
+It has no warnings panel, on purpose. Rather than letting someone configure an
+unbuildable sign and then explaining why it will not work, the tool only ever
+offers choices that can be made: faces that do not suit the chosen cut are not
+in the list, timbers that will not survive outdoors leave it the moment the sign
+is destined for outdoors, and the text-size slider runs from what the bit can
+physically cut to what still fits the board. Choosing something that
+invalidates an earlier choice corrects the earlier one instead of refusing.
+
 > **The business details are placeholders.** Name, address, organisation number,
 > VAT number and email addresses are marked `TODO` in `src/config/site.ts` and
 > must be filled in before the site goes live — Swedish e-commerce law requires
@@ -46,7 +54,7 @@ flow can be exercised offline. See `.env.example`.
 | **TypeScript** | The pricing and geometry code is arithmetic on physical measurements — the place types earn their keep. |
 | **Tailwind v4** | Design tokens live in `globals.css` under `@theme`; both themes are the same tokens with different values. |
 | **next-intl** | Swedish and English with *localised URLs* (`/designa-skylt`, `/en/design-your-sign`) rather than a query string. |
-| **Zustand** | The designer's state, persisted to `localStorage` so nobody loses a half-drawn sign. |
+| **Zustand** | The designer's state, persisted to `localStorage` so nobody loses a half-drawn sign. Every edit passes through `reconcile`, so the stored design is always buildable. |
 | **react-hook-form + Zod** | One schema validates in the browser and again on the server. |
 | **SVG, no canvas** | The preview's viewBox is measured in millimetres, so every number in it is a real dimension on the finished board. |
 
@@ -89,6 +97,13 @@ the real bits are known.
 **`src/lib/designer/pricing.ts`** is the price. It is deterministic and works in
 integer öre, so the same design always produces the same figure and no price
 ever drifts through floating point.
+
+**`src/lib/designer/constraints.ts`** decides what may be chosen. `reconcile`
+runs on every edit and is idempotent; `capHeightRange` computes the ends of the
+size slider from the bit, the face and the board. If you loosen a
+`minCapHeightMm` or a `suitability` rating in the font catalogue, you are
+widening what customers can order — a test guards against ratings that would
+make a face unreachable altogether.
 
 ---
 

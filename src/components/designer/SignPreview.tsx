@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { getWood } from '@/config/woods';
 import type { SignDesign } from '@/lib/designer/types';
 import { safeArea, signOutlinePath, toLines } from '@/lib/designer/geometry';
@@ -27,8 +27,6 @@ interface Props {
   design: SignDesign;
   /** Highlights the block being edited. */
   activeTextId?: string | null;
-  /** Reports whether the lettering has spilled outside the safe area. */
-  onOverflowChange?: (overflows: boolean) => void;
   /** Handed back so the page can export what is on screen. */
   svgRef?: React.RefObject<SVGSVGElement | null>;
   /** Accessible description; the drawing itself is decorative to a screenreader. */
@@ -42,7 +40,6 @@ const PAD = 10;
 export function SignPreview({
   design,
   activeTextId,
-  onOverflowChange,
   svgRef,
   label,
   className,
@@ -51,7 +48,6 @@ export function SignPreview({
   const wood = getWood(design.woodId);
   const localRef = useRef<SVGSVGElement | null>(null);
   const ref = svgRef ?? localRef;
-  const textLayerRef = useRef<SVGGElement | null>(null);
 
   // The first render — on the server and in the browser alike — uses the
   // catalogue's declared ratios, so the two agree. The real figures are
@@ -95,35 +91,6 @@ export function SignPreview({
       ? undefined
       : `url(#${uid}-engrave)`;
 
-  /* ── Overflow detection ──────────────────────────────────────────────── */
-
-  useLayoutEffect(() => {
-    if (!onOverflowChange) return;
-    const layer = textLayerRef.current;
-    if (!layer) return;
-
-    // getBBox throws in a detached tree; the preview may be off-screen.
-    let box: DOMRect | undefined;
-    try {
-      box = layer.getBBox();
-    } catch {
-      return;
-    }
-    if (!box || box.width === 0) {
-      onOverflowChange(false);
-      return;
-    }
-
-    const tolerance = 1.5; // mm — a hair of overhang is not worth alarming about
-    const overflows =
-      box.x < area.x - tolerance ||
-      box.y < area.y - tolerance ||
-      box.x + box.width > area.x + area.width + tolerance ||
-      box.y + box.height > area.y + area.height + tolerance;
-
-    onOverflowChange(overflows);
-  }, [design, capRatios, area.x, area.y, area.width, area.height, onOverflowChange]);
-
   const hasContent = design.texts.some((t) => toLines(t.content).join('').trim()) || design.artwork;
 
   /* ── The board itself, defined once and reused ───────────────────────── */
@@ -160,7 +127,7 @@ export function SignPreview({
   );
 
   const textLayer = (
-    <g ref={textLayerRef}>
+    <g>
       {design.texts.map((block) => (
         <SignText
           key={block.id}
@@ -257,24 +224,6 @@ export function SignPreview({
       {/* A hairline round the board so it reads as an object on the page. */}
       <path d={outline} fill="none" stroke={shade(wood.colour.dark, -0.35)} strokeWidth={0.5} opacity={0.55} />
 
-      {/*
-        The raised path is measured through a clip path, which getBBox cannot
-        see, so an invisible copy of the text is kept for the overflow check.
-      */}
-      {design.method === 'raised' && (
-        <g ref={textLayerRef} opacity={0} aria-hidden="true">
-          {design.texts.map((block) => (
-            <SignText
-              key={block.id}
-              block={block}
-              area={area}
-              capRatios={capRatios}
-              uid={`${uid}m`}
-              fill="#000"
-            />
-          ))}
-        </g>
-      )}
     </svg>
   );
 }

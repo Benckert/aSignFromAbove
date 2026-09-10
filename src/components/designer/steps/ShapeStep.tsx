@@ -4,53 +4,47 @@ import { useTranslations } from 'next-intl';
 import { MACHINE } from '@/config/router-profile';
 import { SIZE_PRESETS } from '@/lib/designer/defaults';
 import { useDesigner } from '@/lib/designer/store';
-import type { EdgeProfile, Placement, SignShape } from '@/lib/designer/types';
+import type { EdgeProfile, SignShape } from '@/lib/designer/types';
 import { Field } from '@/components/ui/Field';
-import { Segmented, Slider, Section } from '@/components/ui/Controls';
+import { Segmented, Slider } from '@/components/ui/Controls';
 import { cx } from '@/lib/cx';
 
-export function SizePanel() {
+/** The board: how big, what shape, what edge. */
+export function ShapeStep() {
   const t = useTranslations('designer');
   const design = useDesigner((s) => s.design);
   const set = useDesigner((s) => s.set);
 
   return (
-    <Section title={t('sections.shape')}>
-      {/* One tap for the common sizes, before anyone has to think in millimetres. */}
-      <div>
-        <span className="spec mb-2 block">{t('size.presets')}</span>
-        <div className="flex flex-wrap gap-1.5">
-          {SIZE_PRESETS.map((preset) => {
-            const active =
-              design.widthMm === preset.widthMm && design.heightMm === preset.heightMm;
-            return (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => set({ widthMm: preset.widthMm, heightMm: preset.heightMm })}
-                aria-pressed={active}
-                className={cx(
-                  'rounded-sm border px-2.5 py-1.5 font-mono text-[0.6875rem] tracking-wide transition',
-                  active
-                    ? 'border-ink bg-ink text-surface'
-                    : 'border-rule text-ink-2 hover:border-rule-strong hover:bg-surface-2',
-                )}
-              >
-                {preset.widthMm}×{preset.heightMm}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div className="flex flex-col gap-5">
+      <Field label={t('size.presets')}>
+        {() => (
+          <div className="flex flex-wrap gap-1.5">
+            {SIZE_PRESETS.map((preset) => {
+              const active =
+                design.widthMm === preset.widthMm && design.heightMm === preset.heightMm;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => set({ widthMm: preset.widthMm, heightMm: preset.heightMm })}
+                  aria-pressed={active}
+                  className={cx(
+                    'rounded-sm border px-3 py-2 font-mono text-[0.75rem] transition',
+                    active
+                      ? 'border-ink bg-ink text-surface'
+                      : 'border-rule text-ink-2 hover:border-rule-strong hover:text-ink',
+                  )}
+                >
+                  {preset.widthMm}×{preset.heightMm}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Field>
 
-      <Field
-        label={t('size.width')}
-        readout={`${design.widthMm} mm`}
-        hint={t('size.maxHint', {
-          width: MACHINE.workAreaMm.width,
-          height: MACHINE.workAreaMm.height,
-        })}
-      >
+      <Field label={t('size.width')} readout={`${design.widthMm} mm`}>
         {(props) => (
           <Slider
             {...props}
@@ -118,21 +112,7 @@ export function SizePanel() {
           />
         )}
       </Field>
-
-      <Field label={t('size.placement')}>
-        {() => (
-          <Segmented<Placement>
-            label={t('size.placement')}
-            value={design.placement}
-            options={(['indoor', 'sheltered', 'outdoor'] as const).map((placement) => ({
-              value: placement,
-              label: t(`placements.${placement}`),
-            }))}
-            onChange={(placement) => set({ placement })}
-          />
-        )}
-      </Field>
-    </Section>
+    </div>
   );
 }
 

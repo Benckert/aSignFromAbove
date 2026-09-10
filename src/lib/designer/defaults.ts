@@ -55,7 +55,7 @@ export function defaultDesign(): SignDesign {
       makeTextBlock({
         content: 'sedan 1953',
         fontId: 'baskerville',
-        capHeightMm: 14,
+        capHeightMm: 16,
         letterSpacing: 0.12,
         y: 0.7,
       }),

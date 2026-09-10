@@ -4,41 +4,41 @@ import { ButtonLink } from '@/components/ui/Button';
 import { HeroSign } from './HeroSign';
 
 /**
- * The front page opens with the thing the site is actually for: a carved sign,
- * shown as the tool draws it. No stock photography, no hero video, no claim
- * about craftsmanship that the page then fails to demonstrate.
- *
- * The layout is deliberately off-centre. Everything on the left is set to a
- * measure you can read; the sign sits to the right and overhangs the column,
- * which is what stops it looking like a template with a picture slot.
+ * The front page opens on the thing the site is for, and the only emphasised
+ * action is the one that leads into the design tool. Everything else on this
+ * page is deliberately quieter than this block.
  */
 export function Hero() {
   const t = useTranslations('home.hero');
   const p = useTranslations('home.livePreview');
 
   return (
-    <section className="relative overflow-hidden border-b border-rule">
-      <div className="shell grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16 lg:py-24">
+    <section className="border-b border-rule">
+      <div className="shell grid items-center gap-10 py-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-20">
         <div>
           <p className="spec">{t('eyebrow')}</p>
-          <h1 className="display mt-4 text-[clamp(2.35rem,6.2vw,4.15rem)]">{t('title')}</h1>
-          <p className="prose-workshop mt-5 text-[1.0625rem]">{t('lede')}</p>
+          <h1 className="display mt-3 text-[clamp(2.1rem,5.4vw,3.5rem)]">{t('title')}</h1>
+          <p className="mt-4 max-w-[42ch] text-[1.0625rem] leading-relaxed text-ink-2">
+            {t('lede')}
+          </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-3">
             <ButtonLink href="/designer" variant="primary" size="lg">
               {t('primary')} <ArrowRight size={17} aria-hidden />
             </ButtonLink>
-            <ButtonLink href="/furniture" variant="secondary" size="lg">
+            <ButtonLink href="/furniture" variant="quiet" size="lg">
               {t('secondary')}
             </ButtonLink>
           </div>
 
-          <p className="mt-5 text-[0.875rem] text-ink-3">{t('note')}</p>
+          <p className="mt-4 text-[0.8125rem] text-ink-3">{t('note')}</p>
         </div>
 
-        <figure className="lg:-mr-12 xl:-mr-20">
+        <figure className="lg:-mr-8">
           <HeroSign label={p('label')} />
-          <figcaption className="mt-4 text-[0.875rem] text-ink-3 lg:pl-4">{p('caption')}</figcaption>
+          <figcaption className="mt-3 text-center text-[0.8125rem] text-ink-3 lg:text-left lg:pl-4">
+            {p('caption')}
+          </figcaption>
         </figure>
       </div>
     </section>

@@ -52,7 +52,17 @@ export interface CarvingFont {
    * releases of a face and getting it wrong makes every sign the wrong size.
    */
   capRatio: number;
-  /** Below this cap height the face loses its detail on any bit. Millimetres. */
+  /**
+   * Below this cap height the face stops reading as itself, whatever bit is
+   * used. Millimetres.
+   *
+   * This is a legibility floor, not a physical one — the physical floor comes
+   * from `strokeRatio` measured against the cutter, and is applied separately.
+   * Because the designer now uses these to bound the size slider rather than to
+   * raise a warning, an over-cautious value here quietly removes a size a
+   * customer could legitimately have had. They are set to where the face
+   * genuinely degrades, not to where it looks its best.
+   */
   minCapHeightMm: number;
   suitability: {
     vcarve: CarveRating;
@@ -75,7 +85,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.085,
     pathFactor: 4.6,
     capRatio: 0.7,
-    minCapHeightMm: 22,
+    minCapHeightMm: 16,
     suitability: { vcarve: 'excellent', pocket: 'good', raised: 'good' },
     note: {
       sv: 'Romerska versaler i samma tradition som inskriptionerna på Trajanuskolonnen. Serifernas spetsar följer V-fräsens vinkel och blir knivskarpa — det klassiska valet för en huggen skylt.',
@@ -92,7 +102,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.13,
     pathFactor: 4.4,
     capRatio: 0.72,
-    minCapHeightMm: 16,
+    minCapHeightMm: 12,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
       sv: 'Kraftiga streck och stora inneslutna ytor. Tål både V-fräsning och urfräsning ner till små storlekar, och läses bra på håll. En trygg allround-antikva.',
@@ -109,7 +119,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.14,
     pathFactor: 4.2,
     capRatio: 0.71,
-    minCapHeightMm: 14,
+    minCapHeightMm: 10,
     suitability: { vcarve: 'good', pocket: 'excellent', raised: 'excellent' },
     note: {
       sv: 'Nästan jämntjocka streck utan hårfina partier, vilket gör den idealisk för urfräsning med platt fräs och för upphöjda bokstäver.',
@@ -126,7 +136,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.2,
     pathFactor: 3.9,
     capRatio: 0.72,
-    minCapHeightMm: 12,
+    minCapHeightMm: 8,
     suitability: { vcarve: 'good', pocket: 'excellent', raised: 'excellent' },
     note: {
       sv: 'Den tyngsta stilen i urvalet. Så breda streck att bakgrunden kan fräsas bort helt och bokstäverna står kvar i massivt trä — bäst för upphöjd text.',
@@ -143,7 +153,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.14,
     pathFactor: 3.4,
     capRatio: 0.73,
-    minCapHeightMm: 12,
+    minCapHeightMm: 10,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
       sv: 'Smal och hög. Får plats med långa namn på en smal bräda utan att bokstäverna behöver krympa.',
@@ -160,7 +170,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.13,
     pathFactor: 3.2,
     capRatio: 0.73,
-    minCapHeightMm: 10,
+    minCapHeightMm: 8,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
       sv: 'Kompakta versaler utan utsmyckning. Den mest utrymmeseffektiva stilen här och läsbar även i liten skala.',
@@ -177,7 +187,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.09,
     pathFactor: 4.5,
     capRatio: 0.72,
-    minCapHeightMm: 25,
+    minCapHeightMm: 15,
     suitability: { vcarve: 'excellent', pocket: 'caution', raised: 'caution' },
     note: {
       sv: 'Boksidans antikva, med tydlig skillnad mellan tjocka och tunna streck. Vacker V-fräst i större storlek, men de tunna partierna är för smala för att fräsas ur platt.',
@@ -194,7 +204,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.07,
     pathFactor: 5.2,
     capRatio: 0.58,
-    minCapHeightMm: 30,
+    minCapHeightMm: 22,
     suitability: { vcarve: 'good', pocket: 'caution', raised: 'caution' },
     note: {
       sv: 'Sammanbunden skrivstil. Fungerar V-fräst om texten får vara stor — bokstäverna löper ihop, så små storlekar blir grötiga.',
@@ -211,8 +221,8 @@ export const CARVING_FONTS: CarvingFont[] = [
     strokeRatio: 0.045,
     pathFactor: 4.7,
     capRatio: 0.7,
-    minCapHeightMm: 40,
-    suitability: { vcarve: 'caution', pocket: 'caution', raised: 'caution' },
+    minCapHeightMm: 30,
+    suitability: { vcarve: 'good', pocket: 'caution', raised: 'caution' },
     note: {
       sv: 'Hög kontrast med riktigt hårfina streck. Tas med för att den är efterfrågad, men den kräver stora bokstäver och en spetsig fräs — annars försvinner de tunna partierna helt.',
       en: 'High contrast with genuinely hairline strokes. Included because people ask for it, but it needs large letters and a sharp bit — otherwise the thin strokes disappear altogether.',

@@ -54,6 +54,20 @@ describe('carving fonts', () => {
     expect(getFont(DEFAULT_FONT_ID).id).toBe(DEFAULT_FONT_ID);
     expect(getFont('no-such-font')).toBe(CARVING_FONTS[0]);
   });
+
+  it('leaves no face unreachable', () => {
+    // The designer hides any face rated 'caution' for the chosen method. A face
+    // rated 'caution' for every method could therefore never be picked at all,
+    // which means it is dead weight in the catalogue rather than an option.
+    const unreachable = CARVING_FONTS.filter((font) =>
+      (['vcarve', 'pocket', 'raised'] as const).every((m) => font.suitability[m] === 'caution'),
+    ).map((f) => f.id);
+    expect(unreachable).toEqual([]);
+  });
+
+  it('keeps the default face available for the default method', () => {
+    expect(getFont(DEFAULT_FONT_ID).suitability.vcarve).not.toBe('caution');
+  });
 });
 
 describe('woods', () => {

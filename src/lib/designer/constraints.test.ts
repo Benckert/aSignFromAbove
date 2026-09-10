@@ -1,0 +1,252 @@
+import { describe, expect, it } from 'vitest';
+import {
+  availableFinishes,
+  availableFonts,
+  availableMethods,
+  availableWoods,
+  capHeightRange,
+  isOrderable,
+  reconcile,
+} from './constraints';
+import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
+import { getFont } from '@/config/carving-fonts';
+import { BITS, MACHINE } from '@/config/router-profile';
+
+const base = () => defaultDesign();
+
+describe('availableWoods', () => {
+  it('offers everything indoors', () => {
+    expect(availableWoods('indoor').length).toBeGreaterThan(2);
+  });
+
+  it('offers only weather-tolerant timbers outdoors', () => {
+    for (const wood of availableWoods('outdoor')) expect(wood.outdoorSuitable).toBe(true);
+  });
+
+  it('never returns an empty list', () => {
+    for (const p of ['indoor', 'sheltered', 'outdoor'] as const) {
+      expect(availableWoods(p).length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('availableMethods', () => {
+  it('drops raised lettering outdoors, where it would hold water', () => {
+    expect(availableMethods('outdoor')).not.toContain('raised');
+    expect(availableMethods('indoor')).toContain('raised');
+  });
+});
+
+describe('availableFinishes', () => {
+  it('always offers something', () => {
+    for (const p of ['indoor', 'sheltered', 'outdoor'] as const) {
+      expect(availableFinishes(p).length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('availableFonts', () => {
+  it('excludes faces that would disappoint under the chosen method', () => {
+    for (const method of ['vcarve', 'pocket', 'raised'] as const) {
+      for (const font of availableFonts(method)) {
+        expect(font.suitability[method]).not.toBe('caution');
+      }
+    }
+  });
+
+  it('never returns an empty picker', () => {
+    for (const method of ['vcarve', 'pocket', 'raised'] as const) {
+      expect(availableFonts(method).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('offers more faces for V-carving than for pocketing', () => {
+    // A V-bit comes to a point, so it copes with faces a straight cutter cannot.
+    expect(availableFonts('vcarve').length).toBeGreaterThanOrEqual(availableFonts('pocket').length);
+  });
+});
+
+describe('capHeightRange', () => {
+  it('never lets a stroke fall below what the bit can enter', () => {
+    for (const method of ['vcarve', 'pocket'] as const) {
+      const bit =
+        method === 'vcarve' ? BITS.find((b) => b.id === 'v60')! : BITS.find((b) => b.id === 'em3')!;
+      for (const font of availableFonts(method)) {
+        const block = makeTextBlock({ fontId: font.id, content: 'Hej' });
+        const { min } = capHeightRange({ ...base(), method }, block);
+        const strokeAtMin = min * font.strokeRatio;
+        expect(strokeAtMin).toBeGreaterThanOrEqual(bit.minStrokeMm - 0.001);
+      }
+    }
+  });
+
+  it('honours the face own minimum too', () => {
+    const font = getFont('cinzel');
+    const block = makeTextBlock({ fontId: 'cinzel', content: 'Hej' });
+    expect(capHeightRange(base(), block).min).toBeGreaterThanOrEqual(font.minCapHeightMm);
+  });
+
+  it('keeps max at or above min for every face and method', () => {
+    for (const method of ['vcarve', 'pocket', 'raised'] as const) {
+      for (const font of availableFonts(method)) {
+        const block = makeTextBlock({ fontId: font.id, content: 'Hej' });
+        const { min, max } = capHeightRange({ ...base(), method }, block);
+        expect(max).toBeGreaterThanOrEqual(min);
+      }
+    }
+  });
+
+  it('shrinks the ceiling as lines are added', () => {
+    const one = capHeightRange(base(), makeTextBlock({ content: 'Ett' }));
+    const three = capHeightRange(base(), makeTextBlock({ content: 'Ett\nTva\nTre' }));
+    expect(three.max).toBeLessThan(one.max);
+  });
+
+  it('shrinks the ceiling on a shorter board', () => {
+    const tall = capHeightRange({ ...base(), heightMm: 400 }, makeTextBlock({ content: 'A' }));
+    const short = capHeightRange({ ...base(), heightMm: 120 }, makeTextBlock({ content: 'A' }));
+    expect(short.max).toBeLessThan(tall.max);
+  });
+
+  it('uses a measured width to cap the size when one is supplied', () => {
+    const block = makeTextBlock({ content: 'Ett mycket långt husnamn' });
+    const unmeasured = capHeightRange(base(), block);
+    // 400 mm wide at a 100 mm cap: the text is four times too wide to fit.
+    const measured = capHeightRange(base(), block, 400);
+    expect(measured.max).toBeLessThan(unmeasured.max);
+  });
+});
+
+describe('reconcile', () => {
+  it('leaves a valid design untouched', () => {
+    const design = base();
+    expect(reconcile(design)).toBe(design);
+  });
+
+  it('leaves every shipped preset untouched', () => {
+    // A preset that needed correcting would visibly rearrange itself the
+    // instant it was picked, which looks like a bug to the person picking it.
+    for (const preset of PRESETS) {
+      const design = structuredClone(preset.design);
+      expect({ id: preset.id, design: reconcile(design) }).toEqual({ id: preset.id, design });
+    }
+  });
+
+  it('swaps an indoor timber when the sign moves outdoors', () => {
+    const next = reconcile({ ...base(), woodId: 'valnot', placement: 'outdoor' });
+    expect(next.placement).toBe('outdoor');
+    expect(next.woodId).not.toBe('valnot');
+    expect(availableWoods('outdoor').some((w) => w.id === next.woodId)).toBe(true);
+  });
+
+  it('leaves a weather-tolerant timber alone outdoors', () => {
+    expect(reconcile({ ...base(), woodId: 'ek', placement: 'outdoor' }).woodId).toBe('ek');
+  });
+
+  it('drops raised lettering when the sign moves outdoors', () => {
+    const next = reconcile({ ...base(), method: 'raised', placement: 'outdoor' });
+    expect(next.method).not.toBe('raised');
+  });
+
+  it('replaces a face that does not suit a newly chosen method', () => {
+    const withPlayfair = { ...base(), texts: [makeTextBlock({ fontId: 'playfair', content: 'Hej' })] };
+    const next = reconcile({ ...withPlayfair, method: 'pocket' });
+    expect(availableFonts('pocket').some((f) => f.id === next.texts[0].fontId)).toBe(true);
+  });
+
+  it('pulls an oversized sign back inside the machine', () => {
+    const next = reconcile({ ...base(), widthMm: 5000, heightMm: 4000 });
+    expect(next.widthMm).toBe(MACHINE.workAreaMm.width);
+    expect(next.heightMm).toBe(MACHINE.workAreaMm.height);
+  });
+
+  it('pushes an undersized sign up to the minimum', () => {
+    const next = reconcile({ ...base(), widthMm: 10, heightMm: 10 });
+    expect(next.widthMm).toBe(MACHINE.minSignMm.width);
+    expect(next.heightMm).toBe(MACHINE.minSignMm.height);
+  });
+
+  it('raises text that is too small for the bit', () => {
+    const next = reconcile({
+      ...base(),
+      texts: [makeTextBlock({ fontId: 'cinzel', content: 'Hej', capHeightMm: 2 })],
+    });
+    const { min } = capHeightRange(next, next.texts[0]);
+    expect(next.texts[0].capHeightMm).toBeGreaterThanOrEqual(min);
+  });
+
+  it('lowers text that is too tall for the board', () => {
+    const next = reconcile({
+      ...base(),
+      heightMm: 120,
+      texts: [makeTextBlock({ content: 'Hej', capHeightMm: 200 })],
+    });
+    expect(next.texts[0].capHeightMm).toBeLessThan(200);
+  });
+
+  it('pulls a border inset back inside a shrinking board', () => {
+    const next = reconcile({
+      ...base(),
+      widthMm: 120,
+      heightMm: 100,
+      decoration: { border: 'line', insetMm: 90, corners: 'none' },
+    });
+    expect(next.decoration.insetMm).toBeLessThan(50);
+  });
+
+  it('is idempotent — reconciling twice changes nothing more', () => {
+    const once = reconcile({ ...base(), woodId: 'valnot', placement: 'outdoor', widthMm: 9000 });
+    expect(reconcile(once)).toBe(once);
+  });
+
+  it('always produces a design whose every choice is on offer', () => {
+    // A deliberately incoherent starting point.
+    const next = reconcile({
+      ...base(),
+      placement: 'outdoor',
+      woodId: 'valnot',
+      method: 'raised',
+      widthMm: 4000,
+      texts: [makeTextBlock({ fontId: 'playfair', content: 'Hej', capHeightMm: 1 })],
+    });
+    expect(availableWoods(next.placement).some((w) => w.id === next.woodId)).toBe(true);
+    expect(availableMethods(next.placement)).toContain(next.method);
+    expect(availableFinishes(next.placement)).toContain(next.finish);
+    expect(availableFonts(next.method).some((f) => f.id === next.texts[0].fontId)).toBe(true);
+    expect(next.widthMm).toBeLessThanOrEqual(MACHINE.workAreaMm.width);
+  });
+});
+
+describe('isOrderable', () => {
+  it('is false with nothing written and no artwork', () => {
+    expect(isOrderable({ ...base(), texts: [], artwork: null })).toBe(false);
+  });
+
+  it('is false when the only line is blank space', () => {
+    expect(
+      isOrderable({ ...base(), texts: [makeTextBlock({ content: '   ' })], artwork: null }),
+    ).toBe(false);
+  });
+
+  it('is true with wording', () => {
+    expect(isOrderable(base())).toBe(true);
+  });
+
+  it('is true with artwork but no wording', () => {
+    expect(
+      isOrderable({
+        ...base(),
+        texts: [],
+        artwork: {
+          svg: '<svg viewBox="0 0 10 10"><path d="M0 0h10v10H0z"/></svg>',
+          fileName: 'logo.svg',
+          aspect: 1,
+          widthMm: 60,
+          x: 0.5,
+          y: 0.3,
+          rotation: 0,
+        },
+      }),
+    ).toBe(true);
+  });
+});

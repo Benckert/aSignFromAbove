@@ -7,30 +7,26 @@ interface Step {
 }
 
 /**
- * How it works.
- *
- * Four steps, laid out so the reader can see there is no payment gate anywhere
- * in them. The point of this section is not to explain a process — it is to
- * remove the worry that clicking into the design tool commits you to something.
+ * Four short steps whose real job is to say that nothing is charged until both
+ * sides have agreed. Kept to one line each — a visitor who wants the detail is
+ * already in the design tool finding it out for themselves.
  */
 export function Steps() {
   const t = useTranslations('home.how');
   const steps = t.raw('steps') as Step[];
 
   return (
-    <section className="border-b border-rule py-16 lg:py-24">
+    <section className="border-b border-rule py-12 lg:py-16">
       <div className="shell">
-        <div className="max-w-xl">
-          <h2 className="display text-[clamp(1.75rem,3.4vw,2.5rem)]">{t('title')}</h2>
-          <p className="prose-workshop mt-3">{t('lede')}</p>
-        </div>
-
-        <ol className="mt-10 grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4">
+        <h2 className="spec">{t('title')}</h2>
+        <ol className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <li key={step.n} className="relative border-t border-rule pt-5">
-              <span className="spec">{step.n}</span>
-              <h3 className="mt-2 text-[1.0625rem] font-semibold text-ink">{step.title}</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-2">{step.body}</p>
+            <li key={step.n}>
+              <h3 className="text-[0.9375rem] font-medium text-ink">
+                <span className="mr-2 font-mono text-[0.75rem] text-ink-3">{step.n}</span>
+                {step.title}
+              </h3>
+              <p className="mt-1 text-[0.875rem] leading-relaxed text-ink-3">{step.body}</p>
             </li>
           ))}
         </ol>

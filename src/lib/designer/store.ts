@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Artwork, Decoration, SignDesign, TextBlock } from './types';
 import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
+import { reconcile } from './constraints';
 
 /**
  * Designer state.
@@ -33,8 +34,6 @@ interface DesignerState {
   design: SignDesign;
   /** Which text block the side panel is editing. */
   activeTextId: string | null;
-  /** Set by the preview after it measures the laid-out text. */
-  overflows: boolean;
   /** Suppresses the restored-design notice once it has been seen. */
   restored: boolean;
 
@@ -47,7 +46,6 @@ interface DesignerState {
   restoreText: (block: TextBlock, index: number) => void;
   setActiveText: (id: string | null) => void;
   setArtwork: (artwork: Artwork | null) => void;
-  setOverflows: (value: boolean) => void;
   applyPreset: (presetId: string) => void;
   reset: () => void;
   loadDesign: (design: SignDesign) => void;
@@ -59,20 +57,27 @@ export const useDesigner = create<DesignerState>()(
     (set, get) => ({
       design: defaultDesign(),
       activeTextId: null,
-      overflows: false,
-      restored: false,
+          restored: false,
 
-      set: (patch) => set((s) => ({ design: { ...s.design, ...patch } })),
+      /*
+        Every mutation goes through reconcile, so the design in the store is
+        always one the workshop could build. That is what lets the interface
+        drop its warning panel: an impossible state cannot be reached, rather
+        than being reached and then complained about.
+      */
+      set: (patch) => set((s) => ({ design: reconcile({ ...s.design, ...patch }) })),
 
       setDecoration: (patch) =>
-        set((s) => ({ design: { ...s.design, decoration: { ...s.design.decoration, ...patch } } })),
+        set((s) => ({
+          design: reconcile({ ...s.design, decoration: { ...s.design.decoration, ...patch } }),
+        })),
 
       updateText: (id, patch) =>
         set((s) => ({
-          design: {
+          design: reconcile({
             ...s.design,
             texts: s.design.texts.map((t) => (t.id === id ? { ...t, ...patch } : t)),
-          },
+          }),
         })),
 
       addText: () => {
@@ -83,7 +88,7 @@ export const useDesigner = create<DesignerState>()(
           y: Math.min(0.5 + get().design.texts.length * 0.16, 0.88),
         });
         set((s) => ({
-          design: { ...s.design, texts: [...s.design.texts, block] },
+          design: reconcile({ ...s.design, texts: [...s.design.texts, block] }),
           activeTextId: block.id,
         }));
       },
@@ -105,23 +110,19 @@ export const useDesigner = create<DesignerState>()(
 
       setArtwork: (artwork) => set((s) => ({ design: { ...s.design, artwork } })),
 
-      setOverflows: (value) =>
-        set((s) => (s.overflows === value ? s : { ...s, overflows: value })),
-
       applyPreset: (presetId) => {
         const preset = PRESETS.find((p) => p.id === presetId);
         if (!preset) return;
         // Clone so the preset objects are never mutated by later edits.
         set({
-          design: structuredClone(preset.design),
+          design: reconcile(structuredClone(preset.design)),
           activeTextId: null,
-          overflows: false,
-        });
+                });
       },
 
-      reset: () => set({ design: defaultDesign(), activeTextId: null, overflows: false }),
+      reset: () => set({ design: reconcile(defaultDesign()), activeTextId: null }),
 
-      loadDesign: (design) => set({ design, activeTextId: null, overflows: false }),
+      loadDesign: (design) => set({ design: reconcile(design), activeTextId: null }),
 
       acknowledgeRestore: () => set({ restored: true }),
     }),
