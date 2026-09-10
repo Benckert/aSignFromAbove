@@ -1,0 +1,665 @@
+{
+  "meta": {
+    "locale": "Svenska",
+    "switchTo": "In English",
+    "switchToShort": "EN"
+  },
+  "nav": {
+    "home": "Start",
+    "designer": "Designa skylt",
+    "furniture": "Möbler",
+    "custom": "Specialbeställning",
+    "workshop": "Verkstaden",
+    "contact": "Kontakt",
+    "menu": "Meny",
+    "close": "Stäng",
+    "theme": "Byt mellan mörkt och ljust",
+    "skipToContent": "Hoppa till innehållet"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Skylt- och möbelsnickeri",
+      "title": "Skyltar frästa i massivt trä",
+      "lede": "Jag gör en skylt i taget i verkstaden — namnet på huset, stugan eller företaget. Rita din egen här nedanför och se exakt hur den blir innan du beställer något.",
+      "primary": "Rita din skylt",
+      "secondary": "Se vad jag har gjort",
+      "note": "Ingen registrering. Priset räknas fram medan du ritar."
+    },
+    "livePreview": {
+      "label": "Skylt i ek, 400 × 220 mm, V-fräst text",
+      "caption": "Så här ser förhandsvisningen ut. Den uppdateras medan du ändrar."
+    },
+    "how": {
+      "title": "Så går det till",
+      "lede": "Fyra steg, och inget av dem kostar något förrän vi är överens.",
+      "steps": [
+        {
+          "n": "01",
+          "title": "Rita",
+          "body": "Välj storlek, träslag och text i ritverktyget. Du ser skylten växa fram medan du ändrar, och priset räknas om direkt."
+        },
+        {
+          "n": "02",
+          "title": "Skicka",
+          "body": "När du är nöjd skickar du ritningen till mig. Du binder dig inte till något — det är ett underlag för att prata vidare."
+        },
+        {
+          "n": "03",
+          "title": "Bekräfta",
+          "body": "Jag hör av mig inom ett par dagar med eventuella frågor och en bekräftelse på pris och leveranstid. Först då är det en beställning."
+        },
+        {
+          "n": "04",
+          "title": "Fräs och lämna",
+          "body": "Skylten fräses, slipas och ytbehandlas för hand. Du får en bild innan den skickas."
+        }
+      ]
+    },
+    "materials": {
+      "eyebrow": "Material",
+      "title": "Sju träslag, inga fanerskivor",
+      "lede": "Allt fräses i massivt trä. Vilket slag du väljer avgör både hur skylten åldras och hur skarp texten blir — hårda slag håller finare detaljer, mjuka är billigare och lever mer.",
+      "cta": "Läs mer om träslagen i ritverktyget"
+    },
+    "furniture": {
+      "eyebrow": "Möbler",
+      "title": "Och en och annan möbel",
+      "lede": "Vid sidan av skyltarna bygger jag möbler på beställning. Inga standardmodeller och ingen katalog — varje sak ritas för sin plats och sin ägare, och görs bara en gång.",
+      "cta": "Se möblerna"
+    },
+    "custom": {
+      "eyebrow": "Något annat",
+      "title": "Sådant som inte får plats i ritverktyget",
+      "lede": "Skyltar större än fräsen, sammansatta bokstäver, infälld metall, en möbel som ska passa ett rum som inte är rätvinkligt. Beskriv vad du tänker dig så hör jag av mig.",
+      "cta": "Beskriv ditt projekt"
+    },
+    "maker": {
+      "eyebrow": "Verkstaden",
+      "title": "En person, en fräs, ingen brådska",
+      "lede": "Det här är inte en fabrik. Jag tar emot ett begränsat antal beställningar i taget för att hinna göra dem ordentligt, och säger hellre nej än levererar något jag inte skulle vilja ha själv.",
+      "cta": "Mer om verkstaden"
+    }
+  },
+  "designer": {
+    "title": "Rita din skylt",
+    "lede": "Ändra vad du vill — förhandsvisningen och priset följer med. Ingenting skickas förrän du väljer att göra det.",
+    "restored": "Vi tog upp skylten du höll på med. Den sparades bara här i din webbläsare.",
+    "restoredAction": "Börja om istället",
+    "preview": {
+      "label": "Förhandsvisning av skylten",
+      "aria": "Skylt i {wood}, {width} × {height} millimeter",
+      "download": "Ladda ner bild",
+      "downloadSvg": "Ladda ner SVG",
+      "downloading": "Förbereder …",
+      "downloadFailed": "Bilden kunde inte skapas. Specifikationen följer ändå med beställningen.",
+      "zoom": "Visa större",
+      "actual": "Faktisk storlek",
+      "actualHint": "Jämför med något du har till hands",
+      "close": "Stäng"
+    },
+    "presets": {
+      "title": "Börja från",
+      "hint": "Byter ut allt du ändrat hittills."
+    },
+    "sections": {
+      "shape": "Storlek och form",
+      "wood": "Träslag",
+      "text": "Text",
+      "carve": "Fräsning och yta",
+      "decor": "Dekor",
+      "artwork": "Egen bild",
+      "price": "Pris"
+    },
+    "size": {
+      "width": "Bredd",
+      "height": "Höjd",
+      "thickness": "Tjocklek",
+      "presets": "Vanliga storlekar",
+      "shape": "Form",
+      "edge": "Kant",
+      "placement": "Var ska den sitta?",
+      "maxHint": "Största skylt jag kan göra i ett stycke är {width} × {height} mm."
+    },
+    "shapes": {
+      "rect": "Rak",
+      "rounded": "Rundade hörn",
+      "arch": "Båge",
+      "oval": "Oval"
+    },
+    "edges": {
+      "square": "Skarp",
+      "chamfer": "Fasad",
+      "roundover": "Rundad"
+    },
+    "placements": {
+      "indoor": "Inomhus",
+      "sheltered": "Under tak",
+      "outdoor": "Ute i väder"
+    },
+    "wood": {
+      "label": "Välj träslag",
+      "hardness": "Hårdhet",
+      "outdoor": "Tål utomhusbruk",
+      "indoorOnly": "Endast inomhus",
+      "pricePerDm2": "Materialpris"
+    },
+    "text": {
+      "blockLabel": "Textrad {n}",
+      "content": "Text",
+      "contentHint": "Tryck retur för att byta rad.",
+      "placeholder": "Skriv något …",
+      "font": "Stil",
+      "capHeight": "Textstorlek",
+      "fitToWidth": "Fyll bredden",
+      "capHeightHint": "Höjden på en stor bokstav.",
+      "lineHeight": "Radavstånd",
+      "letterSpacing": "Bokstavsavstånd",
+      "align": "Justering",
+      "wrap": "Hur texten löper",
+      "curvature": "Hur mycket den böjs",
+      "radius": "Radie",
+      "position": "Var på skylten",
+      "positionX": "I sidled",
+      "positionY": "I höjdled",
+      "add": "Lägg till textrad",
+      "remove": "Ta bort",
+      "removed": "Textraden togs bort.",
+      "undo": "Ångra",
+      "edit": "Redigera",
+      "done": "Klar",
+      "empty": "Tom rad",
+      "capsOnly": "Stilen har bara versaler.",
+      "fontsTitle": "Om stilarna",
+      "fontsLede": "Alla stilar går att skära. Vissa klarar det bättre än andra — det står vid varje.",
+      "suitability": {
+        "excellent": "Utmärkt",
+        "good": "Bra",
+        "caution": "Kräver omsorg"
+      },
+      "suitabilityFor": "Passar den valda skärmetoden",
+      "minSize": "Funkar från {mm} mm",
+      "strokeWidth": "Tunnaste linjen blir ca {mm} mm"
+    },
+    "wraps": {
+      "straight": "Rak",
+      "arcUp": "Båge upp",
+      "arcDown": "Båge ner",
+      "circle": "Cirkel"
+    },
+    "aligns": {
+      "left": "Vänster",
+      "center": "Centrerad",
+      "right": "Höger"
+    },
+    "carve": {
+      "method": "Hur texten skärs",
+      "finish": "Ytbehandling",
+      "paintColour": "Färg i bokstäverna",
+      "hanging": "Hur den sätts upp",
+      "methods": {
+        "vcarve": "Skuren",
+        "vcarveDetail": "Nedsänkt, spetsig botten",
+        "pocket": "Urgröpt",
+        "pocketDetail": "Nedsänkt, plan botten",
+        "raised": "Upphöjd",
+        "raisedDetail": "Bokstäverna står kvar"
+      },
+      "finishes": {
+        "raw": "Obehandlad",
+        "oil": "Hårdvaxolja",
+        "paint": "Färgade bokstäver",
+        "oilPaint": "Färg och olja"
+      },
+      "hangings": {
+        "none": "Ingen",
+        "keyhole": "Nyckelhål",
+        "rope": "Rep",
+        "posts": "Stolpar"
+      }
+    },
+    "decor": {
+      "border": "Ram",
+      "inset": "Avstånd från kanten",
+      "corners": "Hörn",
+      "borders": {
+        "none": "Ingen",
+        "line": "Linje",
+        "double": "Dubbel",
+        "inset": "Nedsänkt fält",
+        "notch": "Bruten"
+      },
+      "cornerStyles": {
+        "none": "Inga",
+        "diamond": "Romb",
+        "leaf": "Blad",
+        "drilled": "Punkter"
+      }
+    },
+    "artwork": {
+      "title": "Egen bild",
+      "lede": "Har du en logotyp eller en teckning som SVG-fil kan den fräsas in. Den blir en form i träet, inte en bild — färger och gråtoner försvinner.",
+      "upload": "Välj SVG-fil",
+      "replace": "Byt fil",
+      "remove": "Ta bort bild",
+      "width": "Bredd",
+      "rotation": "Vridning",
+      "positionX": "Från vänster",
+      "positionY": "Från överkant",
+      "adds": "Lägger till {amount} för uppritning.",
+      "errors": {
+        "tooLarge": "Filen är för stor. Håll dig under 512 kB — en ren vektorfil är nästan alltid mycket mindre.",
+        "notSvg": "Det där ser inte ut som en SVG-fil.",
+        "unparseable": "Filen gick inte att läsa. Prova att exportera om den från ritprogrammet.",
+        "empty": "Filen innehåller ingen form som går att fräsa. Text i en SVG behöver konverteras till banor först."
+      }
+    },
+    "price": {
+      "title": "Pris",
+      "total": "Att betala",
+      "incVat": "inkl. moms",
+      "exVat": "exkl. moms",
+      "vat": "Moms 25 %",
+      "breakdown": "Vad ingår i priset?",
+      "hideBreakdown": "Dölj",
+      "material": "Material",
+      "setup": "Uppstart",
+      "carving": "Skärning",
+      "finishing": "Efterarbete",
+      "extras": "Tillval",
+      "subtotal": "Summa exkl. moms",
+      "minimum": "Minsta orderbelopp tillämpat.",
+      "machineTime": "ca {minutes} min i maskinen",
+      "fixed": "Priset är fast för den här skylten. Frakt tillkommer och räknas ut när adressen är känd.",
+      "leadTime": "Leveranstid {min}–{max} veckor från bekräftad beställning."
+    },
+    "warnings": {
+      "title": "Att tänka på",
+      "blocking": "Går inte att göra",
+      "warning": "Kan bli sämre än du tänkt",
+      "note": "Bra att veta",
+      "none": "Inget att anmärka på. Skylten går att göra som den ser ut."
+    },
+    "order": {
+      "cta": "Gå vidare med den här skylten",
+      "ctaBlocked": "Rätta till punkterna ovan först",
+      "reassure": "Nästa steg är dina kontaktuppgifter. Det är fortfarande ingen beställning."
+    },
+    "reset": "Börja om",
+    "resetConfirm": "Vill du börja om från början? Det du ritat försvinner.",
+    "mobile": {
+      "edit": "Ändra",
+      "close": "Klar",
+      "priceLabel": "Pris"
+    }
+  },
+  "order": {
+    "title": "Skicka ritningen",
+    "lede": "Fyll i hur jag når dig så hör jag av mig med en bekräftelse. Det här är ännu inte en beställning — inget är bindande förrän vi båda sagt ja.",
+    "summary": "Din skylt",
+    "changeDesign": "Ändra ritningen",
+    "fields": {
+      "name": "Namn",
+      "email": "E-post",
+      "phone": "Telefon",
+      "phoneHint": "Frivilligt. Ibland går det fortare att ringa om något är oklart.",
+      "message": "Något jag bör veta?",
+      "messageHint": "Frivilligt. Till exempel om skylten ska vara klar till ett visst datum.",
+      "delivery": "Leverans",
+      "deliveryPickup": "Hämtas i verkstaden",
+      "deliveryShip": "Skickas",
+      "address": "Adress",
+      "addressHint": "Behövs bara för att räkna ut frakten."
+    },
+    "consent": {
+      "label": "Jag godkänner att mina uppgifter används för att hantera min förfrågan.",
+      "detail": "Uppgifterna används bara för det här och sparas i högst 24 månader. Läs mer i integritetspolicyn.",
+      "required": "Du behöver godkänna det här för att jag ska kunna svara dig."
+    },
+    "newsletter": {
+      "label": "Skicka gärna något enstaka mejl när jag gjort något nytt.",
+      "detail": "Högst några gånger om året. Du kan avsluta när du vill."
+    },
+    "withdrawal": {
+      "title": "Om ångerrätt",
+      "body": "En skylt som ritas efter dina uppgifter är en specialtillverkad vara. Enligt 2 kap. 11 § lagen om distansavtal och avtal utanför affärslokaler gäller därför inte den vanliga 14-dagars ångerrätten när tillverkningen väl har börjat. Fram till dess att du bekräftar beställningen kan du avbryta när som helst, utan kostnad.",
+      "acknowledge": "Jag har läst och förstått att en specialtillverkad skylt inte omfattas av ångerrätt när tillverkningen börjat."
+    },
+    "submit": "Skicka förfrågan",
+    "submitting": "Skickar …",
+    "success": {
+      "title": "Tack — ritningen är framme.",
+      "body": "Jag hör av mig till {email} inom ett par arbetsdagar. Får du inget, kolla skräpposten och hör av dig igen.",
+      "reference": "Referens",
+      "back": "Tillbaka till start",
+      "designAgain": "Rita en till"
+    },
+    "error": {
+      "title": "Det gick inte att skicka.",
+      "body": "Något gick fel på vägen. Prova igen om en stund, eller mejla mig direkt på {email} — beskriv skylten så löser vi det.",
+      "retry": "Försök igen"
+    }
+  },
+  "furniture": {
+    "title": "Möbler",
+    "lede": "Varje möbel här är gjord en gång, för en bestämd plats och en bestämd person. Det finns ingen katalog att beställa ur — det här är exempel på vad som gjorts, för att visa hur jag arbetar.",
+    "empty": "Här kommer bilder på möbler efterhand som de blir klara.",
+    "filterAll": "Allt",
+    "details": {
+      "wood": "Trä",
+      "year": "År",
+      "size": "Mått",
+      "finish": "Yta",
+      "forWhom": "Gjord för"
+    },
+    "cta": {
+      "title": "Något liknande?",
+      "body": "Möbler ritas alltid från början tillsammans med den som ska ha dem. Berätta vad du behöver så tar vi det därifrån.",
+      "button": "Beskriv ditt projekt"
+    },
+    "close": "Stäng",
+    "next": "Nästa",
+    "previous": "Föregående",
+    "kinds": {
+      "table": "Bord",
+      "seating": "Sittmöbler",
+      "storage": "Förvaring",
+      "bed": "Sängar",
+      "other": "Övrigt"
+    },
+    "placeholder": "Foto kommer",
+    "placeholderHint": "Bilder läggs upp när pjäsen är fotograferad.",
+    "openDetails": "Läs om pjäsen"
+  },
+  "custom": {
+    "title": "Specialbeställning",
+    "lede": "För sådant som inte går att rita i verktyget: möbler, stora skyltar, sammansatta arbeten, eller något du inte riktigt vet hur du ska beskriva ännu.",
+    "priceNote": {
+      "title": "Om pris",
+      "body": "Jag sätter inget pris här. Ett specialarbete går inte att räkna ut från ett formulär utan att jag vet vad det faktiskt innebär — så vi pratar först, och sedan får du ett pris att ta ställning till. Att fråga kostar ingenting och binder dig inte till något."
+    },
+    "fields": {
+      "kind": "Vad gäller det?",
+      "kinds": {
+        "furniture": "En möbel",
+        "sign": "En skylt utöver det vanliga",
+        "repair": "Reparation eller ombyggnad",
+        "other": "Något annat"
+      },
+      "description": "Beskriv vad du tänker dig",
+      "descriptionHint": "Ju mer du skriver, desto bättre svar får du. Mått, rum, vad den ska användas till, vad du gillar.",
+      "descriptionPlaceholder": "Till exempel: ett matbord till ett kök med sneda väggar, cirka 180 cm långt, gärna i ek …",
+      "timeframe": "När behöver du den?",
+      "timeframes": {
+        "flexible": "Ingen brådska",
+        "months": "Inom några månader",
+        "date": "Till ett bestämt datum"
+      },
+      "date": "Vilket datum?",
+      "budget": "Ungefärlig budget",
+      "budgetHint": "Frivilligt, men hjälper mig att föreslå något realistiskt istället för att gissa.",
+      "budgetOptions": {
+        "unknown": "Vet inte än",
+        "under5": "Under 5 000 kr",
+        "5to15": "5 000–15 000 kr",
+        "15to40": "15 000–40 000 kr",
+        "over40": "Över 40 000 kr"
+      },
+      "files": "Bifoga bilder eller skisser",
+      "filesHint": "Frivilligt. Bilder på rummet eller på något du gillar säger ofta mer än text."
+    },
+    "submit": "Skicka förfrågan",
+    "success": {
+      "title": "Tack — jag har fått din förfrågan.",
+      "body": "Jag läser den ordentligt och hör av mig till {email} inom några arbetsdagar."
+    }
+  },
+  "workshop": {
+    "title": "Verkstaden",
+    "lede": "En person, en fräs och ett antal handverktyg.",
+    "body": [
+      "Jag gör skyltar och möbler på beställning. Det är hela verksamheten. Inga anställda, ingen butik, inget lager — allt som lämnar verkstaden är gjort för någon som frågat efter just det.",
+      "Skyltarna fräses i en CNC-fräs, vilket låter industriellt men inte är det. Maskinen skär bokstäverna; jag ritar dem, väljer virket, spänner upp det, byter fräsar, slipar för hand och behandlar ytan. En skylt tar en halv till en hel dag från att virket plockas fram till att den är torr och klar.",
+      "Möblerna görs helt för hand, med maskinerna som hjälp där de gör mest nytta. De ritas alltid tillsammans med den som ska ha dem, och de görs en gång.",
+      "Jag tar emot ett begränsat antal beställningar åt gången. Det betyder att du ibland får vänta, och att jag ibland säger nej till något jag inte hinner göra ordentligt. Det är ett medvetet val."
+    ],
+    "principles": {
+      "title": "Vad du kan räkna med",
+      "items": [
+        {
+          "title": "Massivt trä",
+          "body": "Inga fanerskivor, ingen MDF med trämönster. Om det står ek på specifikationen är det ek rakt igenom."
+        },
+        {
+          "title": "Ett pris som håller",
+          "body": "Priset du får bekräftat är det du betalar. Blir något dyrare på vägen frågar jag först."
+        },
+        {
+          "title": "Ärliga besked",
+          "body": "Om det du önskar inte kommer bli bra säger jag det innan, inte efter. Ibland innebär det att jag föreslår något annat än det du bad om."
+        },
+        {
+          "title": "Tid att göra rätt",
+          "body": "Jag lovar hellre fyra veckor och håller det än lovar en och missar."
+        }
+      ]
+    }
+  },
+  "contact": {
+    "title": "Kontakt",
+    "lede": "Enklast är att mejla. Jag läser allt och svarar inom ett par arbetsdagar.",
+    "email": "E-post",
+    "phone": "Telefon",
+    "address": "Adress",
+    "visit": {
+      "title": "Besök",
+      "body": "Verkstaden är inte en butik, men du är välkommen att titta förbi om vi kommer överens om en tid. Hör av dig först."
+    },
+    "business": {
+      "title": "Företagsuppgifter",
+      "org": "Organisationsnummer",
+      "vat": "Momsregistreringsnummer",
+      "fskatt": "Godkänd för F-skatt"
+    },
+    "form": {
+      "title": "Eller skriv här",
+      "subject": "Vad gäller det?",
+      "message": "Meddelande",
+      "submit": "Skicka"
+    }
+  },
+  "footer": {
+    "madeIn": "Gjort i Sverige",
+    "sections": {
+      "explore": "På sajten",
+      "legal": "Villkor",
+      "contact": "Kontakt"
+    },
+    "privacy": "Integritetspolicy",
+    "terms": "Köpvillkor",
+    "cookies": "Kakor",
+    "newsletter": {
+      "title": "Nyhetsbrev",
+      "body": "Kommer så småningom. Några mejl om året, inget annat.",
+      "soon": "Inte igång än"
+    },
+    "copyright": "© {year} {name}"
+  },
+  "legal": {
+    "updated": "Senast uppdaterad {date}",
+    "privacy": {
+      "title": "Integritetspolicy",
+      "lede": "Den här sajten samlar in så lite om dig som det går att komma undan med. Det som ändå behövs står här.",
+      "sections": [
+        {
+          "title": "Vem som ansvarar",
+          "body": [
+            "Personuppgiftsansvarig är {entity}, organisationsnummer {org}, {address}.",
+            "Har du frågor om hur dina uppgifter hanteras, mejla {privacyEmail}."
+          ]
+        },
+        {
+          "title": "Vad som samlas in, och varför",
+          "body": [
+            "**När du skickar en förfrågan eller beställning:** namn, e-postadress och — om du fyller i dem — telefonnummer, adress och det du skriver i meddelandefältet. Ritningen på din skylt följer med. Detta behövs för att kunna svara dig och för att kunna genomföra ett avtal om du beställer. Rättslig grund är avtal (artikel 6.1 b i dataskyddsförordningen), och för själva förfrågan innan avtal finns, ditt samtycke (artikel 6.1 a).",
+            "**När du använder ritverktyget:** ingenting lämnar din webbläsare. Skylten du ritar sparas lokalt på din egen enhet så att den finns kvar om du stänger fliken. Den skickas först när du själv väljer att skicka en förfrågan.",
+            "**När du bara läser sajten:** ingen analys, ingen spårning, inga tredjepartskakor. Webbservern för en teknisk logg över anrop, som alla webbservrar gör, och den innehåller IP-adresser. Den används enbart för drift och säkerhet och gallras löpande."
+          ]
+        },
+        {
+          "title": "Vilka som får se uppgifterna",
+          "body": [
+            "Ingen utomstående får dina uppgifter för egna ändamål. De hanteras av mig, och av de leverantörer som krävs för att driva sajten och skicka e-post — webbhotell och e-postleverantör. Dessa agerar personuppgiftsbiträden och behandlar uppgifterna bara på mina instruktioner.",
+            "Uppgifter säljs aldrig och används aldrig för profilering eller automatiserat beslutsfattande."
+          ]
+        },
+        {
+          "title": "Hur länge de sparas",
+          "body": [
+            "Förfrågningar som inte leder till en beställning: högst 24 månader, sedan raderas de.",
+            "Genomförda beställningar: så länge bokföringslagen kräver, vilket är sju år efter räkenskapsårets slut för underlag som utgör bokföringsmaterial.",
+            "Anmälan till nyhetsbrev, när det finns: tills du avanmäler dig."
+          ]
+        },
+        {
+          "title": "Dina rättigheter",
+          "body": [
+            "Du har rätt att få veta vilka uppgifter som finns om dig, att få felaktiga uppgifter rättade, att få uppgifter raderade, att invända mot behandling, att begära begränsning av behandlingen och att få ut dina uppgifter i ett maskinläsbart format.",
+            "Har du lämnat samtycke kan du när som helst ta tillbaka det. Det påverkar inte det som redan gjorts.",
+            "Hör av dig till {privacyEmail} så ordnar jag det. Är du inte nöjd med hur jag hanterat saken kan du klaga hos Integritetsskyddsmyndigheten, IMY, som är tillsynsmyndighet i Sverige."
+          ]
+        },
+        {
+          "title": "Typsnitt och externa anrop",
+          "body": [
+            "Alla typsnitt på sajten laddas från vår egen server. Ingenting hämtas från Google Fonts eller något annat externt nätverk, vilket betyder att din IP-adress inte skickas vidare till någon tredje part när du besöker sidan."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Kakor och lokal lagring",
+      "lede": "Det finns ingen kakruta här, av den enkla anledningen att det inte finns några kakor att samtycka till.",
+      "sections": [
+        {
+          "title": "Kakor",
+          "body": [
+            "Sajten sätter inga kakor för analys, marknadsföring eller spårning. Det finns inga tredjepartsskript, ingen besöksstatistik och inga pixlar."
+          ]
+        },
+        {
+          "title": "Lokal lagring i ritverktyget",
+          "body": [
+            "Ritverktyget sparar den skylt du håller på att rita i webbläsarens lokala lagring, på din egen enhet. Det är för att du inte ska förlora ditt arbete om du stänger fliken eller tappar uppkopplingen.",
+            "Innehållet är enbart de val du gjort — mått, träslag, text. Ingen identifierare, ingenting om vem du är, och det skickas inte någonstans. Enligt lagen om elektronisk kommunikation krävs inget samtycke för lagring som är nödvändig för en tjänst du själv har begärt, och det här är sådan lagring.",
+            "Du kan rensa den när som helst genom att välja Börja om i ritverktyget, eller genom att rensa webbplatsdata i din webbläsare."
+          ]
+        },
+        {
+          "title": "Språkval",
+          "body": [
+            "Vilket språk du valt lagras i webbläsaren så att sajten kommer ihåg det. Det är också nödvändig lagring och innehåller inget annat än sv eller en."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Köpvillkor",
+      "lede": "Villkoren nedan gäller när du beställer något av mig som privatperson. Handlar du som företag gäller köplagen istället, och en del av det som står här om konsumentskydd blir då inte tillämpligt.",
+      "sections": [
+        {
+          "title": "Vem du handlar av",
+          "body": [
+            "{entity}, organisationsnummer {org}, {address}. E-post {email}. Momsregistreringsnummer {vat}."
+          ]
+        },
+        {
+          "title": "När ett avtal uppstår",
+          "body": [
+            "Att skicka en ritning eller en förfrågan från sajten är inte en beställning och binder dig inte till någonting. Det är ett underlag.",
+            "Jag återkommer med en bekräftelse där pris, utförande och leveranstid står. Ett avtal uppstår först när du har godkänt den bekräftelsen. Fram till dess kan du avbryta utan kostnad, och jag kan tacka nej till uppdraget."
+          ]
+        },
+        {
+          "title": "Priser",
+          "body": [
+            "Priser som visas på sajten är i svenska kronor och inklusive moms, i enlighet med prisinformationslagen. Fraktkostnad tillkommer och anges i bekräftelsen, eftersom den beror på storlek och adress.",
+            "Priset i ritverktyget är fast för den skylt som ritats. Ändras utförandet efter bekräftelse räknas priset om, och du får godkänna det nya priset innan arbetet fortsätter."
+          ]
+        },
+        {
+          "title": "Betalning",
+          "body": [
+            "Betalning sker mot faktura med 14 dagars betalningsvillkor om inget annat avtalats. Vid större arbeten kan en del av beloppet faktureras i förskott, vilket i så fall står i bekräftelsen."
+          ]
+        },
+        {
+          "title": "Leverans",
+          "body": [
+            "Normal leveranstid är {leadMin}–{leadMax} veckor från bekräftad beställning. Blir det försenat hör jag av mig innan tiden gått ut, inte efter.",
+            "Du kan välja att hämta i verkstaden efter överenskommelse, eller få varan skickad. Risken för varan går över på dig när du tagit emot den."
+          ]
+        },
+        {
+          "title": "Ångerrätt",
+          "body": [
+            "Vid distansköp har du som konsument normalt 14 dagars ångerrätt enligt lagen om distansavtal och avtal utanför affärslokaler (2005:59).",
+            "**Ångerrätten gäller dock inte för specialtillverkade varor.** Enligt 2 kap. 11 § första stycket 3 i samma lag är avtal om en vara som har tillverkats enligt dina anvisningar eller som annars har fått en tydlig personlig prägel undantagna. En skylt med din text, i dina mått och ditt träslag, och en möbel som ritats för dig, är sådana varor.",
+            "Det innebär i praktiken att du kan ändra dig fritt fram till att du godkänner bekräftelsen, men inte efter att tillverkningen påbörjats. Jag är tydlig med när jag börjar.",
+            "Beställer du något som inte är specialtillverkat gäller vanlig ångerrätt, och du får då information om hur du utövar den tillsammans med varan."
+          ]
+        },
+        {
+          "title": "Om något är fel",
+          "body": [
+            "Är varan felaktig har du rätt att reklamera den enligt konsumentköplagen (2022:260). Reklamationsrätten gäller i tre år från det att du tog emot varan. Under de första två åren är det jag som ska visa att felet inte fanns vid leveransen.",
+            "Hör av dig till {email} med en beskrivning och gärna en bild, så löser vi det. I första hand lagar eller gör jag om varan.",
+            "Trä är ett levande material. Att virket rör sig något med luftfuktigheten, att färgen mörknar med tiden och att obehandlat trä ute grånar är egenskaper hos materialet, inte fel. Sprickor som påverkar hållfastheten eller läsbarheten är däremot fel, och dem åtgärdar jag."
+          ]
+        },
+        {
+          "title": "Om vi inte blir överens",
+          "body": [
+            "Skulle vi hamna i en tvist som vi inte löser själva kan du vända dig till Allmänna reklamationsnämnden, ARN, Box 174, 101 23 Stockholm, arn.se. Jag följer ARN:s rekommendationer.",
+            "EU:s onlineplattform för tvistlösning, ODR, upphörde den 20 juli 2025 och går inte längre att använda. Bor du i ett annat EU-land kan Konsument Europa hjälpa dig vidare."
+          ]
+        },
+        {
+          "title": "Immateriella rättigheter",
+          "body": [
+            "Skickar du in en logotyp, en teckning eller en text ansvarar du för att du har rätt att använda den. Jag använder inte ditt material till något annat än din beställning.",
+            "Jag vill gärna visa det jag gjort. Säg bara till om du inte vill att din skylt eller möbel dyker upp bland bilderna — det är helt i sin ordning och påverkar ingenting annat."
+          ]
+        }
+      ]
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Sidan finns inte",
+      "body": "Länken leder någon annanstans än den borde. Det kan vara ett gammalt bokmärke.",
+      "home": "Till startsidan",
+      "designer": "Till ritverktyget"
+    },
+    "general": {
+      "title": "Något gick fel",
+      "body": "Ett oväntat fel uppstod. Ladda om sidan och försök igen.",
+      "retry": "Försök igen"
+    },
+    "form": {
+      "required": "Det här behöver fyllas i.",
+      "email": "Kontrollera e-postadressen.",
+      "tooShort": "Skriv gärna lite mer.",
+      "tooLong": "Det där blev för långt.",
+      "rateLimited": "Du har skickat flera meddelanden nyss. Vänta en stund och försök igen."
+    }
+  },
+  "common": {
+    "mm": "mm",
+    "optional": "frivilligt",
+    "required": "obligatoriskt",
+    "back": "Tillbaka",
+    "loading": "Laddar …",
+    "yes": "Ja",
+    "no": "Nej"
+  }
+}

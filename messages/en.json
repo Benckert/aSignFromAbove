@@ -1,0 +1,665 @@
+{
+  "meta": {
+    "locale": "English",
+    "switchTo": "På svenska",
+    "switchToShort": "SV"
+  },
+  "nav": {
+    "home": "Home",
+    "designer": "Design a sign",
+    "furniture": "Furniture",
+    "custom": "Custom work",
+    "workshop": "The workshop",
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Close",
+    "theme": "Switch between dark and light",
+    "skipToContent": "Skip to content"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Sign carving and furniture making",
+      "title": "Signs routed from solid timber",
+      "lede": "One sign at a time, in a workshop in Sweden — the name of a house, a cabin, a business. Draw yours below and see exactly how it will look before you order anything.",
+      "primary": "Draw your sign",
+      "secondary": "See what I have made",
+      "note": "No sign-up. The price works itself out as you draw."
+    },
+    "livePreview": {
+      "label": "Oak sign, 400 × 220 mm, V-carved lettering",
+      "caption": "This is the preview. It redraws as you change things."
+    },
+    "how": {
+      "title": "How it works",
+      "lede": "Four steps, and none of them costs anything until we have agreed.",
+      "steps": [
+        {
+          "n": "01",
+          "title": "Draw",
+          "body": "Choose the size, the timber and the wording in the design tool. You watch the sign take shape as you change it, and the price updates with it."
+        },
+        {
+          "n": "02",
+          "title": "Send",
+          "body": "When you are happy, send the drawing over. You are not committing to anything — it is a starting point for a conversation."
+        },
+        {
+          "n": "03",
+          "title": "Confirm",
+          "body": "I come back within a couple of days with any questions and a confirmation of price and timing. Only then is it an order."
+        },
+        {
+          "n": "04",
+          "title": "Cut and hand over",
+          "body": "The sign is routed, sanded and finished by hand. You get a photograph before it leaves."
+        }
+      ]
+    },
+    "materials": {
+      "eyebrow": "Materials",
+      "title": "Seven timbers, no veneered board",
+      "lede": "Everything is cut from solid wood. Which species you pick decides both how the sign ages and how crisp the lettering comes out — hard timbers hold finer detail, soft ones cost less and have more life in them.",
+      "cta": "Read about the timbers in the design tool"
+    },
+    "furniture": {
+      "eyebrow": "Furniture",
+      "title": "And the occasional piece of furniture",
+      "lede": "Alongside the signs I build furniture to order. No standard models and no catalogue — each piece is drawn for its place and its owner, and made once.",
+      "cta": "See the furniture"
+    },
+    "custom": {
+      "eyebrow": "Something else",
+      "title": "The things the design tool cannot hold",
+      "lede": "Signs bigger than the machine, built-up letters, inlaid metal, a piece of furniture for a room that is not square. Describe what you have in mind and I will get back to you.",
+      "cta": "Describe your project"
+    },
+    "maker": {
+      "eyebrow": "The workshop",
+      "title": "One person, one router, no hurry",
+      "lede": "This is not a factory. I take on a limited number of jobs at a time so there is room to do them properly, and I would rather say no than hand over something I would not want myself.",
+      "cta": "More about the workshop"
+    }
+  },
+  "designer": {
+    "title": "Draw your sign",
+    "lede": "Change whatever you like — the preview and the price follow. Nothing is sent until you choose to send it.",
+    "restored": "We picked up the sign you were working on. It was only ever saved here in your browser.",
+    "restoredAction": "Start over instead",
+    "preview": {
+      "label": "Preview of the sign",
+      "aria": "Sign in {wood}, {width} by {height} millimetres",
+      "download": "Download image",
+      "downloadSvg": "Download SVG",
+      "downloading": "Preparing …",
+      "downloadFailed": "The image could not be generated. The written specification goes with the order regardless.",
+      "zoom": "View larger",
+      "actual": "Actual size",
+      "actualHint": "Compare it against something to hand",
+      "close": "Close"
+    },
+    "presets": {
+      "title": "Start from",
+      "hint": "Replaces everything you have changed so far."
+    },
+    "sections": {
+      "shape": "Size and shape",
+      "wood": "Timber",
+      "text": "Lettering",
+      "carve": "Cut and finish",
+      "decor": "Decoration",
+      "artwork": "Your own artwork",
+      "price": "Price"
+    },
+    "size": {
+      "width": "Width",
+      "height": "Height",
+      "thickness": "Thickness",
+      "presets": "Common sizes",
+      "shape": "Shape",
+      "edge": "Edge",
+      "placement": "Where will it live?",
+      "maxHint": "The biggest sign I can make in one piece is {width} × {height} mm."
+    },
+    "shapes": {
+      "rect": "Square-cut",
+      "rounded": "Rounded corners",
+      "arch": "Arched",
+      "oval": "Oval"
+    },
+    "edges": {
+      "square": "Sharp",
+      "chamfer": "Chamfered",
+      "roundover": "Rounded"
+    },
+    "placements": {
+      "indoor": "Indoors",
+      "sheltered": "Under cover",
+      "outdoor": "Out in the weather"
+    },
+    "wood": {
+      "label": "Choose a timber",
+      "hardness": "Hardness",
+      "outdoor": "Stands up outdoors",
+      "indoorOnly": "Indoors only",
+      "pricePerDm2": "Material cost"
+    },
+    "text": {
+      "blockLabel": "Line {n}",
+      "content": "Text",
+      "contentHint": "Press return for a new line.",
+      "placeholder": "Type something …",
+      "font": "Face",
+      "capHeight": "Text size",
+      "fitToWidth": "Fill the width",
+      "capHeightHint": "The height of a capital letter.",
+      "lineHeight": "Line spacing",
+      "letterSpacing": "Letter spacing",
+      "align": "Alignment",
+      "wrap": "How the text runs",
+      "curvature": "How much it bends",
+      "radius": "Radius",
+      "position": "Where on the sign",
+      "positionX": "Across",
+      "positionY": "Up and down",
+      "add": "Add a line",
+      "remove": "Remove",
+      "removed": "The line was removed.",
+      "undo": "Undo",
+      "edit": "Edit",
+      "done": "Done",
+      "empty": "Empty line",
+      "capsOnly": "This face has capitals only.",
+      "fontsTitle": "About the faces",
+      "fontsLede": "Every style here can be cut. Some take it better than others — each one says which.",
+      "suitability": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "caution": "Needs care"
+      },
+      "suitabilityFor": "Suits the chosen cutting method",
+      "minSize": "Works from {mm} mm",
+      "strokeWidth": "Thinnest line comes out about {mm} mm"
+    },
+    "wraps": {
+      "straight": "Straight",
+      "arcUp": "Arch up",
+      "arcDown": "Arch down",
+      "circle": "Circle"
+    },
+    "aligns": {
+      "left": "Left",
+      "center": "Centred",
+      "right": "Right"
+    },
+    "carve": {
+      "method": "How the text is cut",
+      "finish": "Finish",
+      "paintColour": "Colour in the letters",
+      "hanging": "How it goes up",
+      "methods": {
+        "vcarve": "Carved",
+        "vcarveDetail": "Cut in, tapering to a point",
+        "pocket": "Hollowed",
+        "pocketDetail": "Cut in, flat bottom",
+        "raised": "Raised",
+        "raisedDetail": "The letters stand proud"
+      },
+      "finishes": {
+        "raw": "Untreated",
+        "oil": "Hardwax oil",
+        "paint": "Painted letters",
+        "oilPaint": "Paint and oil"
+      },
+      "hangings": {
+        "none": "None",
+        "keyhole": "Keyhole slots",
+        "rope": "Rope",
+        "posts": "Posts"
+      }
+    },
+    "decor": {
+      "border": "Border",
+      "inset": "Distance from the edge",
+      "corners": "Corners",
+      "borders": {
+        "none": "None",
+        "line": "Single line",
+        "double": "Double line",
+        "inset": "Recessed panel",
+        "notch": "Broken"
+      },
+      "cornerStyles": {
+        "none": "None",
+        "diamond": "Diamond",
+        "leaf": "Leaf",
+        "drilled": "Drilled dots"
+      }
+    },
+    "artwork": {
+      "title": "Your own artwork",
+      "lede": "If you have a logo or a drawing as an SVG file, it can be cut in. It becomes a shape in the timber rather than a picture — colours and greys fall away.",
+      "upload": "Choose an SVG file",
+      "replace": "Replace file",
+      "remove": "Remove artwork",
+      "width": "Width",
+      "rotation": "Rotation",
+      "positionX": "From the left",
+      "positionY": "From the top",
+      "adds": "Adds {amount} for drawing preparation.",
+      "errors": {
+        "tooLarge": "That file is too big. Keep it under 512 kB — a clean vector file is almost always far smaller.",
+        "notSvg": "That does not look like an SVG file.",
+        "unparseable": "The file could not be read. Try exporting it again from your drawing program.",
+        "empty": "There is no cuttable shape in that file. Text inside an SVG has to be converted to paths first."
+      }
+    },
+    "price": {
+      "title": "Price",
+      "total": "Total",
+      "incVat": "incl. VAT",
+      "exVat": "excl. VAT",
+      "vat": "VAT at 25 %",
+      "breakdown": "What is in the price?",
+      "hideBreakdown": "Hide",
+      "material": "Material",
+      "setup": "Set-up",
+      "carving": "Cutting",
+      "finishing": "Finishing",
+      "extras": "Extras",
+      "subtotal": "Total excl. VAT",
+      "minimum": "Minimum order value applied.",
+      "machineTime": "about {minutes} min in the machine",
+      "fixed": "This is a fixed price for this sign. Carriage is extra and is worked out once the address is known.",
+      "leadTime": "Delivery {min}–{max} weeks from a confirmed order."
+    },
+    "warnings": {
+      "title": "Worth knowing",
+      "blocking": "Cannot be made",
+      "warning": "May disappoint",
+      "note": "Worth knowing",
+      "none": "Nothing to flag. This sign can be made as it stands."
+    },
+    "order": {
+      "cta": "Go ahead with this sign",
+      "ctaBlocked": "Sort out the points above first",
+      "reassure": "Next comes your contact details. It is still not an order."
+    },
+    "reset": "Start over",
+    "resetConfirm": "Start again from scratch? What you have drawn will be lost.",
+    "mobile": {
+      "edit": "Adjust",
+      "close": "Done",
+      "priceLabel": "Price"
+    }
+  },
+  "order": {
+    "title": "Send the drawing",
+    "lede": "Tell me how to reach you and I will come back with a confirmation. This is not an order yet — nothing binds either of us until we have both said yes.",
+    "summary": "Your sign",
+    "changeDesign": "Change the drawing",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "phoneHint": "Optional. Sometimes a call is quicker when something is unclear.",
+      "message": "Anything I should know?",
+      "messageHint": "Optional. For instance if the sign is needed by a particular date.",
+      "delivery": "Delivery",
+      "deliveryPickup": "Collect from the workshop",
+      "deliveryShip": "Ship it",
+      "address": "Address",
+      "addressHint": "Only needed to work out the carriage."
+    },
+    "consent": {
+      "label": "I agree that my details may be used to handle my enquiry.",
+      "detail": "Used for this and nothing else, and kept for no more than 24 months. See the privacy policy.",
+      "required": "I need this to be able to reply to you."
+    },
+    "newsletter": {
+      "label": "Send me the occasional email when there is something new.",
+      "detail": "A few times a year at most. Unsubscribe whenever you like."
+    },
+    "withdrawal": {
+      "title": "About the right of withdrawal",
+      "body": "A sign drawn to your specification is a custom-made item. Under chapter 2, section 11 of the Swedish Distance Contracts Act, the usual 14-day right of withdrawal therefore does not apply once making has begun. Up until you confirm the order you can call it off at any time, at no cost.",
+      "acknowledge": "I have read and understood that a custom-made sign carries no right of withdrawal once making has begun."
+    },
+    "submit": "Send the enquiry",
+    "submitting": "Sending …",
+    "success": {
+      "title": "Thank you — the drawing arrived.",
+      "body": "I will be in touch at {email} within a couple of working days. If nothing shows up, check your spam folder and try me again.",
+      "reference": "Reference",
+      "back": "Back to the start",
+      "designAgain": "Draw another"
+    },
+    "error": {
+      "title": "That did not go through.",
+      "body": "Something failed on the way. Try again shortly, or email me directly at {email} — describe the sign and we will sort it out.",
+      "retry": "Try again"
+    }
+  },
+  "furniture": {
+    "title": "Furniture",
+    "lede": "Every piece here was made once, for a particular place and a particular person. There is no catalogue to order from — these are examples of what has been made, to show how I work.",
+    "empty": "Photographs of furniture will appear here as pieces are finished.",
+    "filterAll": "Everything",
+    "details": {
+      "wood": "Timber",
+      "year": "Year",
+      "size": "Size",
+      "finish": "Finish",
+      "forWhom": "Made for"
+    },
+    "cta": {
+      "title": "Something along these lines?",
+      "body": "Furniture is always drawn from scratch with the person who is going to live with it. Tell me what you need and we will take it from there.",
+      "button": "Describe your project"
+    },
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "kinds": {
+      "table": "Tables",
+      "seating": "Seating",
+      "storage": "Storage",
+      "bed": "Beds",
+      "other": "Other"
+    },
+    "placeholder": "Photograph to come",
+    "placeholderHint": "Images go up once a piece has been photographed.",
+    "openDetails": "Read about this piece"
+  },
+  "custom": {
+    "title": "Custom work",
+    "lede": "For the things the design tool cannot cover: furniture, oversized signs, built-up work, or something you cannot quite describe yet.",
+    "priceNote": {
+      "title": "About price",
+      "body": "I am not going to put a number here. A one-off cannot be costed from a form without knowing what it actually involves — so we talk first, and then you get a price to consider. Asking costs nothing and commits you to nothing."
+    },
+    "fields": {
+      "kind": "What is it about?",
+      "kinds": {
+        "furniture": "A piece of furniture",
+        "sign": "A sign beyond the ordinary",
+        "repair": "A repair or an alteration",
+        "other": "Something else"
+      },
+      "description": "Describe what you have in mind",
+      "descriptionHint": "The more you write, the better an answer you get. Dimensions, the room, what it is for, what you like.",
+      "descriptionPlaceholder": "For example: a dining table for a kitchen with sloping walls, around 180 cm long, ideally in oak …",
+      "timeframe": "When do you need it?",
+      "timeframes": {
+        "flexible": "No hurry",
+        "months": "Within a few months",
+        "date": "By a particular date"
+      },
+      "date": "Which date?",
+      "budget": "Rough budget",
+      "budgetHint": "Optional, but it helps me suggest something realistic rather than guess.",
+      "budgetOptions": {
+        "unknown": "Not sure yet",
+        "under5": "Under 5 000 kr",
+        "5to15": "5 000–15 000 kr",
+        "15to40": "15 000–40 000 kr",
+        "over40": "Over 40 000 kr"
+      },
+      "files": "Attach photographs or sketches",
+      "filesHint": "Optional. A photograph of the room, or of something you like, often says more than a paragraph."
+    },
+    "submit": "Send the enquiry",
+    "success": {
+      "title": "Thank you — your enquiry arrived.",
+      "body": "I will read it properly and get back to you at {email} within a few working days."
+    }
+  },
+  "workshop": {
+    "title": "The workshop",
+    "lede": "One person, one router and a fair number of hand tools.",
+    "body": [
+      "I make signs and furniture to order. That is the whole business. No staff, no shop, no stock — everything that leaves the workshop was made for someone who asked for that particular thing.",
+      "The signs are cut on a CNC router, which sounds industrial and is not. The machine cuts the letters; I draw them, choose the board, clamp it down, change the bits, sand it by hand and finish the surface. A sign takes half a day to a full day from picking out the timber to it being dry and done.",
+      "The furniture is made by hand, with the machines helping where they earn their place. It is always drawn together with whoever is going to own it, and it is made once.",
+      "I take on a limited number of jobs at a time. That means you sometimes have to wait, and that I sometimes turn down work I cannot do properly. It is a deliberate choice."
+    ],
+    "principles": {
+      "title": "What you can count on",
+      "items": [
+        {
+          "title": "Solid timber",
+          "body": "No veneered board, no MDF with a wood pattern printed on it. If the specification says oak, it is oak the whole way through."
+        },
+        {
+          "title": "A price that holds",
+          "body": "The price you have confirmed is the price you pay. If something turns out to cost more, I ask first."
+        },
+        {
+          "title": "A straight answer",
+          "body": "If what you are asking for will not turn out well, I say so beforehand rather than afterwards. Sometimes that means suggesting something other than what you asked for."
+        },
+        {
+          "title": "Time to do it right",
+          "body": "I would rather promise four weeks and keep it than promise one and miss."
+        }
+      ]
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "lede": "Email is easiest. I read everything and reply within a couple of working days.",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "visit": {
+      "title": "Visiting",
+      "body": "The workshop is not a shop, but you are welcome to come by if we arrange a time. Get in touch first."
+    },
+    "business": {
+      "title": "Business details",
+      "org": "Company registration number",
+      "vat": "VAT number",
+      "fskatt": "Approved for Swedish F-tax"
+    },
+    "form": {
+      "title": "Or write here",
+      "subject": "What is it about?",
+      "message": "Message",
+      "submit": "Send"
+    }
+  },
+  "footer": {
+    "madeIn": "Made in Sweden",
+    "sections": {
+      "explore": "On this site",
+      "legal": "Terms",
+      "contact": "Contact"
+    },
+    "privacy": "Privacy policy",
+    "terms": "Terms of sale",
+    "cookies": "Cookies",
+    "newsletter": {
+      "title": "Newsletter",
+      "body": "Coming eventually. A few emails a year, nothing else.",
+      "soon": "Not running yet"
+    },
+    "copyright": "© {year} {name}"
+  },
+  "legal": {
+    "updated": "Last updated {date}",
+    "privacy": {
+      "title": "Privacy policy",
+      "lede": "This site collects as little about you as it can get away with. What it does need is set out here.",
+      "sections": [
+        {
+          "title": "Who is responsible",
+          "body": [
+            "The data controller is {entity}, company registration number {org}, {address}.",
+            "If you have questions about how your details are handled, email {privacyEmail}."
+          ]
+        },
+        {
+          "title": "What is collected, and why",
+          "body": [
+            "**When you send an enquiry or an order:** your name, email address and — if you fill them in — phone number, address and whatever you write in the message field. The drawing of your sign goes with it. This is needed to reply to you and to perform a contract if you order. The legal basis is contract (Article 6(1)(b) GDPR), and for an enquiry before any contract exists, your consent (Article 6(1)(a)).",
+            "**When you use the design tool:** nothing leaves your browser. The sign you are drawing is saved locally on your own device so it is still there if you close the tab. It is only sent when you choose to send an enquiry.",
+            "**When you are only reading the site:** no analytics, no tracking, no third-party cookies. The web server keeps a technical log of requests, as all web servers do, and that contains IP addresses. It is used solely for operations and security and is rotated out regularly."
+          ]
+        },
+        {
+          "title": "Who gets to see it",
+          "body": [
+            "No outside party receives your details for their own purposes. They are handled by me, and by the suppliers needed to run the site and send email — the web host and the email provider. Those act as processors and handle the data only on my instructions.",
+            "Details are never sold, and never used for profiling or automated decision-making."
+          ]
+        },
+        {
+          "title": "How long it is kept",
+          "body": [
+            "Enquiries that do not become orders: 24 months at most, then deleted.",
+            "Completed orders: as long as Swedish bookkeeping law requires, which is seven years after the end of the financial year for material that forms part of the accounts.",
+            "Newsletter sign-ups, once that exists: until you unsubscribe."
+          ]
+        },
+        {
+          "title": "Your rights",
+          "body": [
+            "You have the right to know what is held about you, to have inaccuracies corrected, to have data erased, to object to processing, to ask for processing to be restricted, and to receive your data in a machine-readable format.",
+            "Where you have given consent, you can withdraw it at any time. That does not affect what has already been done.",
+            "Write to {privacyEmail} and I will sort it out. If you are not satisfied with how I have handled it, you can complain to the Swedish Authority for Privacy Protection (IMY), which is the supervisory authority in Sweden."
+          ]
+        },
+        {
+          "title": "Fonts and outside requests",
+          "body": [
+            "Every typeface on this site is served from our own server. Nothing is fetched from Google Fonts or any other external network, which means your IP address is not passed to a third party when you visit."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookies and local storage",
+      "lede": "There is no cookie banner here, for the simple reason that there are no cookies to consent to.",
+      "sections": [
+        {
+          "title": "Cookies",
+          "body": [
+            "The site sets no cookies for analytics, marketing or tracking. There are no third-party scripts, no visitor statistics and no pixels."
+          ]
+        },
+        {
+          "title": "Local storage in the design tool",
+          "body": [
+            "The design tool saves the sign you are working on in your browser's local storage, on your own device. That is so you do not lose your work if you close the tab or drop your connection.",
+            "The contents are only the choices you made — dimensions, timber, wording. No identifier, nothing about who you are, and it is not sent anywhere. Under the Swedish Electronic Communications Act, storage strictly necessary for a service you have yourself requested needs no consent, and this is that kind of storage.",
+            "You can clear it at any time by choosing Start over in the design tool, or by clearing site data in your browser."
+          ]
+        },
+        {
+          "title": "Language choice",
+          "body": [
+            "Which language you chose is stored in the browser so the site remembers it. That too is necessary storage, and contains nothing beyond sv or en."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of sale",
+      "lede": "These terms apply when you order from me as a private individual. If you are buying as a business, the Swedish Sale of Goods Act applies instead, and some of the consumer protection described here will not.",
+      "sections": [
+        {
+          "title": "Who you are buying from",
+          "body": [
+            "{entity}, company registration number {org}, {address}. Email {email}. VAT number {vat}."
+          ]
+        },
+        {
+          "title": "When a contract is formed",
+          "body": [
+            "Sending a drawing or an enquiry from this site is not an order and commits you to nothing. It is a starting point.",
+            "I come back with a confirmation setting out price, specification and timing. A contract is formed only once you have accepted that confirmation. Until then you can withdraw at no cost, and I may decline the job."
+          ]
+        },
+        {
+          "title": "Prices",
+          "body": [
+            "Prices shown on this site are in Swedish kronor and include VAT, as the Swedish Price Information Act requires. Carriage is extra and is stated in the confirmation, since it depends on size and address.",
+            "The price in the design tool is fixed for the sign as drawn. If the specification changes after confirmation the price is recalculated, and you approve the new price before work continues."
+          ]
+        },
+        {
+          "title": "Payment",
+          "body": [
+            "Payment is by invoice with 14 days' terms unless otherwise agreed. On larger jobs a part of the amount may be invoiced up front, which will be stated in the confirmation."
+          ]
+        },
+        {
+          "title": "Delivery",
+          "body": [
+            "Normal delivery is {leadMin}–{leadMax} weeks from a confirmed order. If it is going to be late, you hear from me before the deadline passes, not after.",
+            "You may collect from the workshop by arrangement, or have the item shipped. Risk passes to you when you take receipt."
+          ]
+        },
+        {
+          "title": "Right of withdrawal",
+          "body": [
+            "In distance selling, you as a consumer normally have a 14-day right of withdrawal under the Swedish Distance Contracts Act (2005:59).",
+            "**That right does not apply to custom-made goods.** Under chapter 2, section 11, first paragraph, item 3 of that Act, contracts for goods made to your specification, or otherwise clearly personalised, are excluded. A sign carrying your wording, in your dimensions and your choice of timber, and a piece of furniture drawn for you, are such goods.",
+            "In practice this means you can change your mind freely up until you accept the confirmation, but not after making has begun. I am explicit about when I start.",
+            "If you order something that is not custom-made, the ordinary right of withdrawal applies and you will be given the information on how to exercise it with the goods."
+          ]
+        },
+        {
+          "title": "If something is wrong",
+          "body": [
+            "If the goods are defective you may complain under the Swedish Consumer Sales Act (2022:260). That right runs for three years from the date you received the item. For the first two years it is for me to show that the fault was not present at delivery.",
+            "Write to {email} with a description and ideally a photograph, and we will sort it out. My first course is to repair or remake the item.",
+            "Wood is a living material. That a board moves a little with humidity, that the colour deepens over time, and that untreated timber outdoors goes silver-grey are properties of the material, not faults. Cracks that affect strength or legibility are faults, and I put those right."
+          ]
+        },
+        {
+          "title": "If we cannot agree",
+          "body": [
+            "If we end up in a dispute we cannot settle between us, you can take it to the Swedish National Board for Consumer Disputes (ARN), Box 174, 101 23 Stockholm, arn.se. I follow ARN's recommendations.",
+            "The EU's online dispute resolution platform (ODR) closed on 20 July 2025 and is no longer available. If you live in another EU country, the European Consumer Centre can point you onward."
+          ]
+        },
+        {
+          "title": "Intellectual property",
+          "body": [
+            "If you send in a logo, a drawing or a piece of text, it is for you to make sure you have the right to use it. I do not use your material for anything other than your order.",
+            "I like to show what I have made. Just say if you would rather your sign or your furniture did not appear among the photographs — that is entirely fine and changes nothing else."
+          ]
+        }
+      ]
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "There is no page here",
+      "body": "That link goes somewhere other than it should. It may be an old bookmark.",
+      "home": "To the home page",
+      "designer": "To the design tool"
+    },
+    "general": {
+      "title": "Something went wrong",
+      "body": "An unexpected error occurred. Reload the page and try again.",
+      "retry": "Try again"
+    },
+    "form": {
+      "required": "This needs filling in.",
+      "email": "Check the email address.",
+      "tooShort": "A little more, if you would.",
+      "tooLong": "That is too long.",
+      "rateLimited": "You have sent several messages just now. Wait a moment and try again."
+    }
+  },
+  "common": {
+    "mm": "mm",
+    "optional": "optional",
+    "required": "required",
+    "back": "Back",
+    "loading": "Loading …",
+    "yes": "Yes",
+    "no": "No"
+  }
+}
