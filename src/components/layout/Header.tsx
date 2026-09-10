@@ -20,7 +20,6 @@ import { ThemeToggle } from './ThemeToggle';
 
 const LINKS: Array<{ href: AppPathname; key: string }> = [
   { href: '/furniture', key: 'furniture' },
-  { href: '/custom', key: 'custom' },
   { href: '/workshop', key: 'workshop' },
   { href: '/contact', key: 'contact' },
 ];

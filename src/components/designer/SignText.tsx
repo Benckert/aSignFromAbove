@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { getFont } from '@/config/carving-fonts';
 import type { TextBlock } from '@/lib/designer/types';
 import { arcRadius, arcTextPath, circleTextPath, stackedRadius, toLines } from '@/lib/designer/geometry';
@@ -21,7 +22,7 @@ interface Props {
   /** The area the text is allowed to occupy, in mm. */
   area: { x: number; y: number; width: number; height: number };
   capRatios: Record<string, number>;
-  /** Unique per preview, to keep generated path ids apart. */
+  /** Unique per preview, kept for callers that scope other defs by it. */
   uid: string;
   fill: string;
   filter?: string;
@@ -30,6 +31,16 @@ interface Props {
 }
 
 export function SignText({ block, area, capRatios, uid, fill, filter, selected }: Props) {
+  /*
+    Path ids come from React's own useId rather than from the block's id.
+
+    Block ids are generated with Math.random when a line is created, which is
+    fine for a React key but produces a different value on the server than in
+    the browser. Any curved line puts that id into the DOM twice — once on the
+    <path> and once in the <textPath href> — so the two renders disagreed and
+    React reported a hydration mismatch. useId is stable across both.
+  */
+  const pathId = useId().replace(/:/g, '');
   const font = getFont(block.fontId);
   const lines = toLines(block.content);
   if (lines.every((l) => !l.trim())) return null;
@@ -73,7 +84,7 @@ export function SignText({ block, area, capRatios, uid, fill, filter, selected }
                   area.width * 0.92,
                   block.curvature,
                 );
-            return <path key={i} id={`${uid}-${block.id}-l${i}`} d={d} />;
+            return <path key={i} id={`${pathId}-l${i}`} d={d} />;
           })}
         </defs>
         {content.map((line, i) => (
@@ -81,7 +92,7 @@ export function SignText({ block, area, capRatios, uid, fill, filter, selected }
             {/* startOffset 50 % with a centred anchor places the line's middle
                 at the halfway point of its path — the top of a circle, or the
                 crown of an arc. */}
-            <textPath href={`#${uid}-${block.id}-l${i}`} startOffset="50%">
+            <textPath href={`#${pathId}-l${i}`} startOffset="50%">
               {line}
             </textPath>
           </text>

@@ -9,6 +9,7 @@ import type { BorderStyle, CornerStyle, Hanging } from '@/lib/designer/types';
 import { Field } from '@/components/ui/Field';
 import { Segmented, Slider } from '@/components/ui/Controls';
 import { Button } from '@/components/ui/Button';
+import { Disclosure } from '@/components/ui/Disclosure';
 
 /**
  * The optional extras: a border, a fixing, a piece of the customer's own
@@ -44,7 +45,8 @@ export function DetailStep() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3">
+      <Disclosure title={t('decor.section')} summary={t(`decor.borders.${decoration.border}`)} defaultOpen>
       <Field label={t('decor.border')}>
         {() => (
           <Segmented<BorderStyle>
@@ -92,6 +94,9 @@ export function DetailStep() {
         </>
       )}
 
+      </Disclosure>
+
+      <Disclosure title={t('carve.hanging')} summary={t(`carve.hangings.${design.hanging}`)}>
       <Field label={t('carve.hanging')}>
         {() => (
           <Segmented<Hanging>
@@ -107,6 +112,9 @@ export function DetailStep() {
         )}
       </Field>
 
+      </Disclosure>
+
+      <Disclosure title={a('title')} summary={artwork ? artwork.fileName : a('none')}>
       <Field label={a('title')} hint={a('lede')}>
         {() => (
           <>
@@ -185,6 +193,7 @@ export function DetailStep() {
           </>
         )}
       </Field>
+      </Disclosure>
     </div>
   );
 }

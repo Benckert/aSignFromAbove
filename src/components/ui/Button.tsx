@@ -17,9 +17,9 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-ink text-surface hover:bg-moss-deep active:translate-y-px shadow-sheet hover:shadow-lift',
+    'bg-ink text-surface shadow-sheet hover:-translate-y-px hover:shadow-lift active:translate-y-0 active:shadow-sheet',
   secondary:
-    'border border-rule-strong bg-surface text-ink hover:border-ink hover:bg-surface-2 active:translate-y-px',
+    'border border-rule-strong bg-surface-2 text-ink shadow-sheet hover:border-rule-strong hover:bg-surface-3 hover:-translate-y-px hover:shadow-lift active:translate-y-0',
   quiet: 'text-ink-2 hover:bg-surface-3 hover:text-ink',
   danger: 'border border-rust/40 text-rust hover:bg-rust-wash',
 };

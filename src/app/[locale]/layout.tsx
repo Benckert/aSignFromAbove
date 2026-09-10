@@ -10,6 +10,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeScript } from '@/components/layout/ThemeToggle';
 import { SetupNotice } from '@/components/layout/SetupNotice';
+import { Toaster } from '@/components/ui/Toaster';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
             {children}
           </main>
           <Footer />
+          <Toaster />
         </NextIntlClientProvider>
       </body>
     </html>

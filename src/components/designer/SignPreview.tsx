@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { getWood } from '@/config/woods';
 import type { SignDesign } from '@/lib/designer/types';
-import { safeArea, signOutlinePath, toLines } from '@/lib/designer/geometry';
+import { decorationDepthMm, safeArea, signOutlinePath, toLines } from '@/lib/designer/geometry';
 import { isDark, shade } from '@/lib/designer/colour';
 import { fallbackCapRatios, invalidateCapRatios, measureCapRatios } from '@/lib/designer/measure';
 import { WoodDefs } from './WoodDefs';
@@ -68,7 +68,7 @@ export function SignPreview({
   }, []);
 
   const { widthMm: w, heightMm: h } = design;
-  const area = safeArea(design.shape, w, h);
+  const area = safeArea(design.shape, w, h, decorationDepthMm(design.decoration));
   const outline = signOutlinePath(design.shape, w, h);
 
   /* ── Colours ─────────────────────────────────────────────────────────── */
@@ -241,7 +241,12 @@ function Artwork({
   const art = design.artwork;
   if (!art) return null;
 
-  const area = safeArea(design.shape, design.widthMm, design.heightMm);
+  const area = safeArea(
+    design.shape,
+    design.widthMm,
+    design.heightMm,
+    decorationDepthMm(design.decoration),
+  );
   const width = art.widthMm;
   const height = width / (art.aspect || 1);
   const x = area.x + art.x * area.width - width / 2;

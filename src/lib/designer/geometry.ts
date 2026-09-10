@@ -1,4 +1,4 @@
-import type { SignShape, TextWrap } from './types';
+import type { Decoration, SignShape, TextWrap } from './types';
 
 /**
  * Geometry for the sign preview.
@@ -60,22 +60,56 @@ export function signOutlinePath(shape: SignShape, w: number, h: number): string 
 }
 
 /**
+ * How far in from the edge of the board the decoration reaches, in millimetres.
+ *
+ * Not just the inset: a carved border is a groove with width, a double border
+ * has a second line inboard of the first, and corner motifs sit inboard again.
+ * Lettering has to clear all of it.
+ */
+export function decorationDepthMm(decoration: Decoration): number {
+  const { border, corners, insetMm } = decoration;
+  if (border === 'none' && corners === 'none') return 0;
+
+  // Half the groove, plus a little air so the text is not touching the line.
+  const strokeAllowance = 4;
+  const borderDepth = border === 'none' ? 0 : insetMm + strokeAllowance;
+  // The second line of a double border sits 4 mm further in; corner motifs
+  // sit about 7 mm in and are roughly 3 mm across.
+  const extra = border === 'double' ? 4 : 0;
+  const cornerDepth = corners === 'none' ? 0 : insetMm + 10;
+
+  return Math.max(borderDepth + extra, cornerDepth);
+}
+
+/**
  * The area of the blank the lettering may safely occupy, as an inset box.
  *
- * Curved shapes lose usable area near the edge, so they get a deeper inset.
- * This is what the overflow warning measures against.
+ * Two things pull it in. Curved shapes lose usable area near the edge, so an
+ * oval gives up more than a rectangle. And a decorative border is a physical
+ * groove in the board: text that crosses it looks like a mistake, because it
+ * is one. Whichever of the two is the stricter wins.
+ *
+ * Because the size slider's ceiling is computed from this box, respecting the
+ * border here is what actually stops a customer setting a size that would run
+ * the lettering through their own frame.
  */
 export function safeArea(
   shape: SignShape,
   w: number,
   h: number,
+  /** From `decorationDepthMm`. Zero when the sign carries no decoration. */
+  borderDepthMm = 0,
 ): { x: number; y: number; width: number; height: number } {
   const marginRatio = shape === 'oval' ? 0.14 : shape === 'arch' ? 0.1 : 0.07;
-  const mx = w * marginRatio;
-  const my = h * marginRatio;
+  const mx = Math.max(w * marginRatio, borderDepthMm);
+  const my = Math.max(h * marginRatio, borderDepthMm);
   // An arch loses more at the top than the bottom.
   const topExtra = shape === 'arch' ? h * 0.08 : 0;
-  return { x: mx, y: my + topExtra, width: w - mx * 2, height: h - my * 2 - topExtra };
+
+  // Never collapse to nothing on a small board with a deep border.
+  const width = Math.max(w - mx * 2, w * 0.2);
+  const height = Math.max(h - my * 2 - topExtra, h * 0.2);
+  return { x: (w - width) / 2, y: (h - height - topExtra) / 2 + topExtra, width, height };
 }
 
 /**

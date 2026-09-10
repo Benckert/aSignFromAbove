@@ -7,8 +7,7 @@
   "nav": {
     "home": "Home",
     "designer": "Design a sign",
-    "furniture": "Furniture",
-    "custom": "Custom work",
+    "furniture": "Gallery",
     "workshop": "The workshop",
     "contact": "Contact",
     "menu": "Menu",
@@ -21,13 +20,17 @@
       "title": "Signs routed from solid timber",
       "lede": "Draw your own and see exactly how it will look. The price works itself out as you go.",
       "primary": "Draw your sign",
-      "secondary": "See the furniture",
+      "secondary": "See the gallery",
       "note": "No sign-up. Nothing committed.",
       "process": "You draw, I come back with a price and a date, and I only start cutting once you have said yes. Nothing costs anything before that."
     },
     "livePreview": {
       "label": "Oak sign",
-      "caption": "Redraws as you change it."
+      "caption": "Redraws as you change it.",
+      "previous": "Previous",
+      "next": "Next",
+      "pause": "Pause",
+      "play": "Play"
     },
     "furniture": {
       "title": "Furniture to order",
@@ -43,6 +46,12 @@
       "title": "One person, one router",
       "lede": "A limited number of jobs at a time, so there is room to do them properly.",
       "cta": "About the workshop"
+    },
+    "cta": {
+      "title": "Something else in mind?",
+      "body": "Furniture, larger signs, or something you cannot quite describe yet.",
+      "button": "Get in touch",
+      "secondary": "See the gallery"
     }
   },
   "designer": {
@@ -77,7 +86,9 @@
       "thickness": "Thickness",
       "presets": "Common sizes",
       "shape": "Shape",
-      "edge": "Edge"
+      "edge": "Edge",
+      "dimensions": "Dimensions",
+      "form": "Shape and edge"
     },
     "shapes": {
       "rect": "Square-cut",
@@ -154,7 +165,8 @@
         "keyhole": "Keyhole slots",
         "rope": "Rope",
         "posts": "Posts"
-      }
+      },
+      "section": "Cut and finish"
     },
     "decor": {
       "border": "Border",
@@ -172,7 +184,8 @@
         "diamond": "Diamond",
         "leaf": "Leaf",
         "drilled": "Drilled dots"
-      }
+      },
+      "section": "Border and corners"
     },
     "artwork": {
       "title": "Your own artwork",
@@ -189,7 +202,8 @@
         "notSvg": "That does not look like an SVG file.",
         "unparseable": "The file could not be read. Try exporting it again from your drawing program.",
         "empty": "There is no cuttable shape in that file. Text inside an SVG has to be converted to paths first."
-      }
+      },
+      "none": "None"
     },
     "price": {
       "title": "Price",
@@ -228,7 +242,8 @@
       "shape": "Size",
       "material": "Wood and finish",
       "detail": "Details"
-    }
+    },
+    "examples": "Examples:"
   },
   "order": {
     "title": "Send the drawing",
@@ -251,7 +266,8 @@
     "consent": {
       "label": "I agree that my details may be used to handle my enquiry.",
       "detail": "Used for this and nothing else, and kept for no more than 24 months. See the privacy policy.",
-      "required": "I need this to be able to reply to you."
+      "required": "I need this to be able to reply to you.",
+      "detailLabel": "Show details"
     },
     "newsletter": {
       "label": "Send me the occasional email when there is something new.",
@@ -278,7 +294,7 @@
     }
   },
   "furniture": {
-    "title": "Furniture",
+    "title": "Gallery",
     "lede": "Made once, for a particular place. Examples, not a catalogue.",
     "empty": "Photographs of furniture will appear here as pieces are finished.",
     "filterAll": "Everything",
@@ -307,49 +323,6 @@
     "placeholder": "Photograph to come",
     "placeholderHint": "Images go up once a piece has been photographed.",
     "openDetails": "Read about this piece"
-  },
-  "custom": {
-    "title": "Custom work",
-    "lede": "For what the design tool cannot cover.",
-    "priceNote": {
-      "title": "About price",
-      "body": "A one-off cannot be costed from a form. We talk first, then you get a price. Asking commits you to nothing."
-    },
-    "fields": {
-      "kind": "What is it about?",
-      "kinds": {
-        "furniture": "A piece of furniture",
-        "sign": "A sign beyond the ordinary",
-        "repair": "A repair or an alteration",
-        "other": "Something else"
-      },
-      "description": "Describe what you have in mind",
-      "descriptionHint": "The more you write, the better an answer you get. Dimensions, the room, what it is for, what you like.",
-      "descriptionPlaceholder": "For example: a dining table for a kitchen with sloping walls, around 180 cm long, ideally in oak …",
-      "timeframe": "When do you need it?",
-      "timeframes": {
-        "flexible": "No hurry",
-        "months": "Within a few months",
-        "date": "By a particular date"
-      },
-      "date": "Which date?",
-      "budget": "Rough budget",
-      "budgetHint": "Optional, but it helps me suggest something realistic rather than guess.",
-      "budgetOptions": {
-        "unknown": "Not sure yet",
-        "under5": "Under 5 000 kr",
-        "5to15": "5 000–15 000 kr",
-        "15to40": "15 000–40 000 kr",
-        "over40": "Over 40 000 kr"
-      },
-      "files": "Attach photographs or sketches",
-      "filesHint": "Optional. A photograph of the room, or of something you like, often says more than a paragraph."
-    },
-    "submit": "Send the enquiry",
-    "success": {
-      "title": "Thank you — your enquiry arrived.",
-      "body": "I will read it properly and get back to you at {email} within a few working days."
-    }
   },
   "workshop": {
     "title": "The workshop",
@@ -391,12 +364,6 @@
       "org": "Company registration number",
       "vat": "VAT number",
       "fskatt": "Approved for Swedish F-tax"
-    },
-    "form": {
-      "title": "Or write here",
-      "subject": "What is it about?",
-      "message": "Message",
-      "submit": "Send"
     }
   },
   "footer": {
@@ -593,5 +560,36 @@
     "loading": "Loading …",
     "yes": "Yes",
     "no": "No"
+  },
+  "enquiry": {
+    "title": "Contact and custom work",
+    "lede": "For furniture, larger signs, or whatever you have in mind. Asking costs nothing.",
+    "priceNote": {
+      "title": "About price",
+      "body": "A one-off cannot be costed from a form. We talk first, then you get a price to consider."
+    },
+    "fields": {
+      "kind": "What is it about?",
+      "kinds": {
+        "furniture": "A piece of furniture",
+        "sign": "A sign beyond the ordinary",
+        "other": "Something else"
+      },
+      "description": "Tell me what you have in mind",
+      "descriptionHint": "Dimensions, the room, what it is for, what you like.",
+      "descriptionPlaceholder": "For example: a dining table for a kitchen with sloping walls, around 180 cm long, ideally in oak …",
+      "timeframe": "When do you need it?",
+      "timeframes": {
+        "flexible": "No hurry",
+        "months": "Within a few months",
+        "date": "By a date"
+      },
+      "date": "Which date?"
+    },
+    "submit": "Send",
+    "success": {
+      "title": "Thank you — your enquiry arrived.",
+      "body": "I will read it properly and get back to you at {email} within a few working days."
+    }
   }
 }

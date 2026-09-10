@@ -7,6 +7,7 @@ import { useDesigner } from '@/lib/designer/store';
 import type { EdgeProfile, SignShape } from '@/lib/designer/types';
 import { Field } from '@/components/ui/Field';
 import { Segmented, Slider } from '@/components/ui/Controls';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { cx } from '@/lib/cx';
 
 /** The board: how big, what shape, what edge. */
@@ -16,7 +17,12 @@ export function ShapeStep() {
   const set = useDesigner((s) => s.set);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3">
+      <Disclosure
+        title={t('size.dimensions')}
+        summary={`${design.widthMm} × ${design.heightMm} × ${design.thicknessMm} mm`}
+        defaultOpen
+      >
       <Field label={t('size.presets')}>
         {() => (
           <div className="flex flex-wrap gap-1.5">
@@ -84,6 +90,9 @@ export function ShapeStep() {
         )}
       </Field>
 
+      </Disclosure>
+
+      <Disclosure title={t('size.form')} summary={t(`shapes.${design.shape}`)}>
       <Field label={t('size.shape')}>
         {() => (
           <Segmented<SignShape>
@@ -112,6 +121,7 @@ export function ShapeStep() {
           />
         )}
       </Field>
+      </Disclosure>
     </div>
   );
 }

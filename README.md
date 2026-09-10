@@ -120,6 +120,22 @@ choice before first paint, which is what stops the page flashing the wrong one.
 
 ---
 
+## Pages
+
+| Route (sv / en) | What it is |
+| --- | --- |
+| `/` | Hero with the live sign, and one invitation to get in touch |
+| `/designa-skylt` · `/en/design-your-sign` | The designer |
+| `/mobler` · `/en/furniture` | Gallery |
+| `/kontakt` · `/en/contact` | Contact **and** custom work, one form |
+| `/verkstaden` · `/en/workshop` | About |
+| `/kopvillkor` `/integritetspolicy` `/kakor` | Legal |
+
+Contact and custom work used to be two pages asking nearly the same questions.
+The subject field decides whether a project needs a timeframe; there is no
+budget field, because asking someone to name a figure before they have been
+told what things cost puts the awkward half of the conversation first.
+
 ## Adding furniture to the gallery
 
 1. Put the photographs in `public/furniture/`.

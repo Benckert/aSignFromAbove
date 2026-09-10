@@ -1,10 +1,9 @@
-import { customEnquirySchema } from '@/lib/forms/schemas';
+import { enquirySchema } from '@/lib/forms/schemas';
 import { handleSubmission } from '@/lib/forms/handler';
 
 const KIND = {
   furniture: 'Möbel',
   sign: 'Skylt utöver det vanliga',
-  repair: 'Reparation eller ombyggnad',
   other: 'Annat',
 } as const;
 
@@ -14,28 +13,21 @@ const TIMEFRAME = {
   date: 'Till ett bestämt datum',
 } as const;
 
-const BUDGET = {
-  unknown: 'Vet inte än',
-  under5: 'Under 5 000 kr',
-  '5to15': '5 000–15 000 kr',
-  '15to40': '15 000–40 000 kr',
-  over40: 'Över 40 000 kr',
-} as const;
-
 /**
- * A custom-work enquiry.
+ * Everything that is not a sign configured in the designer: custom work,
+ * questions, and anything else someone writes in.
  *
- * Deliberately carries no price. A one-off cannot be costed from a form, so
- * this exists to start a conversation rather than to close a sale.
+ * Deliberately carries no price and no budget field. A one-off cannot be
+ * costed from a form, so this exists to start a conversation.
  */
 export async function POST(request: Request) {
   return handleSubmission({
     request,
-    schema: customEnquirySchema,
+    schema: enquirySchema,
     build: (input, ref) => ({
-      subject: `Specialbeställning ${ref} — ${KIND[input.kind]} — ${input.name}`,
+      subject: `Förfrågan ${ref} — ${KIND[input.kind]} — ${input.name}`,
       text: [
-        `SPECIALBESTÄLLNING ${ref}`,
+        `FÖRFRÅGAN ${ref}`,
         '',
         `Namn:       ${input.name}`,
         `E-post:     ${input.email}`,
@@ -45,7 +37,6 @@ export async function POST(request: Request) {
         '',
         `Gäller:     ${KIND[input.kind]}`,
         `Tidsram:    ${TIMEFRAME[input.timeframe]}${input.date ? ` (${input.date})` : ''}`,
-        `Budget:     ${BUDGET[input.budget]}`,
         '',
         'BESKRIVNING',
         input.description,

@@ -7,8 +7,7 @@
   "nav": {
     "home": "Start",
     "designer": "Designa skylt",
-    "furniture": "Möbler",
-    "custom": "Specialbeställning",
+    "furniture": "Galleri",
     "workshop": "Verkstaden",
     "contact": "Kontakt",
     "menu": "Meny",
@@ -21,13 +20,17 @@
       "title": "Skyltar frästa i massivt trä",
       "lede": "Rita din egen och se exakt hur den blir. Priset räknas fram medan du ritar.",
       "primary": "Rita din skylt",
-      "secondary": "Se möblerna",
+      "secondary": "Se galleriet",
       "note": "Ingen registrering. Du binder dig inte till något.",
       "process": "Du ritar, jag hör av mig med pris och tid, och först när du sagt ja börjar jag fräsa. Inget kostar något innan dess."
     },
     "livePreview": {
       "label": "Skylt i ek",
-      "caption": "Uppdateras medan du ändrar."
+      "caption": "Uppdateras medan du ändrar.",
+      "previous": "Föregående",
+      "next": "Nästa",
+      "pause": "Pausa",
+      "play": "Spela"
     },
     "furniture": {
       "title": "Möbler på beställning",
@@ -43,6 +46,12 @@
       "title": "En person, en fräs",
       "lede": "Ett begränsat antal beställningar i taget, för att hinna göra dem ordentligt.",
       "cta": "Om verkstaden"
+    },
+    "cta": {
+      "title": "Något annat i tankarna?",
+      "body": "Möbler, större skyltar, eller något du inte riktigt vet hur du ska beskriva än.",
+      "button": "Hör av dig",
+      "secondary": "Se galleriet"
     }
   },
   "designer": {
@@ -77,7 +86,9 @@
       "thickness": "Tjocklek",
       "presets": "Vanliga storlekar",
       "shape": "Form",
-      "edge": "Kant"
+      "edge": "Kant",
+      "dimensions": "Mått",
+      "form": "Form och kant"
     },
     "shapes": {
       "rect": "Rak",
@@ -154,7 +165,8 @@
         "keyhole": "Nyckelhål",
         "rope": "Rep",
         "posts": "Stolpar"
-      }
+      },
+      "section": "Fräsning och yta"
     },
     "decor": {
       "border": "Ram",
@@ -172,7 +184,8 @@
         "diamond": "Romb",
         "leaf": "Blad",
         "drilled": "Punkter"
-      }
+      },
+      "section": "Ram och hörn"
     },
     "artwork": {
       "title": "Egen bild",
@@ -189,7 +202,8 @@
         "notSvg": "Det där ser inte ut som en SVG-fil.",
         "unparseable": "Filen gick inte att läsa. Prova att exportera om den från ritprogrammet.",
         "empty": "Filen innehåller ingen form som går att fräsa. Text i en SVG behöver konverteras till banor först."
-      }
+      },
+      "none": "Ingen"
     },
     "price": {
       "title": "Pris",
@@ -228,7 +242,8 @@
       "shape": "Storlek",
       "material": "Trä och yta",
       "detail": "Detaljer"
-    }
+    },
+    "examples": "Exempel:"
   },
   "order": {
     "title": "Skicka ritningen",
@@ -251,7 +266,8 @@
     "consent": {
       "label": "Jag godkänner att mina uppgifter används för att hantera min förfrågan.",
       "detail": "Uppgifterna används bara för det här och sparas i högst 24 månader. Läs mer i integritetspolicyn.",
-      "required": "Du behöver godkänna det här för att jag ska kunna svara dig."
+      "required": "Du behöver godkänna det här för att jag ska kunna svara dig.",
+      "detailLabel": "Visa detaljer"
     },
     "newsletter": {
       "label": "Skicka gärna något enstaka mejl när jag gjort något nytt.",
@@ -278,7 +294,7 @@
     }
   },
   "furniture": {
-    "title": "Möbler",
+    "title": "Galleri",
     "lede": "Gjorda en gång, för en bestämd plats. Exempel, inte en katalog.",
     "empty": "Här kommer bilder på möbler efterhand som de blir klara.",
     "filterAll": "Allt",
@@ -307,49 +323,6 @@
     "placeholder": "Foto kommer",
     "placeholderHint": "Bilder läggs upp när pjäsen är fotograferad.",
     "openDetails": "Läs om pjäsen"
-  },
-  "custom": {
-    "title": "Specialbeställning",
-    "lede": "För det som inte går att rita i verktyget.",
-    "priceNote": {
-      "title": "Om pris",
-      "body": "Ett specialarbete går inte att räkna ut från ett formulär. Vi pratar först, sedan får du ett pris. Att fråga binder dig inte."
-    },
-    "fields": {
-      "kind": "Vad gäller det?",
-      "kinds": {
-        "furniture": "En möbel",
-        "sign": "En skylt utöver det vanliga",
-        "repair": "Reparation eller ombyggnad",
-        "other": "Något annat"
-      },
-      "description": "Beskriv vad du tänker dig",
-      "descriptionHint": "Ju mer du skriver, desto bättre svar får du. Mått, rum, vad den ska användas till, vad du gillar.",
-      "descriptionPlaceholder": "Till exempel: ett matbord till ett kök med sneda väggar, cirka 180 cm långt, gärna i ek …",
-      "timeframe": "När behöver du den?",
-      "timeframes": {
-        "flexible": "Ingen brådska",
-        "months": "Inom några månader",
-        "date": "Till ett bestämt datum"
-      },
-      "date": "Vilket datum?",
-      "budget": "Ungefärlig budget",
-      "budgetHint": "Frivilligt, men hjälper mig att föreslå något realistiskt istället för att gissa.",
-      "budgetOptions": {
-        "unknown": "Vet inte än",
-        "under5": "Under 5 000 kr",
-        "5to15": "5 000–15 000 kr",
-        "15to40": "15 000–40 000 kr",
-        "over40": "Över 40 000 kr"
-      },
-      "files": "Bifoga bilder eller skisser",
-      "filesHint": "Frivilligt. Bilder på rummet eller på något du gillar säger ofta mer än text."
-    },
-    "submit": "Skicka förfrågan",
-    "success": {
-      "title": "Tack — jag har fått din förfrågan.",
-      "body": "Jag läser den ordentligt och hör av mig till {email} inom några arbetsdagar."
-    }
   },
   "workshop": {
     "title": "Verkstaden",
@@ -391,12 +364,6 @@
       "org": "Organisationsnummer",
       "vat": "Momsregistreringsnummer",
       "fskatt": "Godkänd för F-skatt"
-    },
-    "form": {
-      "title": "Eller skriv här",
-      "subject": "Vad gäller det?",
-      "message": "Meddelande",
-      "submit": "Skicka"
     }
   },
   "footer": {
@@ -593,5 +560,36 @@
     "loading": "Laddar …",
     "yes": "Ja",
     "no": "Nej"
+  },
+  "enquiry": {
+    "title": "Kontakt och specialbeställning",
+    "lede": "För möbler, större skyltar eller vad du nu funderar på. Att fråga kostar ingenting.",
+    "priceNote": {
+      "title": "Om pris",
+      "body": "Ett specialarbete går inte att räkna ut från ett formulär. Vi pratar först, sedan får du ett pris att ta ställning till."
+    },
+    "fields": {
+      "kind": "Vad gäller det?",
+      "kinds": {
+        "furniture": "En möbel",
+        "sign": "En skylt utöver det vanliga",
+        "other": "Något annat"
+      },
+      "description": "Berätta vad du tänker dig",
+      "descriptionHint": "Mått, rum, vad den ska användas till, vad du gillar.",
+      "descriptionPlaceholder": "Till exempel: ett matbord till ett kök med sneda väggar, cirka 180 cm långt, gärna i ek …",
+      "timeframe": "När behöver du den?",
+      "timeframes": {
+        "flexible": "Ingen brådska",
+        "months": "Inom några månader",
+        "date": "Till ett datum"
+      },
+      "date": "Vilket datum?"
+    },
+    "submit": "Skicka",
+    "success": {
+      "title": "Tack — jag har fått din förfrågan.",
+      "body": "Jag läser den ordentligt och hör av mig till {email} inom några arbetsdagar."
+    }
   }
 }

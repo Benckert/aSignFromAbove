@@ -41,12 +41,9 @@ export function Hero() {
           </p>
         </div>
 
-        <figure className="lg:-mr-6">
+        <div className="lg:-mr-6">
           <HeroSign label={p('label')} />
-          <figcaption className="mt-3 text-[0.8125rem] text-ink-3 lg:pl-4">
-            {p('caption')}
-          </figcaption>
-        </figure>
+        </div>
       </div>
     </section>
   );

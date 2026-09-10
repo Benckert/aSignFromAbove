@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { getFont } from '@/config/carving-fonts';
 import { useDesigner } from '@/lib/designer/store';
-import { availableFonts, capHeightRange } from '@/lib/designer/constraints';
+import { availableFonts, capHeightRange, limitLines, MAX_TEXT_LINES } from '@/lib/designer/constraints';
 import type { TextAlign, TextBlock, TextWrap } from '@/lib/designer/types';
 import { toLines } from '@/lib/designer/geometry';
 import { measureBlockWidthMm, measureCapRatios } from '@/lib/designer/measure';
@@ -51,6 +51,9 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
   const restoreText = useDesigner((s) => s.restoreText);
   const setActiveText = useDesigner((s) => s.setActiveText);
   const [undoable, setUndoable] = useState<{ block: TextBlock; index: number } | null>(null);
+  // The first line opens by default; later ones stay folded so a sign with
+  // three lines does not present three walls of controls at once.
+  const [open, setOpen] = useState(index === 0);
 
   const patch = (p: Partial<TextBlock>) => updateText(block.id, p);
   const font = getFont(block.fontId);
@@ -95,10 +98,39 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
   const range = capHeightRange(design, block, widthAt100);
   const size = Math.min(Math.max(block.capHeightMm, range.min), range.max);
 
+  const preview = toLines(block.content).join(' · ').trim();
+
   return (
-    <div className="rounded-md border border-rule bg-surface-2 p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="label">{t('text.blockLabel', { n: index + 1 })}</span>
+    <div
+      className={cx(
+        'overflow-hidden rounded-md border transition-colors',
+        open ? 'border-rule-strong bg-surface-2' : 'border-rule bg-surface-2/60',
+      )}
+    >
+      <div className="flex items-stretch">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left transition hover:bg-surface-3/50"
+        >
+          <ChevronDown
+            size={15}
+            aria-hidden
+            className={cx('shrink-0 text-ink-3 transition-transform', open && 'rotate-180')}
+          />
+          <span className="min-w-0 flex-1">
+            <span className="label block">{t('text.blockLabel', { n: index + 1 })}</span>
+            <span
+              className="mt-0.5 block truncate text-[0.9375rem] text-ink"
+              style={{ fontFamily: font.cssFamily }}
+            >
+              {preview || <span className="font-sans italic text-ink-3">{t('text.empty')}</span>}
+            </span>
+          </span>
+          <span className="spec shrink-0">{Math.round(size)} mm</span>
+        </button>
+
         {design.texts.length > 1 && (
           <button
             type="button"
@@ -106,7 +138,7 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
               setUndoable({ block, index });
               removeText(block.id);
             }}
-            className="rounded-sm p-1.5 text-ink-3 transition hover:bg-rust-wash hover:text-rust"
+            className="px-3 text-ink-3 transition hover:bg-rust-wash hover:text-rust"
           >
             <span className="sr-only">{t('text.remove')}</span>
             <Trash2 size={15} aria-hidden />
@@ -114,13 +146,20 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
+      {open && (
+      <div className="flex flex-col gap-4 border-t border-rule px-4 pb-4 pt-4">
         <textarea
           value={block.content}
-          onChange={(e) => patch({ content: e.target.value })}
+          // Trimmed here as well as in the store, so the caret does not jump
+          // when a pasted block of text is cut down.
+          onChange={(e) => patch({ content: limitLines(e.target.value) })}
+          onKeyDown={(e) => {
+            const atLimit = block.content.split('\n').length >= MAX_TEXT_LINES;
+            if (e.key === 'Enter' && atLimit) e.preventDefault();
+          }}
           onFocus={() => setActiveText(block.id)}
           onBlur={() => setActiveText(null)}
-          rows={2}
+          rows={Math.min(block.content.split('\n').length + 1, MAX_TEXT_LINES)}
           placeholder={t('text.placeholder')}
           aria-label={t('text.content')}
           className={cx(inputClass, 'resize-y text-[1.0625rem] leading-snug')}
@@ -275,6 +314,7 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
           )}
         </Field>
       </div>
+      )}
 
       {undoable && (
         <div

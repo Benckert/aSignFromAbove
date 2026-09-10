@@ -6,6 +6,8 @@ import {
   availableWoods,
   capHeightRange,
   isOrderable,
+  limitLines,
+  MAX_TEXT_LINES,
   reconcile,
 } from './constraints';
 import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
@@ -190,6 +192,48 @@ describe('reconcile', () => {
     expect(availableFinishes()).toContain(next.finish);
     expect(availableFonts(next.method).some((f) => f.id === next.texts[0].fontId)).toBe(true);
     expect(next.widthMm).toBeLessThanOrEqual(MACHINE.workAreaMm.width);
+  });
+});
+
+describe('the line limit', () => {
+  it('keeps a block within three lines', () => {
+    const next = reconcile({
+      ...base(),
+      texts: [makeTextBlock({ content: 'Ett\nTva\nTre\nFyra\nFem' })],
+    });
+    expect(next.texts[0].content.split('\n')).toHaveLength(MAX_TEXT_LINES);
+    expect(next.texts[0].content).toBe('Ett\nTva\nTre');
+  });
+
+  it('leaves a block that is already short enough alone', () => {
+    const design = { ...base(), texts: [makeTextBlock({ content: 'Ett\nTva' })] };
+    expect(reconcile(design).texts[0].content).toBe('Ett\nTva');
+  });
+
+  it('trims from the end, keeping what was typed first', () => {
+    expect(limitLines('a\nb\nc\nd')).toBe('a\nb\nc');
+  });
+});
+
+describe('the decorative border', () => {
+  it('pulls the size ceiling in when a border is added', () => {
+    const plain = { ...base(), decoration: { border: 'none' as const, insetMm: 12, corners: 'none' as const } };
+    const framed = { ...base(), decoration: { border: 'double' as const, insetMm: 26, corners: 'diamond' as const } };
+    const block = makeTextBlock({ content: 'Hej' });
+    expect(capHeightRange(framed, block).max).toBeLessThan(capHeightRange(plain, block).max);
+  });
+
+  it('shrinks text that a newly deepened border would cross', () => {
+    const design = reconcile({
+      ...base(),
+      heightMm: 200,
+      texts: [makeTextBlock({ content: 'Hej', capHeightMm: 120 })],
+    });
+    const framed = reconcile({
+      ...design,
+      decoration: { border: 'double', insetMm: 40, corners: 'none' },
+    });
+    expect(framed.texts[0].capHeightMm).toBeLessThan(design.texts[0].capHeightMm);
   });
 });
 

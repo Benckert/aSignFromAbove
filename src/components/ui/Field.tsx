@@ -63,7 +63,13 @@ export function Field({ label, hint, error, required, readout, className, childr
   );
 }
 
+/**
+ * Inputs read as cut into the surface rather than drawn on top of it, which is
+ * both the right metaphor here and the thing that stops a dark form looking
+ * like a flat diagram of a form.
+ */
 export const inputClass =
-  'w-full rounded-sm border border-rule bg-surface px-3 py-2 text-[0.9375rem] text-ink ' +
-  'placeholder:text-ink-3/70 transition-colors focus:border-oak focus:outline-none ' +
-  'focus:ring-2 focus:ring-oak/20 aria-[invalid=true]:border-rust';
+  'w-full rounded-sm border border-rule bg-surface px-3 py-2.5 text-[0.9375rem] text-ink ' +
+  'shadow-[var(--shadow-inset)] placeholder:text-ink-3/70 transition ' +
+  'focus:border-oak focus:outline-none focus:ring-2 focus:ring-oak/25 ' +
+  'aria-[invalid=true]:border-rust';

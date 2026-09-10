@@ -77,7 +77,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={label}
       className={cx(
-        'rounded-md border border-rule bg-surface-2 p-1',
+        'rounded-md border border-rule bg-surface p-1 shadow-[var(--shadow-inset)]',
         wrap ? 'flex flex-wrap gap-0.5' : 'grid auto-cols-fr grid-flow-col gap-0.5',
         className,
       )}
@@ -98,7 +98,7 @@ export function Segmented<T extends string>({
               wrap && 'grow',
               selected
                 ? 'bg-ink text-surface shadow-sheet'
-                : 'text-ink-2 hover:bg-surface-3 hover:text-ink',
+                : 'text-ink-2 hover:bg-surface-3/70 hover:text-ink',
             )}
           >
             <span className="block leading-tight">{option.label}</span>
@@ -162,12 +162,12 @@ export function SwatchGrid({
             className={cx(
               'group rounded-md border p-1.5 text-left transition duration-150 ease-[var(--ease-wood)]',
               selected
-                ? 'border-ink ring-1 ring-ink'
-                : 'border-rule hover:border-rule-strong hover:bg-surface-2',
+                ? 'border-ink bg-surface-2 shadow-lift ring-1 ring-ink'
+                : 'border-rule hover:-translate-y-px hover:border-rule-strong hover:bg-surface-2 hover:shadow-sheet',
             )}
           >
             <span
-              className="block h-9 w-full rounded-sm border border-black/10"
+              className="block h-9 w-full rounded-sm border border-black/25 shadow-[0_1px_0_0_rgb(255_240_214/0.12)_inset,0_1px_3px_rgb(0_0_0/0.35)]"
               style={{
                 background: option.accent
                   ? `repeating-linear-gradient(96deg, ${option.colour} 0 6px, ${option.accent} 6px 8px)`

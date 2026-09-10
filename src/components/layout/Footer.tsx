@@ -21,7 +21,6 @@ export function Footer() {
   const explore: Array<{ href: AppPathname; label: string }> = [
     { href: '/designer', label: nav('designer') },
     { href: '/furniture', label: nav('furniture') },
-    { href: '/custom', label: nav('custom') },
     { href: '/workshop', label: nav('workshop') },
   ];
 

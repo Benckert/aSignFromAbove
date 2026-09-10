@@ -30,10 +30,6 @@ export const routing = defineRouting({
       sv: '/mobler',
       en: '/furniture',
     },
-    '/custom': {
-      sv: '/specialbestallning',
-      en: '/custom-work',
-    },
     '/workshop': {
       sv: '/verkstaden',
       en: '/workshop',

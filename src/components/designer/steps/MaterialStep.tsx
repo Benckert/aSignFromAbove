@@ -8,6 +8,7 @@ import type { CarveMethod, Finish } from '@/lib/designer/types';
 import type { WoodId } from '@/config/woods';
 import { Field } from '@/components/ui/Field';
 import { Segmented, SwatchGrid } from '@/components/ui/Controls';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { cx } from '@/lib/cx';
 
 /**
@@ -41,7 +42,8 @@ export function MaterialStep() {
   const painted = design.finish === 'paint' || design.finish === 'oilPaint';
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3">
+      <Disclosure title={t('wood.label')} summary={wood.name[locale]} defaultOpen>
       <Field label={t('wood.label')}>
         {() => (
           <SwatchGrid
@@ -59,8 +61,13 @@ export function MaterialStep() {
         )}
       </Field>
 
-      <p className="-mt-2 text-[0.8125rem] leading-relaxed text-ink-3">{wood.note[locale]}</p>
+      <p className="-mt-1 text-[0.8125rem] leading-relaxed text-ink-3">{wood.note[locale]}</p>
+      </Disclosure>
 
+      <Disclosure
+        title={t('carve.section')}
+        summary={`${t(`carve.methods.${design.method}`)} · ${t(`carve.finishes.${design.finish}`)}`}
+      >
       <Field label={t('carve.method')}>
         {() => (
           <Segmented<CarveMethod>
@@ -125,6 +132,7 @@ export function MaterialStep() {
           )}
         </Field>
       )}
+      </Disclosure>
     </div>
   );
 }

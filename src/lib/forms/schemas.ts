@@ -154,24 +154,32 @@ export const signOrderSchema = signOrderContactSchema.extend({
     .optional(),
 });
 
-export const customEnquirySchema = z.object({
-  ...contactBlock,
-  kind: z.enum(['furniture', 'sign', 'repair', 'other']),
-  description: z.string().trim().min(20).max(4000),
-  timeframe: z.enum(['flexible', 'months', 'date']),
-  date: optionalText(40),
-  budget: z.enum(['unknown', 'under5', '5to15', '15to40', 'over40']),
-  locale: z.enum(['sv', 'en']),
-});
-
-export const contactSchema = z.object({
-  ...contactBlock,
-  subject: z.string().trim().min(2).max(160),
-  message: z.string().trim().min(10).max(4000),
-  locale: z.enum(['sv', 'en']),
-});
+/**
+ * One form for everything that is not a sign from the designer.
+ *
+ * Custom work and a plain message used to be two pages asking nearly the same
+ * questions. They are one now: the subject decides whether a project needs a
+ * timeframe, and everything else is shared.
+ *
+ * Budget is gone. It was optional, it made people uneasy, and a workshop that
+ * has read the description can propose something and let the customer react to
+ * a number rather than name one first.
+ */
+export const enquirySchema = z
+  .object({
+    ...contactBlock,
+    kind: z.enum(['furniture', 'sign', 'other']),
+    description: z.string().trim().min(20).max(4000),
+    timeframe: z.enum(['flexible', 'months', 'date']),
+    date: optionalText(40),
+    locale: z.enum(['sv', 'en']),
+  })
+  // A date is only meaningful for the option that asks for one.
+  .refine((v) => v.timeframe !== 'date' || Boolean(v.date), {
+    path: ['date'],
+    message: 'A date is needed for this timeframe',
+  });
 
 export type SignOrderContactInput = z.infer<typeof signOrderContactSchema>;
 export type SignOrderInput = z.infer<typeof signOrderSchema>;
-export type CustomEnquiryInput = z.infer<typeof customEnquirySchema>;
-export type ContactInput = z.infer<typeof contactSchema>;
+export type EnquiryInput = z.infer<typeof enquirySchema>;

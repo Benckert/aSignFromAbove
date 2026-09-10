@@ -2,7 +2,7 @@ import { CARVING_FONTS, getFont, type CarvingFont } from '@/config/carving-fonts
 import { WOODS, type Wood } from '@/config/woods';
 import { BITS, MACHINE } from '@/config/router-profile';
 import type { CarveMethod, Finish, SignDesign, TextBlock } from './types';
-import { safeArea } from './geometry';
+import { decorationDepthMm, safeArea } from './geometry';
 
 /**
  * What can actually be built, given what has been chosen so far.
@@ -103,7 +103,12 @@ export function capHeightRange(
   const strokeFloor = Math.ceil(bit.minStrokeMm / font.strokeRatio);
   const min = Math.max(strokeFloor, font.minCapHeightMm);
 
-  const area = safeArea(design.shape, design.widthMm, design.heightMm);
+  const area = safeArea(
+    design.shape,
+    design.widthMm,
+    design.heightMm,
+    decorationDepthMm(design.decoration),
+  );
 
   // Ceiling from height: the whole block, however many lines, must fit.
   const lineCount = Math.max(block.content.split('\n').length, 1);
@@ -164,6 +169,13 @@ export function reconcile(design: SignDesign): SignDesign {
   change('widthMm', w);
   change('heightMm', h);
 
+  // No block carries more lines than a sign can wear.
+  const trimmed = next.texts.map((block) => {
+    const content = limitLines(block.content);
+    return content === block.content ? block : { ...block, content };
+  });
+  if (trimmed.some((t, i) => t !== next.texts[i])) next = { ...next, texts: trimmed };
+
   // Text sizes stay inside their allowed range. Width measurement is not
   // available here, so this enforces the floor and the height ceiling; the
   // width ceiling is applied by the slider, which can measure.
@@ -179,6 +191,22 @@ export function reconcile(design: SignDesign): SignDesign {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * The most lines one block of text may carry.
+ *
+ * Three is a practical ceiling rather than an arbitrary one: past it the
+ * lettering has to shrink so far to fit a board that it stops being a carved
+ * sign and starts being a paragraph cut into wood. Anyone who genuinely needs
+ * more is doing something the enquiry form handles better than this tool.
+ */
+export const MAX_TEXT_LINES = 3;
+
+/** Trims a block of text to the line limit, keeping what was typed first. */
+export function limitLines(content: string): string {
+  const lines = content.split('\n');
+  return lines.length <= MAX_TEXT_LINES ? content : lines.slice(0, MAX_TEXT_LINES).join('\n');
 }
 
 /** The only thing left that can stop an order: nothing has been written yet. */
