@@ -259,6 +259,8 @@
     font-weight: 400;
     letter-spacing: -0.014em;
     line-height: 1.12;
+    /* Even line lengths rather than a last line carrying one short word. */
+    text-wrap: balance;
     font-variation-settings:
       'SOFT' 30,
       'WONK' 1,
@@ -270,6 +272,8 @@
     max-width: 58ch;
     line-height: 1.62;
     color: var(--color-ink-2);
+    /* Keeps a paragraph from ending on a single orphaned word. */
+    text-wrap: pretty;
   }
   .prose-workshop p + p {
     margin-top: 1.1em;

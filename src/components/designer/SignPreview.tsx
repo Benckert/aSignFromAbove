@@ -159,22 +159,37 @@ export function SignPreview({
         </clipPath>
         {/*
           For raised lettering the letters keep the original surface while the
-          ground drops away. That is drawn by clipping a second copy of the very
-          same board to the shape of the text, so the grain runs continuously
+          ground drops away. That is drawn by showing a second copy of the very
+          same board only where the text is, so the grain runs continuously
           through the letters instead of restarting inside them.
+
+          A mask, not a clip path, and the distinction is not academic: a
+          <clipPath> may only contain shapes, <text> and <use>, so the <g> that
+          wraps every text block — and the <defs> that carries the baselines a
+          curved line rides on — were both silently discarded, leaving an empty
+          clip and a board with no lettering on it at all. A mask takes
+          arbitrary content. White shows the board through, black hides it.
         */}
         {design.method === 'raised' && (
-          <clipPath id={`${uid}-letters`}>
+          <mask
+            id={`${uid}-letters`}
+            maskUnits="userSpaceOnUse"
+            x={-PAD}
+            y={-PAD}
+            width={w + PAD * 2}
+            height={h + PAD * 2}
+          >
+            <rect x={-PAD} y={-PAD} width={w + PAD * 2} height={h + PAD * 2} fill="#000" />
             {design.texts.map((block) => (
               <SignText
                 key={block.id}
                 block={block}
                 area={area}
                 capRatios={capRatios}
-                fill="#000"
+                fill="#fff"
               />
             ))}
-          </clipPath>
+          </mask>
         )}
       </defs>
 
@@ -199,7 +214,7 @@ export function SignPreview({
 
         {design.method === 'raised' ? (
           <g filter={`url(#${uid}-raise)`}>
-            <g clipPath={`url(#${uid}-letters)`}>{board}</g>
+            <g mask={`url(#${uid}-letters)`}>{board}</g>
           </g>
         ) : (
           textLayer

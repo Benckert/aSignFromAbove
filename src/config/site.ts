@@ -97,7 +97,10 @@ export const site = {
 
 export type Site = typeof site;
 
-/** True when any TODO placeholder is still present — surfaces a dev-only warning. */
-export function hasPlaceholderDetails(): boolean {
-  return JSON.stringify(site).includes('TODO');
-}
+/*
+  There was a `hasPlaceholderDetails()` here, feeding a development-only banner
+  across the top of every page. The banner is gone, and so is the function: the
+  placeholders announce themselves perfectly well on their own, since every
+  `TODO` above is printed verbatim in the footer of every page and in the legal
+  documents. The pre-launch list in the README is the checklist.
+*/

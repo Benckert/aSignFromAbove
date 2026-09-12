@@ -12,6 +12,10 @@ import { PieceImage } from './PieceImage';
  * pieces both were apparatus around content that fits on one screen — a filter
  * that never has much to filter, and a click that opens what could simply have
  * been shown. Everything a piece has to say is now on its card.
+ *
+ * Three across on a wide screen rather than two. At two, six pieces became six
+ * very large panels — and until the photographs exist those panels are empty,
+ * so the page read as mostly nothing.
  */
 export function Gallery() {
   const t = useTranslations('furniture');
@@ -22,7 +26,7 @@ export function Gallery() {
   }
 
   return (
-    <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2">
+    <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
       {PIECES.map((piece, i) => (
         <li key={piece.id}>
           <span className="relative block aspect-[4/3] overflow-hidden rounded-lg border border-rule">

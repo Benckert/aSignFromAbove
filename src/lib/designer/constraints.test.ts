@@ -10,6 +10,7 @@ import {
   MAX_TEXT_LINES,
   reconcile,
 } from './constraints';
+import { anchorWithin, blockBox, decorationDepthMm, safeArea } from './geometry';
 import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
 import { getFont } from '@/config/carving-fonts';
 import { BITS, MACHINE } from '@/config/router-profile';
@@ -103,6 +104,135 @@ describe('capHeightRange', () => {
     // 400 mm wide at a 100 mm cap: the text is four times too wide to fit.
     const measured = capHeightRange(base(), block, 400);
     expect(measured.max).toBeLessThan(unmeasured.max);
+  });
+});
+
+/*
+  The containment guarantee.
+
+  Every wrap, on every shape, at every one of the nine placements: after
+  reconcile, the block must sit wholly inside the safe area. This is the
+  property the designer sells — "anything you can reach is something the
+  workshop can make" — and curved text broke it twice before it was stated as
+  a test rather than as a comment. A ring of 40 mm capitals at a 78 mm radius
+  needs 236 mm of board in both directions; asked for at the top of a 220 mm
+  board, two thirds of it hung off the edge.
+*/
+describe('curved text stays on the board', () => {
+  const SHAPES = ['rect', 'rounded', 'arch', 'oval'] as const;
+  const WRAPS = ['straight', 'arcUp', 'arcDown', 'circle'] as const;
+  const STOPS = [0.15, 0.5, 0.85];
+  const SIZES = [
+    [300, 150],
+    [400, 220],
+    [600, 300],
+    [800, 250],
+    [300, 300],
+  ] as const;
+
+  it('fits inside the safe area whatever is asked for', () => {
+    for (const shape of SHAPES) {
+      for (const [widthMm, heightMm] of SIZES) {
+        for (const wrap of WRAPS) {
+          for (const x of STOPS) {
+            for (const y of STOPS) {
+              const design = reconcile({
+                ...base(),
+                shape,
+                widthMm,
+                heightMm,
+                decoration: { border: 'double', insetMm: 14, corners: 'diamond' },
+                texts: [
+                  makeTextBlock({
+                    content: 'Björkhaga',
+                    // Deliberately unreasonable: the largest letters, the
+                    // hardest bend and the widest ring the controls can ask
+                    // for, so the constraints have to do the work.
+                    capHeightMm: 220,
+                    wrap,
+                    curvature: 1,
+                    circleRadiusMm: 400,
+                    x,
+                    y,
+                  }),
+                ],
+              });
+
+              const block = design.texts[0];
+              const area = safeArea(
+                shape,
+                widthMm,
+                heightMm,
+                decorationDepthMm(design.decoration),
+              );
+              const box = blockBox({
+                wrap: block.wrap,
+                capHeightMm: block.capHeightMm,
+                lineHeight: block.lineHeight,
+                lineCount: 1,
+                curvature: block.curvature,
+                circleRadiusMm: block.circleRadiusMm,
+                availableWidthMm: area.width,
+              });
+
+              const cy = anchorWithin(area.y, area.height, block.y, box.up, box.down);
+              const where = `${shape} ${widthMm}×${heightMm} ${wrap} @${x},${y}`;
+
+              // A tenth of a millimetre of slack: these are millimetres on a
+              // board, and the arithmetic runs through a square root.
+              expect(`${where}: ${(box.up + box.down).toFixed(1)}`).toBe(
+                `${where}: ${Math.min(box.up + box.down, area.height).toFixed(1)}`,
+              );
+              expect(cy - box.up).toBeGreaterThanOrEqual(area.y - 0.1);
+              expect(cy + box.down).toBeLessThanOrEqual(area.y + area.height + 0.1);
+
+              if (wrap !== 'straight') {
+                const cx = anchorWithin(area.x, area.width, block.x, box.halfWidth, box.halfWidth);
+                expect(cx - box.halfWidth).toBeGreaterThanOrEqual(area.x - 0.1);
+                expect(cx + box.halfWidth).toBeLessThanOrEqual(area.x + area.width + 0.1);
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it('gives up the bend before it gives up the letters', () => {
+    // A short board cannot carry a deep bow and tall letters at once. The
+    // letters are what the sign is for, so the bow is what yields.
+    const design = reconcile({
+      ...base(),
+      widthMm: 400,
+      heightMm: 120,
+      texts: [makeTextBlock({ content: 'Välkommen', capHeightMm: 40, wrap: 'arcUp', curvature: 1 })],
+    });
+    expect(design.texts[0].curvature).toBeLessThan(1);
+    expect(design.texts[0].capHeightMm).toBe(40);
+  });
+
+  it('shrinks a ring that no longer fits its board', () => {
+    const roomy = reconcile({
+      ...base(),
+      widthMm: 400,
+      heightMm: 400,
+      texts: [makeTextBlock({ content: 'Bageriet', capHeightMm: 24, wrap: 'circle', circleRadiusMm: 120 })],
+    });
+    expect(roomy.texts[0].circleRadiusMm).toBe(120);
+
+    const cramped = reconcile({ ...roomy, heightMm: 220 });
+    expect(cramped.texts[0].circleRadiusMm).toBeLessThan(120);
+    expect(cramped.texts[0].capHeightMm).toBe(24);
+  });
+
+  it('is idempotent for curved text too', () => {
+    const once = reconcile({
+      ...base(),
+      widthMm: 300,
+      heightMm: 150,
+      texts: [makeTextBlock({ content: 'Bageriet', capHeightMm: 90, wrap: 'circle', circleRadiusMm: 300 })],
+    });
+    expect(reconcile(once)).toBe(once);
   });
 });
 
@@ -213,9 +343,11 @@ describe('circle text', () => {
       heightMm: 300,
       shape: 'oval' as const,
       decoration: { border: 'none' as const, insetMm: 10, corners: 'none' as const },
-      texts: [makeTextBlock({ content: 'Runt', wrap: 'circle', circleRadiusMm: 60 })],
+      // 216 mm of safe area, so the ring plus its letters has 108 mm to reach
+      // into: 55 mm of radius and 40 mm capitals leave room for the accents.
+      texts: [makeTextBlock({ content: 'Runt', wrap: 'circle', circleRadiusMm: 55 })],
     };
-    expect(reconcile(design).texts[0].circleRadiusMm).toBe(60);
+    expect(reconcile(design).texts[0].circleRadiusMm).toBe(55);
   });
 
   it('tightens the ring when a deep border is added', () => {

@@ -180,7 +180,9 @@ export const PRESETS: Preset[] = [
           capHeightMm: 22,
           letterSpacing: 0.16,
           wrap: 'circle',
-          circleRadiusMm: 98,
+          // A ring is its radius plus a letter in every direction, so this is
+          // set from the 216 mm safe area rather than from the 300 mm board.
+          circleRadiusMm: 80,
           x: 0.5,
           y: 0.5,
         }),

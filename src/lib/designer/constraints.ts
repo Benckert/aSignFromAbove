@@ -2,7 +2,15 @@ import { CARVING_FONTS, getFont, type CarvingFont } from '@/config/carving-fonts
 import { WOODS, type Wood } from '@/config/woods';
 import { BITS, MACHINE } from '@/config/router-profile';
 import type { CarveMethod, Finish, SignDesign, TextBlock } from './types';
-import { decorationDepthMm, safeArea } from './geometry';
+import {
+  baselineLengthMm,
+  decorationDepthMm,
+  maxCapHeightMm,
+  maxCircleRadiusMm,
+  maxCurvature,
+  MIN_CURVATURE,
+  safeArea,
+} from './geometry';
 
 /**
  * What can actually be built, given what has been chosen so far.
@@ -81,13 +89,34 @@ export interface CapHeightRange {
   max: number;
 }
 
+/** The area of the board this design's lettering may occupy. */
+function textArea(design: SignDesign) {
+  return safeArea(
+    design.shape,
+    design.widthMm,
+    design.heightMm,
+    decorationDepthMm(design.decoration),
+  );
+}
+
+function lineCountOf(block: TextBlock): number {
+  return Math.max(block.content.split('\n').length, 1);
+}
+
 /**
  * The range the text-size slider is allowed to cover.
  *
  * The floor comes from physics: below it, the narrowest stroke in the face is
  * thinner than the cutter, and the letter cannot be cut. The ceiling comes from
- * the board: above it, the line runs off the edge. Between the two, every value
- * is buildable — which is why there is no overflow warning anywhere in the app.
+ * the board: above it, some part of the block runs off the edge. Between the
+ * two, every value is buildable — which is why there is no overflow warning
+ * anywhere in the app.
+ *
+ * "Some part of the block" is doing real work in that sentence. A line of text
+ * is not a rectangle of its own cap height: it has descenders below it, a bow
+ * lifts its letters clear of the curve they sit on, and a ring of text is as
+ * wide as its diameter plus two letters. All three are counted here, which is
+ * what stopped a 40 mm circle at radius 78 being offered on a 220 mm board.
  */
 export function capHeightRange(
   design: SignDesign,
@@ -103,28 +132,72 @@ export function capHeightRange(
   const strokeFloor = Math.ceil(bit.minStrokeMm / font.strokeRatio);
   const min = Math.max(strokeFloor, font.minCapHeightMm);
 
-  const area = safeArea(
-    design.shape,
-    design.widthMm,
-    design.heightMm,
-    decorationDepthMm(design.decoration),
+  const area = textArea(design);
+
+  const fitCeiling = Math.floor(
+    maxCapHeightMm({
+      wrap: block.wrap,
+      lineHeight: block.lineHeight,
+      lineCount: lineCountOf(block),
+      curvature: block.curvature,
+      circleRadiusMm: block.circleRadiusMm,
+      areaWidthMm: area.width,
+      areaHeightMm: area.height,
+    }),
   );
 
-  // Ceiling from height: the whole block, however many lines, must fit.
-  const lineCount = Math.max(block.content.split('\n').length, 1);
-  const heightCeiling = Math.floor(
-    area.height / ((lineCount - 1) * block.lineHeight + 1),
-  );
-
-  // Ceiling from width, once the browser has measured the actual glyphs.
-  const available = block.wrap === 'straight' ? area.width : area.width * 0.92;
+  // Ceiling from the words themselves, once the browser has measured them.
+  const available = baselineLengthMm({
+    wrap: block.wrap,
+    capHeightMm: block.capHeightMm,
+    curvature: block.curvature,
+    circleRadiusMm: block.circleRadiusMm,
+    areaWidthMm: area.width,
+  });
   const widthCeiling =
     widthAt100mm && widthAt100mm > 0
       ? Math.floor((available / widthAt100mm) * 100 * 0.98)
       : Infinity;
 
-  const max = Math.max(min, Math.min(heightCeiling, widthCeiling, 220));
+  const max = Math.max(min, Math.min(fitCeiling, widthCeiling, 220));
   return { min, max };
+}
+
+/**
+ * How hard a bowed line may be bent, given the board and the letters on it.
+ *
+ * Bend and letter height compete for the same millimetres, so one of them has
+ * to give way. Letter height wins: a sign exists to be read from the road, and
+ * the bend is a flourish. So this ceiling moves with the chosen size, and the
+ * size ceiling moves with the chosen bend — each slider stops where the other
+ * currently stands, and neither can push the text off the board.
+ */
+export function curvatureRange(design: SignDesign, block: TextBlock) {
+  const area = textArea(design);
+  const max = maxCurvature({
+    capHeightMm: block.capHeightMm,
+    lineHeight: block.lineHeight,
+    lineCount: lineCountOf(block),
+    areaWidthMm: area.width,
+    areaHeightMm: area.height,
+  });
+  return { min: MIN_CURVATURE, max: Math.max(max, MIN_CURVATURE) };
+}
+
+/** The smallest ring worth offering. Below it the text stops reading as a ring. */
+export const MIN_CIRCLE_RADIUS_MM = 20;
+
+/** How wide a ring of text may be before it leaves the board. */
+export function circleRadiusRange(design: SignDesign, block: TextBlock) {
+  const area = textArea(design);
+  const max = Math.floor(
+    maxCircleRadiusMm({
+      capHeightMm: block.capHeightMm,
+      areaWidthMm: area.width,
+      areaHeightMm: area.height,
+    }),
+  );
+  return { min: MIN_CIRCLE_RADIUS_MM, max: Math.max(max, MIN_CIRCLE_RADIUS_MM) };
 }
 
 /* ── Reconciliation ───────────────────────────────────────────────────── */
@@ -169,43 +242,55 @@ export function reconcile(design: SignDesign): SignDesign {
   change('widthMm', w);
   change('heightMm', h);
 
-  /*
-    A circle of text has to fit on the board. Its radius is set independently
-    of the sign's size, so shrinking the board — or deepening the border —
-    would otherwise leave the ring hanging over the edge.
-  */
-  const area = safeArea(
-    next.shape,
-    next.widthMm,
-    next.heightMm,
-    decorationDepthMm(next.decoration),
-  );
-  const maxRadius = Math.max(Math.min(area.width, area.height) / 2, 10);
-  const ringed = next.texts.map((block) =>
-    block.wrap === 'circle' && block.circleRadiusMm > maxRadius
-      ? { ...block, circleRadiusMm: Math.floor(maxRadius) }
-      : block,
-  );
-  if (ringed.some((t, i) => t !== next.texts[i])) next = { ...next, texts: ringed };
-
-  // No block carries more lines than a sign can wear.
+  // No block carries more lines than a sign can wear. Done before anything is
+  // measured, since the line count feeds every ceiling below.
   const trimmed = next.texts.map((block) => {
     const content = limitLines(block.content);
     return content === block.content ? block : { ...block, content };
   });
   if (trimmed.some((t, i) => t !== next.texts[i])) next = { ...next, texts: trimmed };
 
-  // Text sizes stay inside their allowed range. Width measurement is not
-  // available here, so this enforces the floor and the height ceiling; the
-  // width ceiling is applied by the slider, which can measure.
-  const corrected = next.texts.map((block) => {
-    const { min, max } = capHeightRange(next, block);
-    const capped = clamp(block.capHeightMm, min, max);
-    return capped === block.capHeightMm ? block : { ...block, capHeightMm: capped };
+  /*
+    Bend, ring and size all have to fit the same board, and a change to the
+    board can break all three at once — shrink a sign, or deepen its border,
+    and a ring set for the old one now hangs over the edge.
+
+    They are corrected in order of what is worth losing. The flourish goes
+    first: bend, then ring size, and only then the letters themselves, which
+    are the point of the sign. Each step is computed against the values the
+    step before it settled, so one pass is enough and the result is stable —
+    loosening one constraint never re-tightens an earlier one.
+  */
+  next = mapTexts(next, (block) => {
+    if (block.wrap !== 'arcUp' && block.wrap !== 'arcDown') return block;
+    const { min, max } = curvatureRange(next, block);
+    const curvature = clamp(block.curvature, min, max);
+    return curvature === block.curvature ? block : { ...block, curvature };
   });
-  if (corrected.some((t, i) => t !== next.texts[i])) next = { ...next, texts: corrected };
+
+  next = mapTexts(next, (block) => {
+    if (block.wrap !== 'circle') return block;
+    const { min, max } = circleRadiusRange(next, block);
+    const circleRadiusMm = clamp(block.circleRadiusMm, min, max);
+    return circleRadiusMm === block.circleRadiusMm ? block : { ...block, circleRadiusMm };
+  });
+
+  // Width measurement is not available here, so this enforces the floor and
+  // everything the board dictates; the ceiling that depends on the actual
+  // glyphs is applied by the slider, which can measure them.
+  next = mapTexts(next, (block) => {
+    const { min, max } = capHeightRange(next, block);
+    const capHeightMm = clamp(block.capHeightMm, min, max);
+    return capHeightMm === block.capHeightMm ? block : { ...block, capHeightMm };
+  });
 
   return next;
+}
+
+/** Applies a correction to every block, keeping the design's identity if none applied. */
+function mapTexts(design: SignDesign, fn: (block: TextBlock) => TextBlock): SignDesign {
+  const texts = design.texts.map(fn);
+  return texts.some((t, i) => t !== design.texts[i]) ? { ...design, texts } : design;
 }
 
 function clamp(value: number, min: number, max: number): number {

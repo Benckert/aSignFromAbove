@@ -18,7 +18,7 @@ export default async function FurniturePage({ params }: { params: Promise<{ loca
   const t = await getTranslations({ locale, namespace: 'furniture' });
 
   return (
-    <div className="shell py-12 lg:py-20">
+    <div className="shell pb-14 pt-7 lg:pb-20 lg:pt-10">
       <header className="max-w-2xl">
         <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">{t('title')}</h1>
         <p className="prose-workshop mt-4">{t('lede')}</p>

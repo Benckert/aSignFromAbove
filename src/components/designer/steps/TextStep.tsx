@@ -5,7 +5,14 @@ import { useTranslations } from 'next-intl';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { getFont } from '@/config/carving-fonts';
 import { useDesigner } from '@/lib/designer/store';
-import { availableFonts, capHeightRange, limitLines, MAX_TEXT_LINES } from '@/lib/designer/constraints';
+import {
+  availableFonts,
+  capHeightRange,
+  circleRadiusRange,
+  curvatureRange,
+  limitLines,
+  MAX_TEXT_LINES,
+} from '@/lib/designer/constraints';
 import type { TextAlign, TextBlock, TextWrap } from '@/lib/designer/types';
 import { toLines } from '@/lib/designer/geometry';
 import { measureBlockWidthMm, measureCapRatios } from '@/lib/designer/measure';
@@ -97,6 +104,19 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
 
   const range = capHeightRange(design, block, widthAt100);
   const size = Math.min(Math.max(block.capHeightMm, range.min), range.max);
+  const bend = curvatureRange(design, block);
+  const ring = circleRadiusRange(design, block);
+
+  /*
+    The measured ceiling exists only here, because only here is there a canvas
+    to measure with. When it lands below the stored size — a longer word typed
+    into an existing line, a face swapped for a wider one — the store is
+    corrected rather than only the slider, or the control would show one number
+    while the board carved another.
+  */
+  useEffect(() => {
+    if (block.capHeightMm > range.max) updateText(block.id, { capHeightMm: range.max });
+  }, [block.id, block.capHeightMm, range.max, updateText]);
 
   const preview = toLines(block.content).join(' · ').trim();
 
@@ -230,9 +250,9 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
             {(props) => (
               <Slider
                 {...props}
-                value={block.curvature}
-                min={0.05}
-                max={1}
+                value={Math.min(block.curvature, bend.max)}
+                min={bend.min}
+                max={bend.max}
                 step={0.01}
                 onChange={(curvature) => patch({ curvature })}
               />
@@ -245,10 +265,10 @@ function TextBlockCard({ block, index }: { block: TextBlock; index: number }) {
             {(props) => (
               <Slider
                 {...props}
-                value={block.circleRadiusMm}
-                min={20}
-                max={Math.max(design.widthMm, design.heightMm) / 2}
-                step={2}
+                value={Math.min(block.circleRadiusMm, ring.max)}
+                min={ring.min}
+                max={ring.max}
+                step={1}
                 onChange={(circleRadiusMm) => patch({ circleRadiusMm })}
               />
             )}

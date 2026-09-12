@@ -111,7 +111,31 @@ export function Designer() {
   return (
     // items-start matters: a stretched flex child cannot be sticky, because it
     // is already as tall as the row and has nowhere to travel.
-    <div className="lg:flex lg:items-start">
+    <div
+      className={cx(
+        'lg:flex lg:items-start',
+        // The header plus the sticky tab rail beneath it. The summary below
+        // subtracts this from the viewport so it comes to rest directly under
+        // the tabs rather than behind them.
+        '[--designer-rail:11.75rem]',
+        /*
+          A footer's worth of extra travel for the sign, taken back again.
+
+          A sticky element may only move inside its parent's *content* box, so
+          the sign came unpinned the instant the columns ended: scroll on into
+          the footer and it slid up behind the header. The controls column
+          below carries a footer's height of bottom padding, which lengthens
+          that content box; this negative margin pulls the footer back up by
+          the same amount, so it still begins immediately under the columns and
+          the page is exactly as long as it was. The sign now holds its place
+          all the way to the end of the document.
+
+          304 px against the footer's 316: a shade under, so the padding can
+          never push past the last pixel of the page.
+        */
+        'lg:-mb-[19rem]',
+      )}
+    >
       {/* ── The sign. Holds still and takes the room. ─────────────────── */}
       <section
         className={cx(
@@ -172,7 +196,20 @@ export function Designer() {
       </section>
 
       {/* ── The controls. The only thing that scrolls. ────────────────── */}
-      <section className="flex flex-col lg:w-[26rem] lg:shrink-0 xl:w-[29rem]">
+      <section
+        className={cx(
+          'flex flex-col lg:w-[26rem] lg:shrink-0 xl:w-[29rem]',
+          // The run-off the negative margin above is paid out of.
+          'lg:pb-[19rem]',
+          /*
+            And the guarantee that it is this column, not the sign, that sets
+            the row's height: viewport minus header, plus that same run-off. If
+            the sign were ever the taller of the two, pulling the footer up by
+            19rem would drag it over the sign instead of over empty padding.
+          */
+          'lg:min-h-[calc(100dvh+15rem)]',
+        )}
+      >
         {/*
           Sticky only where it has a column of its own. On a phone this sits
           directly below the sticky preview, and two sticky siblings at the
@@ -237,20 +274,25 @@ export function Designer() {
           </div>
         </div>
 
-        {/*
-          A generous run-off below the last control. Two reasons: it reads as
-          the end of the column, and it keeps the sticky preview pinned through
-          an over-scroll — the sign only starts to travel once the containing
-          block runs out, so ending the column flush with the button made a
-          stray flick of the wheel nudge it out of place.
-        */}
-        <div className="px-4 pb-40 pt-4 lg:px-6 lg:pb-[26rem]">
+        <div className="px-4 pb-40 pt-4 lg:px-6 lg:pb-0">
           {step === 'text' && <TextStep />}
           {step === 'shape' && <ShapeStep />}
           {step === 'material' && <MaterialStep />}
           {step === 'detail' && <DetailStep />}
 
-          <div className="mt-7 hidden flex-col gap-3 border-t border-rule pt-6 lg:flex">
+          {/*
+            The summary gets a screen of its own.
+
+            Its height is the viewport less the header and the tab rail above
+            it, which means the bottom of the column and the bottom of the
+            window meet at the exact moment the price arrives directly under
+            the tabs. The run-off underneath is not padding for its own sake:
+            it is what makes the end of the scroll a composed view rather than
+            a place you happen to stop, and it keeps the pinned sign still
+            through an over-scroll, since the sign only travels once its
+            containing block runs out.
+          */}
+          <div className="mt-7 hidden flex-col gap-3 border-t border-rule pt-6 lg:flex lg:min-h-[calc(100dvh-var(--designer-rail))]">
             <PriceCard price={price} />
             <OrderButton orderable={orderable} />
           </div>

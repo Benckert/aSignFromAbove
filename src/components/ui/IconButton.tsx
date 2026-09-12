@@ -5,6 +5,12 @@ import { cx } from '@/lib/cx';
  * The button counterpart to IconLink: a symbol with its wording moved into the
  * accessible name and the hover title, so nothing is lost to anyone who cannot
  * see it or does not recognise the mark.
+ *
+ * The `{children}` below is not boilerplate. This took `children` as a prop and
+ * then closed its own tag, so the download and reset controls beside the
+ * preview were rendering as two empty squares — present, labelled, clickable,
+ * and completely invisible. The linter's unused-variable warning was the only
+ * thing that noticed.
  */
 export function IconButton({
   label,
@@ -27,6 +33,8 @@ export function IconButton({
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </button>
   );
 }

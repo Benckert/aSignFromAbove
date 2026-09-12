@@ -117,7 +117,7 @@ export function OrderForm() {
 
   if (status === 'sent') {
     return (
-      <div className="shell max-w-2xl py-16 lg:py-24">
+      <div className="shell max-w-2xl pb-16 pt-10 lg:pb-24 lg:pt-14">
         <div className="rounded-lg border border-rule bg-surface-2 p-8">
           <span className="grid h-11 w-11 place-items-center rounded-full bg-moss-wash text-moss-deep">
             <Check size={20} aria-hidden />
@@ -143,7 +143,7 @@ export function OrderForm() {
   }
 
   return (
-    <div className="shell py-10 lg:py-16">
+    <div className="shell pb-12 pt-6 lg:pb-16 lg:pt-8">
       <Link
         href="/designer"
         className="inline-flex items-center gap-1.5 text-[0.875rem] text-ink-2 transition hover:text-ink"
@@ -240,8 +240,14 @@ export function OrderForm() {
             to be informed, so the sentence that carries the actual meaning is
             always visible and the full explanation is one click away and
             always in the DOM — what is folded is the detail, not the point.
+
+            Dressed the same as the consent box below it rather than in the
+            accent wash it used to wear. Two acknowledgements asked at the same
+            moment should look like two of the same thing; painting one of them
+            amber made it the loudest element on a page whose actual subject is
+            the sign.
           */}
-          <div className="rounded-md border border-oak/30 bg-oak-wash p-4">
+          <div className="rounded-md border border-rule bg-surface-2 p-4">
             <Checkbox
               checked={Boolean(withdrawal)}
               onChange={(v) => setValue('withdrawalAcknowledged', v as true, { shouldValidate: true })}

@@ -30,7 +30,7 @@ export function LegalDocument({
   updated: string;
 }) {
   return (
-    <div className="shell py-12 lg:py-20">
+    <div className="shell pb-14 pt-7 lg:pb-20 lg:pt-10">
       <header className="max-w-2xl">
         <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">{title}</h1>
         <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-2">{lede}</p>

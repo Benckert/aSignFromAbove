@@ -31,7 +31,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-16 border-t border-rule bg-surface-2">
+    <footer className="border-t border-rule bg-surface-2">
       <div className="shell grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
         <div className="lg:col-span-1">
           <Wordmark />

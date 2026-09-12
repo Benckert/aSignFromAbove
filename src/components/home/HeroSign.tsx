@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { SignPreview } from '@/components/designer/SignPreview';
+import { getWood } from '@/config/woods';
 import { defaultDesign, makeTextBlock } from '@/lib/designer/defaults';
+import { reconcile } from '@/lib/designer/constraints';
 import type { SignDesign } from '@/lib/designer/types';
 import { cx } from '@/lib/cx';
 
@@ -29,7 +31,16 @@ import { cx } from '@/lib/cx';
  * feature.
  */
 
-const SCENES: SignDesign[] = [
+/*
+  Run through the same reconciliation the designer uses.
+
+  These are hand-written configurations, and a hand-written configuration can
+  be wrong: the round one asked for a 98 mm ring of 20 mm capitals on a board
+  whose safe area is 216 mm across, which put the whole word off the edge and
+  left that slide looking blank. Passing them through the constraint system
+  means a slide cannot show something the tool would not let a customer build.
+*/
+const SCENES: SignDesign[] = ([
   {
     ...defaultDesign(),
     widthMm: 420,
@@ -107,7 +118,7 @@ const SCENES: SignDesign[] = [
         capHeightMm: 20,
         letterSpacing: 0.18,
         wrap: 'circle',
-        circleRadiusMm: 98,
+        circleRadiusMm: 84,
       }),
       makeTextBlock({
         content: 'Est.\n1998',
@@ -118,7 +129,7 @@ const SCENES: SignDesign[] = [
       }),
     ],
   },
-];
+] satisfies SignDesign[]).map(reconcile);
 
 /** Milliseconds each sign is held before the next one. */
 const INTERVAL = 5200;
@@ -147,6 +158,7 @@ function useReducedMotion(): boolean {
 
 export function HeroSign({ label }: { label: string }) {
   const t = useTranslations('home.livePreview');
+  const locale = useLocale() === 'en' ? 'en' : 'sv';
   const [index, setIndex] = useState(0);
   /** Set once the visitor drives it themselves; never cleared. */
   const [manual, setManual] = useState(false);
@@ -242,6 +254,18 @@ export function HeroSign({ label }: { label: string }) {
         </div>
 
         {/*
+          What the board on screen actually is, in the units the workshop
+          works in and in the same form the designer prints beneath its own
+          preview. It costs one line and it settles the question every visitor
+          has about a drawing of a sign — whether it is a real thing with
+          dimensions or a picture.
+        */}
+        <span className="spec ml-auto truncate">
+          {SCENES[index].widthMm} × {SCENES[index].heightMm} mm ·{' '}
+          {getWood(SCENES[index].woodId).name[locale]}
+        </span>
+
+        {/*
           Symbol only. Pause and play are the two most universally understood
           marks there are, and a word beside them buys nothing but width. The
           label survives as the accessible name and the hover title.
@@ -252,7 +276,7 @@ export function HeroSign({ label }: { label: string }) {
             onClick={() => setManual((v) => !v)}
             aria-label={manual ? t('play') : t('pause')}
             title={manual ? t('play') : t('pause')}
-            className="ml-auto grid h-8 w-8 place-items-center rounded-sm text-ink-3 transition hover:bg-surface-3 hover:text-ink"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-sm text-ink-3 transition hover:bg-surface-3 hover:text-ink"
           >
             {manual ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>

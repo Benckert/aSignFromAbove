@@ -9,7 +9,6 @@ import { site } from '@/config/site';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeScript } from '@/components/layout/ThemeToggle';
-import { SetupNotice } from '@/components/layout/SetupNotice';
 import { Toaster } from '@/components/ui/Toaster';
 import '../globals.css';
 
@@ -71,7 +70,6 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-dvh flex-col antialiased">
         <NextIntlClientProvider>
-          <SetupNotice />
           <Header />
           <main id="content" className="flex-1">
             {children}
