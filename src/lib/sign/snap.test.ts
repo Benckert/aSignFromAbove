@@ -28,7 +28,11 @@ describe('snapAxis', () => {
   });
 
   it('takes the nearer of two', () => {
-    const result = snapAxis({ min: 195, max: 295 }, guides.filter((g) => g.axis === 'x'), 12);
+    const result = snapAxis(
+      { min: 195, max: 295 },
+      guides.filter((g) => g.axis === 'x'),
+      12,
+    );
     // The left edge is 5 mm from the centre line; the block's own centre is 45
     // away from it and its right edge 77 from the right of the safe area.
     expect(result.delta).toBeCloseTo(5);

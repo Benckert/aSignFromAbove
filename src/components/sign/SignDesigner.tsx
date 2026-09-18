@@ -13,7 +13,8 @@ import { IconButton } from '@/components/ui/IconButton';
 import { Board } from './Board';
 import { Lettering, type Rect } from './Lettering';
 import { CutChoice, FinishChoice, ShapeChoice, SizeChoice, WoodChoice } from './Choices';
-import { useFitLettering, useOutline } from './useOutline';
+import { isBlank } from './BoardText';
+import { useFitLettering } from './useTextBox';
 import { cx } from '@/lib/cx';
 
 /**
@@ -56,11 +57,17 @@ export function SignDesigner() {
   const [rect, setRect] = useState<Rect | null>(null);
   const [editing, setEditing] = useState(false);
 
-  const outline = useOutline(draft);
-  useFitLettering(draft, outline);
+  const size = useSign((s) => s.size);
+  useFitLettering(draft, size);
   const price = useMemo(() => priceSign(toSignDesign(draft)), [draft]);
   const wood = getWood(draft.woodId);
-  const empty = outline === null;
+  /*
+    Read from the words rather than from the measurement. A board with nothing
+    on it is a fact about the draft, known on the server and on the first paint;
+    waiting for a measurement to say so would flash the empty state onto a sign
+    that has lettering on it.
+  */
+  const empty = isBlank(draft.block.text);
 
   const edit = useCallback(() => {
     select(true);

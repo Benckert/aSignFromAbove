@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { CARVING_FONTS, getFont } from '@/config/carving-fonts';
 import { patchBlock, useSign } from '@/lib/sign/store';
-import { capLimits, useOutline } from './useOutline';
+import { capLimits } from './useTextBox';
 import { cx } from '@/lib/cx';
 
 /**
@@ -44,6 +44,8 @@ export interface Rect {
 
 const GAP = 12;
 const WIDTH = 320;
+/** How close to the edge of the stage the panel may come, in pixels. */
+const EDGE = 8;
 
 /**
  * The most lines one sign will carry.
@@ -71,10 +73,13 @@ export function Lettering({
   const draft = useSign((s) => s.draft);
   const selected = useSign((s) => s.selected);
   const commit = useSign((s) => s.commit);
-  const outline = useOutline(draft);
-  const limits = capLimits(draft, outline);
+  const measured = useSign((s) => s.size);
+  const want = useSign((s) => s.want);
+  const limits = capLimits(draft, measured);
 
   const field = useRef<HTMLTextAreaElement | null>(null);
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null);
+  const [panelHeight, setPanelHeight] = useState<number | null>(null);
   const [facesOpen, setFacesOpen] = useState(false);
   const block = draft.block;
   const face = getFont(block.fontId);
@@ -98,6 +103,25 @@ export function Lettering({
     return () => window.removeEventListener('keydown', close);
   }, [facesOpen]);
 
+  /*
+    How tall this panel actually is.
+
+    It used to be guessed from the number of lines, and the guess knew nothing
+    about the face list — so opening the list added two hundred pixels the
+    placement had never been told about, and the last two faces fell off the
+    bottom of the screen where they could not be clicked at all. Measuring
+    costs one observer and cannot be wrong about anything, including whatever
+    this panel grows next.
+  */
+  useLayoutEffect(() => {
+    if (!panel) return;
+    // Observing delivers a first measurement of its own, so there is nothing
+    // to seed here; the estimate above covers the one frame before it arrives.
+    const observer = new ResizeObserver(() => setPanelHeight(panel.offsetHeight));
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, [panel]);
+
   // Grow the field to its content, so two lines of text look like two lines.
   useLayoutEffect(() => {
     const node = field.current;
@@ -118,19 +142,35 @@ export function Lettering({
     height: rect.height,
   };
 
-  // Below by default; above when there is no room below. Measured against the
-  // stage rather than the window, so it can never be half off the board.
-  const estimatedHeight = 104 + lines.length * 26 + (lines.length > 1 ? 40 : 0);
+  /*
+    Below the lettering by default, above it when there is no room below, and
+    pushed back inside the stage when it fits in neither — in that order,
+    because the panel covering the words being typed is the one outcome worth
+    any amount of shuffling to avoid.
+
+    Measured against the stage rather than the window, so it can never end up
+    half off the board. The estimate is only ever used for the single frame
+    before the first measurement lands.
+  */
+  const height = panelHeight ?? 104 + lines.length * 26 + (lines.length > 1 ? 40 : 0);
   const below = relative.top + relative.height + GAP;
-  const flip = below + estimatedHeight > bounds.height;
-  const top = flip ? Math.max(relative.top - estimatedHeight - GAP, 8) : below;
+  const above = relative.top - height - GAP;
+  const top =
+    below + height <= bounds.height - EDGE
+      ? below
+      : above >= EDGE
+        ? above
+        : Math.max(Math.min(below, bounds.height - height - EDGE), EDGE);
   const left = Math.min(
-    Math.max(relative.left + relative.width / 2 - WIDTH / 2, 8),
-    Math.max(bounds.width - WIDTH - 8, 8),
+    Math.max(relative.left + relative.width / 2 - WIDTH / 2, EDGE),
+    Math.max(bounds.width - WIDTH - EDGE, EDGE),
   );
 
-  const step = (by: number) =>
-    commit(patchBlock({ capHeightMm: Math.min(Math.max(size + by, limits.min), limits.max) }));
+  const step = (by: number) => {
+    const next = Math.min(Math.max(size + by, limits.min), limits.max);
+    want(next);
+    commit(patchBlock({ capHeightMm: next }));
+  };
 
   const addLine = () => {
     if (lines.length >= MAX_LINES) return;
@@ -153,6 +193,7 @@ export function Lettering({
       only from `lg` up do the measured coordinates take over.
     */
     <div
+      ref={setPanel}
       className={cx(
         'z-40 animate-[fade-in_0.16s_var(--ease-wood)]',
         // In the flow on a phone, floating over the stage from lg up.

@@ -47,9 +47,14 @@ export interface CarvingFont {
   pathFactor: number;
   /**
    * Cap height ÷ em size, used to turn a cap height in millimetres into an SVG
-   * font-size. This is a fallback: the preview measures the real ratio from the
-   * loaded font once it is available, because the exact figure differs between
-   * releases of a face and getting it wrong makes every sign the wrong size.
+   * font-size.
+   *
+   * Read out of each font file rather than estimated — `node scripts/measure-faces.mjs`
+   * reproduces the whole table. They were estimates once, and the estimates
+   * were badly wrong: Dancing Script was out by 24 %, Oswald by 11 %, Alfa Slab
+   * by 8 %. Since this is the number that turns "40 mm letters" into a font
+   * size, a sign asked for in Dancing Script was a quarter smaller than the one
+   * the customer specified.
    */
   capRatio: number;
   /**
@@ -101,7 +106,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.13,
     pathFactor: 4.4,
-    capRatio: 0.72,
+    capRatio: 0.743,
     minCapHeightMm: 12,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
@@ -118,7 +123,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.14,
     pathFactor: 4.2,
-    capRatio: 0.71,
+    capRatio: 0.711,
     minCapHeightMm: 10,
     suitability: { vcarve: 'good', pocket: 'excellent', raised: 'excellent' },
     note: {
@@ -135,7 +140,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.2,
     pathFactor: 3.9,
-    capRatio: 0.72,
+    capRatio: 0.778,
     minCapHeightMm: 8,
     suitability: { vcarve: 'good', pocket: 'excellent', raised: 'excellent' },
     note: {
@@ -152,7 +157,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.14,
     pathFactor: 3.4,
-    capRatio: 0.73,
+    capRatio: 0.81,
     minCapHeightMm: 10,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
@@ -169,7 +174,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: true,
     strokeRatio: 0.13,
     pathFactor: 3.2,
-    capRatio: 0.73,
+    capRatio: 0.7,
     minCapHeightMm: 8,
     suitability: { vcarve: 'excellent', pocket: 'excellent', raised: 'good' },
     note: {
@@ -186,7 +191,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.09,
     pathFactor: 4.5,
-    capRatio: 0.72,
+    capRatio: 0.77,
     minCapHeightMm: 15,
     suitability: { vcarve: 'excellent', pocket: 'caution', raised: 'caution' },
     note: {
@@ -203,7 +208,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.07,
     pathFactor: 5.2,
-    capRatio: 0.58,
+    capRatio: 0.72,
     minCapHeightMm: 22,
     suitability: { vcarve: 'good', pocket: 'caution', raised: 'caution' },
     note: {
@@ -220,7 +225,7 @@ export const CARVING_FONTS: CarvingFont[] = [
     capsOnly: false,
     strokeRatio: 0.045,
     pathFactor: 4.7,
-    capRatio: 0.7,
+    capRatio: 0.708,
     minCapHeightMm: 30,
     suitability: { vcarve: 'good', pocket: 'caution', raised: 'caution' },
     note: {

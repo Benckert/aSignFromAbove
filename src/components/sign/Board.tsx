@@ -8,7 +8,8 @@ import { WoodDefs } from '@/components/designer/WoodDefs';
 import { boardGuides, snapBox, type Guide } from '@/lib/sign/snap';
 import { patchBlock, useSign } from '@/lib/sign/store';
 import { safeArea } from '@/lib/sign/draft';
-import { capLimits, useOutline } from './useOutline';
+import { BoardText, isBlank } from './BoardText';
+import { capLimits, useMeasuredLettering } from './useTextBox';
 import { cx } from '@/lib/cx';
 
 /**
@@ -77,6 +78,7 @@ export function Board({
   const select = useSign((s) => s.select);
   const live = useSign((s) => s.live);
   const mark = useSign((s) => s.mark);
+  const want = useSign((s) => s.want);
 
   const uid = useId().replace(/:/g, '');
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -85,7 +87,8 @@ export function Board({
   const [readout, setReadout] = useState<string | null>(null);
 
   const wood = getWood(draft.woodId);
-  const outline = useOutline(draft);
+  const size = useSign((s) => s.size);
+
   const safe = safeArea(draft);
 
   /* ── The frame ─────────────────────────────────────────────────────── */
@@ -99,23 +102,39 @@ export function Board({
 
   /* ── Where the lettering is ────────────────────────────────────────── */
 
+  /*
+    Where to hang the text so that its box comes out centred on the block's
+    position. Zero until the first measurement, and after that a fixed property
+    of these particular glyphs at this particular size — so correcting for it
+    does not move what is being measured, and one pass settles it.
+  */
+  const anchorXMm = draft.block.xMm - (size?.offsetXMm ?? 0);
+  const anchorYMm = draft.block.yMm - (size?.offsetYMm ?? 0);
+  const measure = useMeasuredLettering(draft.block.capHeightMm, anchorXMm, anchorYMm);
+
   /**
-   * The ink box, in board millimetres.
+   * The lettering's box, in board millimetres.
    *
-   * The block stores the centre of its ink; the outline says how big that ink
-   * is. Everything else — the selection frame, the handle, what snaps to what —
-   * is derived from this one rectangle, so there is no second idea of where the
-   * text is that could disagree with the first.
+   * The block stores where its centre should be and the measurement says how
+   * big it came out, and the two meet here. Everything else — the selection
+   * frame, the handle, what snaps to what — is derived from this one rectangle,
+   * so there is no second idea of where the text is that could disagree with
+   * the first.
+   *
+   * The centre is not measured, only arranged: the anchor above is chosen so
+   * that the box lands centred on the position. That is what keeps a drag
+   * exact, because a measured centre would always be reporting the frame
+   * before last.
    */
-  const inkBox = useMemo(() => {
-    if (!outline) return null;
+  const textBox = useMemo(() => {
+    if (!size || isBlank(draft.block.text)) return null;
     return {
-      x: draft.block.xMm - outline.box.width / 2,
-      y: draft.block.yMm - outline.box.height / 2,
-      width: outline.box.width,
-      height: outline.box.height,
+      x: draft.block.xMm - size.widthMm / 2,
+      y: draft.block.yMm - size.heightMm / 2,
+      width: size.widthMm,
+      height: size.heightMm,
     };
-  }, [outline, draft.block.xMm, draft.block.yMm]);
+  }, [size, draft.block.text, draft.block.xMm, draft.block.yMm]);
 
   /**
    * Where to point when there is nothing written yet.
@@ -135,14 +154,8 @@ export function Board({
     [safe.x, safe.y, safe.width, safe.height],
   );
 
-  /** The ink when there is any, and the invitation when there is not. */
-  const frameBox = inkBox ?? placeholder;
-
-  /** Moves the outline's own origin to where the block should sit. */
-  const inkTransform =
-    inkBox && outline
-      ? `translate(${inkBox.x - outline.box.x} ${inkBox.y - outline.box.y})`
-      : undefined;
+  /** The lettering when there is any, and the invitation when there is not. */
+  const frameBox = textBox ?? placeholder;
 
   /* ── Pointer arithmetic ────────────────────────────────────────────── */
 
@@ -163,13 +176,13 @@ export function Board({
     return width > 0 ? frameW / width : 1;
   }, [frameW]);
 
-  const { min: minCapMm, max: maxCapMm } = capLimits(draft, outline);
+  const { min: minCapMm, max: maxCapMm } = capLimits(draft, size);
 
   /* ── Gestures ──────────────────────────────────────────────────────── */
 
   const startDrag = (event: React.PointerEvent, mode: Drag['mode']) => {
     const at = toBoard(event.clientX, event.clientY);
-    if (!at || !inkBox) return;
+    if (!at || !textBox) return;
     event.stopPropagation();
     (event.target as Element).setPointerCapture(event.pointerId);
     select(true);
@@ -189,7 +202,7 @@ export function Board({
 
   const onPointerMove = (event: React.PointerEvent) => {
     const gesture = drag.current;
-    if (!gesture || gesture.pointerId !== event.pointerId || !inkBox || !outline) return;
+    if (!gesture || gesture.pointerId !== event.pointerId || !textBox) return;
     const at = toBoard(event.clientX, event.clientY);
     if (!at) return;
 
@@ -202,10 +215,10 @@ export function Board({
 
     if (gesture.mode === 'move') {
       const wanted = {
-        x: at.x - gesture.grabX - inkBox.width / 2,
-        y: at.y - gesture.grabY - inkBox.height / 2,
-        width: inkBox.width,
-        height: inkBox.height,
+        x: at.x - gesture.grabX - textBox.width / 2,
+        y: at.y - gesture.grabY - textBox.height / 2,
+        width: textBox.width,
+        height: textBox.height,
       };
       const snapped = snapBox(
         wanted,
@@ -218,12 +231,12 @@ export function Board({
       // the guides are lining up — the top-left corner of a word is not a
       // number anybody is thinking about.
       setReadout(
-        `${Math.round(snapped.x + inkBox.width / 2)} × ${Math.round(snapped.y + inkBox.height / 2)} mm`,
+        `${Math.round(snapped.x + textBox.width / 2)} × ${Math.round(snapped.y + textBox.height / 2)} mm`,
       );
       live(
         patchBlock({
-          xMm: snapped.x + inkBox.width / 2,
-          yMm: snapped.y + inkBox.height / 2,
+          xMm: snapped.x + textBox.width / 2,
+          yMm: snapped.y + textBox.height / 2,
         }),
       );
       return;
@@ -237,6 +250,10 @@ export function Board({
     const capHeightMm = Math.min(Math.max(Math.round(wanted), minCapMm), maxCapMm);
     setGuides([]);
     setReadout(`${capHeightMm} mm`);
+    // Sizing by hand is a request, not just a result: let go of a long word on
+    // a small board and the letters stay where they were put, rather than
+    // springing back to a size chosen before the word was there.
+    want(capHeightMm);
     live(patchBlock({ capHeightMm }));
   };
 
@@ -329,7 +346,7 @@ export function Board({
       ? shade(wood.colour.light, 0.14)
       : shade(wood.colour.dark, -0.42);
   const outlinePath = signOutlinePath(draft.shape, draft.widthMm, draft.heightMm);
-  const handle = inkBox ? { x: inkBox.x + inkBox.width, y: inkBox.y + inkBox.height } : null;
+  const handle = textBox ? { x: textBox.x + textBox.width, y: textBox.y + textBox.height } : null;
 
   return (
     <svg
@@ -408,14 +425,15 @@ export function Board({
           fill={`url(#${uid}-vignette)`}
         />
 
-        {outline && (
-          <path
-            d={outline.d}
-            transform={inkTransform}
-            fill={carveFill}
-            filter={painted ? `url(#${uid}-painted)` : `url(#${uid}-engrave)`}
-          />
-        )}
+        <BoardText
+          block={draft.block}
+          anchorXMm={anchorXMm}
+          anchorYMm={anchorYMm}
+          textRef={measure}
+          widthMm={size?.widthMm}
+          fill={carveFill}
+          filter={painted ? `url(#${uid}-painted)` : `url(#${uid}-engrave)`}
+        />
       </g>
 
       {/*
@@ -434,7 +452,7 @@ export function Board({
 
       {/* ── What you can grab ─────────────────────────────────────────── */}
 
-      {!inkBox && (
+      {!textBox && (
         <g className="cursor-text" onPointerDown={(e) => e.stopPropagation()} onClick={onEdit}>
           <rect
             x={placeholder.x}
@@ -462,7 +480,7 @@ export function Board({
         </g>
       )}
 
-      {inkBox && (
+      {textBox && (
         <g>
           {/*
             The body of the lettering, as one target. Transparent rather than
@@ -470,10 +488,10 @@ export function Board({
             the stem of an 'l' to move a word is not a tool, it is a test.
           */}
           <rect
-            x={inkBox.x}
-            y={inkBox.y}
-            width={inkBox.width}
-            height={inkBox.height}
+            x={textBox.x}
+            y={textBox.y}
+            width={textBox.width}
+            height={textBox.height}
             fill="transparent"
             className="cursor-move"
             onPointerDown={(event) => startDrag(event, 'move')}
@@ -483,10 +501,10 @@ export function Board({
           {selected && (
             <>
               <rect
-                x={inkBox.x - 2}
-                y={inkBox.y - 2}
-                width={inkBox.width + 4}
-                height={inkBox.height + 4}
+                x={textBox.x - 2}
+                y={textBox.y - 2}
+                width={textBox.width + 4}
+                height={textBox.height + 4}
                 fill="none"
                 stroke="#c78a48"
                 strokeWidth={frameW * 0.0022}
@@ -540,10 +558,10 @@ export function Board({
         />
       ))}
 
-      {readout && inkBox && !editing && (
+      {readout && textBox && !editing && (
         <text
-          x={inkBox.x + inkBox.width / 2}
-          y={inkBox.y - 6}
+          x={textBox.x + textBox.width / 2}
+          y={textBox.y - 6}
           textAnchor="middle"
           fontSize={frameW * 0.026}
           fill="#f6f1e7"
