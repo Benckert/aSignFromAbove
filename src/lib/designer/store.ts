@@ -139,6 +139,23 @@ export const useDesigner = create<DesignerState>()(
         sides, and the designer calls rehydrate() once it has mounted.
       */
       skipHydration: true,
+
+      /*
+        A restored design goes through the same constraints as a typed one.
+
+        This is the hole that let a sign come back from storage with its
+        lettering hanging over the edges. Every action above runs `reconcile`,
+        and the claim that an impossible design cannot be reached rested on
+        that — but rehydration is not an action. It writes the stored object
+        into the store directly, so a design saved before a rule existed, or
+        saved under a rule that has since been tightened, arrived exempt from
+        both. Anything that has been away from the store and comes back is a
+        design from somewhere else, and is treated as one.
+      */
+      merge: (persisted, current) => {
+        const saved = (persisted as { design?: SignDesign } | undefined)?.design;
+        return { ...current, design: saved ? reconcile(saved) : current.design };
+      },
     },
   ),
 );

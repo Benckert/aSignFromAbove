@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getWood } from '@/config/woods';
 import { isDark, shade } from '@/lib/designer/colour';
 import { signOutlinePath } from '@/lib/designer/geometry';
@@ -45,7 +45,33 @@ interface Drag {
   moved: boolean;
 }
 
-export function Board({ className, label }: { className?: string; label: string }) {
+export interface BoardProps {
+  className?: string;
+  label: string;
+  /**
+   * Where the lettering is on screen, in client coordinates, so that the
+   * controls for it can sit beside it rather than across the room. Null when
+   * there is nothing to point at.
+   */
+  onLetteringRect?: (
+    rect: { top: number; left: number; width: number; height: number } | null,
+  ) => void;
+  /** Asked for by a double-click, or by Enter on a selected block. */
+  onEdit?: () => void;
+  /** Quietens the board's own overlays while the words are being typed. */
+  editing?: boolean;
+  /** Shown on the board when there is nothing written yet. */
+  emptyLabel?: string;
+}
+
+export function Board({
+  className,
+  label,
+  onLetteringRect,
+  onEdit,
+  editing,
+  emptyLabel = 'Klicka för att skriva',
+}: BoardProps) {
   const draft = useSign((s) => s.draft);
   const selected = useSign((s) => s.selected);
   const select = useSign((s) => s.select);
@@ -91,10 +117,32 @@ export function Board({ className, label }: { className?: string; label: string 
     };
   }, [outline, draft.block.xMm, draft.block.yMm]);
 
+  /**
+   * Where to point when there is nothing written yet.
+   *
+   * Without this an empty sign is a dead end: no ink means no box, no box
+   * means nothing to click, and nothing to click means the only way back to
+   * having text is a control that no longer exists. So an empty block still
+   * occupies a place on the board, and that place invites a click.
+   */
+  const placeholder = useMemo(
+    () => ({
+      x: safe.x + safe.width * 0.12,
+      y: safe.y + safe.height * 0.34,
+      width: safe.width * 0.76,
+      height: safe.height * 0.32,
+    }),
+    [safe.x, safe.y, safe.width, safe.height],
+  );
+
+  /** The ink when there is any, and the invitation when there is not. */
+  const frameBox = inkBox ?? placeholder;
+
   /** Moves the outline's own origin to where the block should sit. */
-  const inkTransform = inkBox && outline
-    ? `translate(${inkBox.x - outline.box.x} ${inkBox.y - outline.box.y})`
-    : undefined;
+  const inkTransform =
+    inkBox && outline
+      ? `translate(${inkBox.x - outline.box.x} ${inkBox.y - outline.box.y})`
+      : undefined;
 
   /* ── Pointer arithmetic ────────────────────────────────────────────── */
 
@@ -210,6 +258,12 @@ export function Board({ className, label }: { className?: string; label: string 
       ArrowUp: [0, -step],
       ArrowDown: [0, step],
     };
+    if (event.key === 'Enter' && onEdit) {
+      event.preventDefault();
+      onEdit();
+      return;
+    }
+
     const move = moves[event.key];
     if (!move) return;
     event.preventDefault();
@@ -218,6 +272,52 @@ export function Board({ className, label }: { className?: string; label: string 
       block: { ...d.block, xMm: d.block.xMm + move[0], yMm: d.block.yMm + move[1] },
     }));
   };
+
+  /* ── Telling the page where the lettering is ───────────────────────── */
+
+  /*
+    The floating controls need this in screen coordinates, and the only honest
+    source for that is the SVG's own matrix — the board is letterboxed inside
+    whatever space the layout gives it, so nothing about the element's own box
+    predicts where a millimetre lands. Measured after layout, and again on
+    anything that could move it.
+  */
+  const report = useCallback(() => {
+    if (!onLetteringRect) return;
+    const svg = svgRef.current;
+    const matrix = svg?.getScreenCTM();
+    if (!svg || !matrix) {
+      onLetteringRect(null);
+      return;
+    }
+    const topLeft = new DOMPoint(frameBox.x, frameBox.y).matrixTransform(matrix);
+    const bottomRight = new DOMPoint(
+      frameBox.x + frameBox.width,
+      frameBox.y + frameBox.height,
+    ).matrixTransform(matrix);
+    onLetteringRect({
+      left: topLeft.x,
+      top: topLeft.y,
+      width: bottomRight.x - topLeft.x,
+      height: bottomRight.y - topLeft.y,
+    });
+  }, [onLetteringRect, frameBox]);
+
+  useLayoutEffect(report, [report]);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const observer = new ResizeObserver(report);
+    observer.observe(svg);
+    window.addEventListener('scroll', report, { passive: true, capture: true });
+    window.addEventListener('resize', report);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', report, { capture: true });
+      window.removeEventListener('resize', report);
+    };
+  }, [report]);
 
   /* ── Drawing ───────────────────────────────────────────────────────── */
 
@@ -229,19 +329,17 @@ export function Board({ className, label }: { className?: string; label: string 
       ? shade(wood.colour.light, 0.14)
       : shade(wood.colour.dark, -0.42);
   const outlinePath = signOutlinePath(draft.shape, draft.widthMm, draft.heightMm);
-  const handle = inkBox
-    ? { x: inkBox.x + inkBox.width, y: inkBox.y + inkBox.height }
-    : null;
+  const handle = inkBox ? { x: inkBox.x + inkBox.width, y: inkBox.y + inkBox.height } : null;
 
   return (
     <svg
       ref={svgRef}
       viewBox={`${originX} ${originY} ${frameW} ${frameH}`}
       className={cx(
-        'touch-none select-none rounded-sm',
+        'touch-none rounded-sm select-none',
         // The ring is drawn inside the frame rather than around it: an outline
         // on a full-width board reads as a page border, not as focus.
-        'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-oak',
+        'focus-visible:outline-oak outline-none focus-visible:outline-2 focus-visible:-outline-offset-2',
         className,
       )}
       /*
@@ -287,9 +385,21 @@ export function Board({ className, label }: { className?: string; label: string 
           opacity={0.16 + wood.grainStrength * 0.4}
         />
         {(draft.finish === 'oil' || draft.finish === 'oilPaint') && (
-          <rect x={0} y={0} width={draft.widthMm} height={draft.heightMm} fill={`url(#${uid}-oil)`} />
+          <rect
+            x={0}
+            y={0}
+            width={draft.widthMm}
+            height={draft.heightMm}
+            fill={`url(#${uid}-oil)`}
+          />
         )}
-        <rect x={0} y={0} width={draft.widthMm} height={draft.heightMm} fill={`url(#${uid}-light)`} />
+        <rect
+          x={0}
+          y={0}
+          width={draft.widthMm}
+          height={draft.heightMm}
+          fill={`url(#${uid}-light)`}
+        />
         <rect
           x={0}
           y={0}
@@ -318,6 +428,34 @@ export function Board({ className, label }: { className?: string; label: string 
 
       {/* ── What you can grab ─────────────────────────────────────────── */}
 
+      {!inkBox && (
+        <g className="cursor-text" onPointerDown={(e) => e.stopPropagation()} onClick={onEdit}>
+          <rect
+            x={placeholder.x}
+            y={placeholder.y}
+            width={placeholder.width}
+            height={placeholder.height}
+            rx={4}
+            fill="transparent"
+            stroke="#c78a48"
+            strokeWidth={frameW * 0.0025}
+            strokeDasharray={`${frameW * 0.012} ${frameW * 0.009}`}
+            opacity={0.65}
+          />
+          <text
+            x={placeholder.x + placeholder.width / 2}
+            y={placeholder.y + placeholder.height / 2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={frameW * 0.032}
+            fill="#e0a869"
+            pointerEvents="none"
+          >
+            {emptyLabel}
+          </text>
+        </g>
+      )}
+
       {inkBox && (
         <g>
           {/*
@@ -333,19 +471,20 @@ export function Board({ className, label }: { className?: string; label: string 
             fill="transparent"
             className="cursor-move"
             onPointerDown={(event) => startDrag(event, 'move')}
+            onDoubleClick={onEdit}
           />
 
           {selected && (
             <>
               <rect
-                x={inkBox.x}
-                y={inkBox.y}
-                width={inkBox.width}
-                height={inkBox.height}
+                x={inkBox.x - 2}
+                y={inkBox.y - 2}
+                width={inkBox.width + 4}
+                height={inkBox.height + 4}
                 fill="none"
                 stroke="#c78a48"
-                strokeWidth={0.7}
-                strokeDasharray="4 3"
+                strokeWidth={frameW * 0.0022}
+                opacity={editing ? 0.9 : 0.6}
                 pointerEvents="none"
               />
               {handle && (
@@ -395,7 +534,7 @@ export function Board({ className, label }: { className?: string; label: string 
         />
       ))}
 
-      {readout && inkBox && (
+      {readout && inkBox && !editing && (
         <text
           x={inkBox.x + inkBox.width / 2}
           y={inkBox.y - 6}

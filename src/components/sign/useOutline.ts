@@ -5,6 +5,7 @@ import { getFont } from '@/config/carving-fonts';
 import { loadedFace, loadFace } from '@/lib/sign/faces';
 import { outlineBlock, type Outline } from '@/lib/sign/outline';
 import { safeArea, type Draft } from '@/lib/sign/draft';
+import { useSign } from '@/lib/sign/store';
 
 /** Smallest letters offered, whatever the face says. */
 export const MIN_CAP_MM = 8;
@@ -87,4 +88,51 @@ export function capLimits(draft: Draft, outline: Outline | null): CapLimits {
   const safe = safeArea(draft);
   const fit = Math.min(safe.width / outline.box.width, safe.height / outline.box.height);
   return { min, max: Math.max(Math.floor(draft.block.capHeightMm * fit), min) };
+}
+
+/**
+ * Keeps the lettering inside a board that has changed underneath it.
+ *
+ * Choosing a smaller board, or a shape that gives up more of its corners, does
+ * not touch the lettering — so without this the text stays exactly as large and
+ * exactly where it was, and hangs over the edge. That is the failure the old
+ * designer shipped twice, in two different disguises, and the cause both times
+ * was the same: a rule applied where a value is entered rather than wherever
+ * the value can become wrong.
+ *
+ * So it is applied here, against whatever the board currently is. Shrinking the
+ * letters can only loosen the constraint and moving them cannot tighten it, so
+ * one pass settles it and there is no loop to guard against.
+ */
+export function useFitLettering(draft: Draft, outline: Outline | null): void {
+  const { max } = capLimits(draft, outline);
+  const capHeightMm = draft.block.capHeightMm;
+
+  useEffect(() => {
+    if (!outline) return;
+    const safe = safeArea(draft);
+    const tooBig = capHeightMm > max;
+
+    // Recomputed at the size it is about to become, so position and size are
+    // not corrected against two different pictures of the same block.
+    const scale = tooBig ? max / capHeightMm : 1;
+    const half = { x: (outline.box.width * scale) / 2, y: (outline.box.height * scale) / 2 };
+    const x = clamp(draft.block.xMm, safe.x + half.x, safe.x + safe.width - half.x);
+    const y = clamp(draft.block.yMm, safe.y + half.y, safe.y + safe.height - half.y);
+
+    if (!tooBig && x === draft.block.xMm && y === draft.block.yMm) return;
+
+    useSign.getState().live((current) => ({
+      ...current,
+      block: { ...current.block, capHeightMm: tooBig ? max : capHeightMm, xMm: x, yMm: y },
+    }));
+    // The draft is read through the values that can make it wrong; listing the
+    // whole object would re-run this on every keystroke for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [max, capHeightMm, outline, draft.widthMm, draft.heightMm, draft.block.xMm, draft.block.yMm]);
+}
+
+/** Centres the value when the box is wider than the room it has. */
+function clamp(value: number, low: number, high: number): number {
+  return low > high ? (low + high) / 2 : Math.min(Math.max(value, low), high);
 }

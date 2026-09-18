@@ -79,23 +79,27 @@ export function defaultDraft(): Draft {
 }
 
 /**
- * The margin the lettering is kept inside, in mm.
+ * The part of the board the lettering may occupy.
  *
- * A plain proportional inset for now, where the old designer computed one from
- * the decoration. This designer has no decoration yet; when it does, this is
- * the single place that has to learn about it.
+ * Inset by a proportion of the board, and by more where the shape gives its
+ * corners away: a rectangle keeps all of its area, an arch loses the sweep
+ * across its top, and an oval has no corners at all, so a word that fits the
+ * bounding box of an ellipse still runs off the ellipse. The arch is taken in
+ * further at the top than the bottom for the same reason.
+ *
+ * When this designer grows a carved border, this is the one function that has
+ * to learn about it.
  */
-export function safeInsetMm(draft: Draft): number {
-  return Math.max(Math.min(draft.widthMm, draft.heightMm) * 0.07, 8);
-}
-
 export function safeArea(draft: Draft) {
-  const inset = safeInsetMm(draft);
+  const ratio = draft.shape === 'oval' ? 0.13 : draft.shape === 'arch' ? 0.1 : 0.07;
+  const x = Math.max(draft.widthMm * ratio, 8);
+  const y = Math.max(draft.heightMm * ratio, 8);
+  const topExtra = draft.shape === 'arch' ? draft.heightMm * 0.07 : 0;
   return {
-    x: inset,
-    y: inset,
-    width: draft.widthMm - inset * 2,
-    height: draft.heightMm - inset * 2,
+    x,
+    y: y + topExtra,
+    width: draft.widthMm - x * 2,
+    height: draft.heightMm - y * 2 - topExtra,
   };
 }
 

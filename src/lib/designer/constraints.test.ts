@@ -13,6 +13,7 @@ import {
 import { anchorWithin, blockBox, decorationDepthMm, safeArea } from './geometry';
 import { defaultDesign, makeTextBlock, PRESETS } from './defaults';
 import { getFont } from '@/config/carving-fonts';
+import type { SignDesign } from './types';
 import { BITS, MACHINE } from '@/config/router-profile';
 import { WOODS } from '@/config/woods';
 
@@ -439,5 +440,41 @@ describe('isOrderable', () => {
         },
       }),
     ).toBe(true);
+  });
+});
+
+describe('a design coming back from storage', () => {
+  it('is reconciled like any other', () => {
+    /*
+      The hole that let a saved sign come back with its lettering over the
+      edges. Every action in the store reconciles, but rehydration is not an
+      action — it writes the stored object in directly — so a design saved
+      under a looser rule returned exempt from the tighter one.
+    */
+    const stale: SignDesign = {
+      ...base(),
+      widthMm: 400,
+      heightMm: 220,
+      texts: [
+        makeTextBlock({ content: 'BJÖRKHAGA', capHeightMm: 120, fontId: 'playfair' }),
+        makeTextBlock({ content: 'SEDAN 1953', capHeightMm: 90, y: 0.7 }),
+      ],
+    };
+
+    const fixed = reconcile(stale);
+    const area = safeArea(fixed.shape, fixed.widthMm, fixed.heightMm, decorationDepthMm(fixed.decoration));
+
+    for (const block of fixed.texts) {
+      const box = blockBox({
+        wrap: block.wrap,
+        capHeightMm: block.capHeightMm,
+        lineHeight: block.lineHeight,
+        lineCount: 1,
+        curvature: block.curvature,
+        circleRadiusMm: block.circleRadiusMm,
+        availableWidthMm: area.width,
+      });
+      expect(box.up + box.down).toBeLessThanOrEqual(area.height + 0.1);
+    }
   });
 });
