@@ -19,8 +19,12 @@ declare module 'opentype.js' {
   }
 
   export class Path {
-    /** SVG path data. `decimals` controls rounding. */
-    toPathData(decimals?: number): string;
+    /**
+     * The commands making up the path. Read directly, because this project
+     * writes its own path data — see `toPathData` in lib/sign/outline.ts for
+     * the bug in the bundled serialiser that made that necessary.
+     */
+    commands: unknown[];
     /** Smallest box containing the path. Empty paths return all zeroes. */
     getBoundingBox(): BoundingBox;
     /** Appends another path's commands to this one. */

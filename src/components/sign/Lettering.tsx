@@ -1,7 +1,16 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Check, Minus, Plus, Type } from 'lucide-react';
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Check,
+  CornerDownLeft,
+  Minus,
+  Plus,
+  Type,
+} from 'lucide-react';
 import { CARVING_FONTS, getFont } from '@/config/carving-fonts';
 import { patchBlock, useSign } from '@/lib/sign/store';
 import { capLimits, useOutline } from './useOutline';
@@ -36,6 +45,16 @@ export interface Rect {
 const GAP = 12;
 const WIDTH = 320;
 
+/**
+ * The most lines one sign will carry.
+ *
+ * Four is where a carved sign stops being a sign: past it the lettering has to
+ * shrink so far to fit the board that it reads as a paragraph cut into wood,
+ * and anyone who genuinely needs that is describing something the enquiry form
+ * handles better than this tool does.
+ */
+const MAX_LINES = 4;
+
 export function Lettering({
   rect,
   stage,
@@ -60,6 +79,7 @@ export function Lettering({
   const block = draft.block;
   const face = getFont(block.fontId);
   const size = Math.min(Math.max(block.capHeightMm, limits.min), limits.max);
+  const lines = block.text.split('\n');
 
   // Focus follows the intent to edit, and selects what is there so that typing
   // replaces the old words rather than appending to them.
@@ -100,7 +120,7 @@ export function Lettering({
 
   // Below by default; above when there is no room below. Measured against the
   // stage rather than the window, so it can never be half off the board.
-  const estimatedHeight = editing ? 168 : 132;
+  const estimatedHeight = 104 + lines.length * 26 + (lines.length > 1 ? 40 : 0);
   const below = relative.top + relative.height + GAP;
   const flip = below + estimatedHeight > bounds.height;
   const top = flip ? Math.max(relative.top - estimatedHeight - GAP, 8) : below;
@@ -111,6 +131,19 @@ export function Lettering({
 
   const step = (by: number) =>
     commit(patchBlock({ capHeightMm: Math.min(Math.max(size + by, limits.min), limits.max) }));
+
+  const addLine = () => {
+    if (lines.length >= MAX_LINES) return;
+    commit(patchBlock({ text: `${block.text}\n` }));
+    onEditingChange(true);
+    // Put the caret on the new line rather than wherever it happened to be.
+    requestAnimationFrame(() => {
+      const node = field.current;
+      if (!node) return;
+      node.focus();
+      node.setSelectionRange(node.value.length, node.value.length);
+    });
+  };
 
   return (
     /*
@@ -142,12 +175,11 @@ export function Lettering({
         onFocus={() => onEditingChange(true)}
         onBlur={() => onEditingChange(false)}
         onKeyDown={(e) => {
-          // Escape hands the board back; shift-enter is how you get a second line.
+          // Escape hands the board back. Enter does what Enter does in any
+          // other text box — it starts a line — until the sign cannot carry
+          // another one.
           if (e.key === 'Escape') e.currentTarget.blur();
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            e.currentTarget.blur();
-          }
+          if (e.key === 'Enter' && lines.length >= MAX_LINES) e.preventDefault();
         }}
         rows={1}
         spellCheck={false}
@@ -192,6 +224,60 @@ export function Lettering({
             <Plus size={13} aria-hidden />
           </Stepper>
         </div>
+      </div>
+
+      {/*
+        A second line is one of the two or three things a sign actually needs —
+        a name and a year, a name and a family. Pressing Enter in a box nobody
+        has told you is multi-line is not a way of offering it.
+      */}
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={addLine}
+          disabled={lines.length >= MAX_LINES}
+          className={cx(
+            'border-rule text-ink-2 hover:border-rule-strong hover:text-ink flex items-center gap-1.5',
+            'rounded-sm border px-2.5 py-1.5 text-[0.75rem] transition',
+            'disabled:hover:border-rule disabled:hover:text-ink-2 disabled:opacity-40',
+          )}
+        >
+          <CornerDownLeft size={12} aria-hidden />
+          Ny rad
+        </button>
+
+        {lines.length > 1 && (
+          <div
+            role="radiogroup"
+            aria-label="Justering"
+            className="border-rule ml-auto flex shrink-0 items-center rounded-sm border"
+          >
+            {(
+              [
+                ['left', 'Vänster', AlignLeft],
+                ['center', 'Centrerad', AlignCenter],
+                ['right', 'Höger', AlignRight],
+              ] as const
+            ).map(([value, label, Icon]) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={block.align === value}
+                aria-label={label}
+                onClick={() => commit(patchBlock({ align: value }))}
+                className={cx(
+                  'grid h-8 w-8 place-items-center transition first:rounded-l-sm last:rounded-r-sm',
+                  block.align === value
+                    ? 'bg-surface-3 text-ink'
+                    : 'text-ink-3 hover:bg-surface-2 hover:text-ink',
+                )}
+              >
+                <Icon size={13} aria-hidden />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {facesOpen && (

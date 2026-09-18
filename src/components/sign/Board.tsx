@@ -418,7 +418,13 @@ export function Board({
         )}
       </g>
 
+      {/*
+        The hairline round the blank, and the thing the page measures to find
+        where the board actually is. The SVG is letterboxed inside whatever box
+        the layout gives it, so the element's own rectangle is not the board's.
+      */}
       <path
+        data-board=""
         d={outlinePath}
         fill="none"
         stroke={shade(wood.colour.dark, -0.35)}

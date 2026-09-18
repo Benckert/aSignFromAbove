@@ -142,9 +142,81 @@ export function outlineBlock(font: Font, request: LineRequest): Outline | null {
 
   const b = block.getBoundingBox();
   return {
-    d: block.toPathData(2),
+    d: toPathData(block, 3),
     box: { x: b.x1, y: b.y1, width: b.x2 - b.x1, height: b.y2 - b.y1 },
   };
+}
+
+/**
+ * Writes a path out as SVG path data.
+ *
+ * opentype.js has a `toPathData` of its own and this does not use it, for a
+ * reason worth recording rather than a preference. Its number formatter rounds
+ * by building a string:
+ *
+ *     +(Math.round(decimalPart + 'e+' + places) + 'e-' + places)
+ *
+ * which works until `decimalPart` is small enough that JavaScript prints it in
+ * exponential form — anything under 1e-6. Then the concatenation reads
+ * "7.1054e-15e+2", which is not a number, and the coordinate comes out as the
+ * literal text NaN in the middle of the path. Any coordinate landing a hair
+ * above a whole millimetre hits it, so whether a sign renders depends on
+ * whether the arithmetic at that particular size happens to produce one:
+ * BLALSLE in Cinzel lost four letters at 48 mm, six at 50 mm, and was perfect
+ * at 51 mm. The sweep in outline.test.ts is there to make sure nothing of the
+ * sort can return unnoticed.
+ *
+ * Closing each contour is the other difference. `Glyph.getPath` drops every Z
+ * unless the path is being stroked, which fill hides and a cutting path would
+ * not: a glyph outline is a set of closed contours, and it should say so.
+ */
+export function toPathData(path: Path, decimals: number): string {
+  const parts: string[] = [];
+  let open = false;
+
+  const n = (value: number) => {
+    const rounded = Number(value.toFixed(decimals));
+    // Negative zero is valid in SVG and noise in a diff.
+    return Object.is(rounded, -0) ? '0' : String(rounded);
+  };
+
+  for (const command of (path as unknown as { commands: PathCommand[] }).commands) {
+    switch (command.type) {
+      case 'M':
+        if (open) parts.push('Z');
+        open = true;
+        parts.push(`M${n(command.x!)} ${n(command.y!)}`);
+        break;
+      case 'L':
+        parts.push(`L${n(command.x!)} ${n(command.y!)}`);
+        break;
+      case 'Q':
+        parts.push(`Q${n(command.x1!)} ${n(command.y1!)} ${n(command.x!)} ${n(command.y!)}`);
+        break;
+      case 'C':
+        parts.push(
+          `C${n(command.x1!)} ${n(command.y1!)} ${n(command.x2!)} ${n(command.y2!)}` +
+            ` ${n(command.x!)} ${n(command.y!)}`,
+        );
+        break;
+      case 'Z':
+        parts.push('Z');
+        open = false;
+        break;
+    }
+  }
+  if (open) parts.push('Z');
+  return parts.join('');
+}
+
+interface PathCommand {
+  type: 'M' | 'L' | 'Q' | 'C' | 'Z';
+  x?: number;
+  y?: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
 }
 
 /**

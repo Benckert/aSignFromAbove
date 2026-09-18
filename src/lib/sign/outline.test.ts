@@ -211,3 +211,42 @@ describe('toLines', () => {
     expect(toLines('a')).toEqual(['a']);
   });
 });
+
+describe('the path data itself', () => {
+  /*
+    The sweep that would have caught the worst bug in this module.
+
+    opentype's own serialiser emitted the literal text NaN for any coordinate
+    that landed within a millionth of a whole number, so whether a sign drew
+    at all depended on the arithmetic at that exact size. It was invisible in
+    every test that checked a bounding box, because the boxes were perfectly
+    correct — only the string handed to the browser was broken.
+  */
+  it('is finite at every size, in every face', () => {
+    const broken: string[] = [];
+    for (const font of CARVING_FONTS) {
+      for (let cap = 8; cap <= 120; cap += 1) {
+        const out = block(font.id, 'Blalsle ÅÄÖ 1953', cap);
+        if (!out || /NaN|Infinity|undefined|e[+-]/i.test(out.d)) {
+          broken.push(`${font.id} at ${cap} mm`);
+        }
+      }
+    }
+    expect(broken).toEqual([]);
+  });
+
+  it('closes every contour it opens', () => {
+    // A glyph is a set of closed contours. Fill hides an unclosed one; a
+    // cutting path would not.
+    const out = block('cinzel', 'BJÖRKHAGA', 40)!;
+    expect((out.d.match(/M/g) ?? []).length).toBe((out.d.match(/Z/g) ?? []).length);
+    expect(out.d.endsWith('Z')).toBe(true);
+  });
+
+  it('keeps enough precision to place a letter', () => {
+    // Three decimals of a millimetre is a micron: far finer than the machine,
+    // and fine enough that rounding never shifts a glyph visibly.
+    const small = block('oswald', 'H', 8)!;
+    expect(small.d).toMatch(/\d\.\d/);
+  });
+});

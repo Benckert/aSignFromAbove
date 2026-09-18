@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { ArrowRight, Redo2, RotateCcw, Undo2 } from 'lucide-react';
 import { getWood } from '@/config/woods';
@@ -67,6 +67,55 @@ export function SignDesigner() {
     setEditing(true);
   }, [select]);
 
+  const priceRef = useRef<HTMLDivElement | null>(null);
+  const [metrics, setMetrics] = useState({ footer: 0, runOff: 0 });
+
+  /*
+    Two measurements the layout cannot express on its own.
+
+    `footer` is how tall the site footer is. The row below lends the sticky sign
+    that much extra travel and takes the same amount back with a negative
+    margin, so the sign holds its place to the last pixel of the page instead of
+    sliding up as the footer arrives. It was a hard-coded 19rem until now, which
+    was twelve pixels short of the real footer — and twelve pixels of drift at
+    the very end of the scroll is exactly the sort of thing you feel without
+    being able to name.
+
+    `runOff` is the space after the price so that, when the column bottoms out,
+    the summary comes to rest level with the top of the board rather than at the
+    bottom of the window. Measured from the board's own outline, because the
+    drawing is letterboxed inside its box and the two tops are not the same.
+  */
+  useEffect(() => {
+    const measure = () => {
+      const footer = document.querySelector('footer');
+      const board = document.querySelector('[data-board]');
+      const price = priceRef.current;
+      if (!footer || !board || !price) return;
+      const boardTop = board.getBoundingClientRect().top;
+      const footerHeight = footer.getBoundingClientRect().height;
+      // At the end of the scroll the column's last visible pixel is the top of
+      // the footer, not the bottom of the window, so the footer comes out of
+      // the sum as well as the board and the summary itself.
+      const visible = window.innerHeight - footerHeight;
+      setMetrics({
+        footer: Math.round(footerHeight),
+        runOff: Math.max(Math.round(visible - boardTop - price.getBoundingClientRect().height), 0),
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    const footer = document.querySelector('footer');
+    if (footer) observer.observe(footer);
+    if (priceRef.current) observer.observe(priceRef.current);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [draft.widthMm, draft.heightMm, draft.shape]);
+
   // Undo belongs to the page: a change made in the panel has to be undoable
   // from wherever the focus happens to be.
   useEffect(() => {
@@ -84,7 +133,15 @@ export function SignDesigner() {
   }, [undo, redo]);
 
   return (
-    <div className={cx('lg:flex lg:items-start', 'lg:-mb-[19rem]')}>
+    <div
+      className={cx('lg:flex lg:items-start', 'lg:mb-[calc(var(--footer-h)*-1)]')}
+      style={
+        {
+          '--footer-h': `${metrics.footer}px`,
+          '--run-off': `${metrics.runOff}px`,
+        } as React.CSSProperties
+      }
+    >
       {/* ── The sign ───────────────────────────────────────────────────── */}
 
       <section
@@ -158,72 +215,96 @@ export function SignDesigner() {
       <section
         className={cx(
           'flex flex-col lg:w-[25rem] lg:shrink-0 xl:w-[27rem]',
-          'lg:min-h-[calc(100dvh+15rem)] lg:pb-[19rem]',
+          // Tall enough that this column, and not the sign, sets the row's
+          // height — otherwise pulling the footer up would drag it over the sign.
+          'lg:min-h-[calc(100dvh+var(--footer-h))] lg:pb-[var(--footer-h)]',
         )}
       >
-        <div className="flex flex-col gap-7 px-4 pt-6 pb-6 lg:px-6">
-          <SizeChoice
-            widthMm={draft.widthMm}
-            heightMm={draft.heightMm}
-            /*
+        {/*
+          Everything down to the summary shares one tall box, because a sticky
+          element may only move inside its own container — wrapped snugly round
+          the price it would have had nowhere to travel and would have scrolled
+          away like any other block.
+        */}
+        <div className="flex flex-1 flex-col">
+          <div className="flex flex-col gap-7 px-4 pt-6 pb-6 lg:px-6">
+            <SizeChoice
+              widthMm={draft.widthMm}
+              heightMm={draft.heightMm}
+              /*
               Changing the board carries the lettering with it, in proportion.
               Keeping the millimetres instead would leave a line that sat in the
               middle of a 220 mm board sitting low on a 150 mm one, for no
               reason the person choosing a smaller board would recognise.
             */
-            onChange={(size) =>
-              commit((d) => ({
-                ...d,
-                ...size,
-                block: {
-                  ...d.block,
-                  xMm: (d.block.xMm / d.widthMm) * size.widthMm,
-                  yMm: (d.block.yMm / d.heightMm) * size.heightMm,
-                },
-              }))
-            }
-          />
-          <ShapeChoice value={draft.shape} onChange={(shape) => commit((d) => ({ ...d, shape }))} />
-          <WoodChoice
-            value={draft.woodId}
-            locale={locale}
-            onChange={(woodId) => commit((d) => ({ ...d, woodId: woodId as WoodId }))}
-          />
-          <CutChoice
-            value={draft.method}
-            onChange={(method) => commit((d) => ({ ...d, method }))}
-          />
-          <FinishChoice
-            value={draft.finish}
-            onChange={(finish) => commit((d) => ({ ...d, finish }))}
-          />
-        </div>
+              onChange={(size) =>
+                commit((d) => ({
+                  ...d,
+                  ...size,
+                  block: {
+                    ...d.block,
+                    xMm: (d.block.xMm / d.widthMm) * size.widthMm,
+                    yMm: (d.block.yMm / d.heightMm) * size.heightMm,
+                  },
+                }))
+              }
+            />
+            <ShapeChoice
+              value={draft.shape}
+              onChange={(shape) => commit((d) => ({ ...d, shape }))}
+            />
+            <WoodChoice
+              value={draft.woodId}
+              locale={locale}
+              onChange={(woodId) => commit((d) => ({ ...d, woodId: woodId as WoodId }))}
+            />
+            <CutChoice
+              value={draft.method}
+              onChange={(method) => commit((d) => ({ ...d, method }))}
+            />
+            <FinishChoice
+              value={draft.finish}
+              onChange={(finish) => commit((d) => ({ ...d, finish }))}
+            />
+          </div>
 
-        {/*
-          The price, pinned to the bottom of the window for as long as the
-          column is on screen. Sticky rather than fixed so it belongs to this
-          column and gives way at the end of the page instead of hanging over
-          the footer.
+          {/*
+          The price rides the bottom of the window while there is column left,
+          and then comes to rest level with the top of the board.
+
+          That resting place is what the run-off underneath buys. A sticky
+          element stops sticking when its own container's bottom reaches it, so
+          ending this container a board's-height early — rather than flush with
+          the column — lands the summary beside the sign at the end of the
+          scroll instead of in the corner of the screen.
         */}
-        <div className="border-rule bg-surface/95 sticky bottom-0 z-20 mt-auto border-t backdrop-blur-md">
-          <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
-            <span className="min-w-0 flex-1">
-              <span className="spec block leading-none">Att betala · inkl. moms</span>
-              <span className="display text-ink mt-1 block truncate text-[1.5rem] leading-none">
-                {formatOre(price.totalOre, locale)}
+          <div
+            data-price=""
+            ref={priceRef}
+            className="border-rule bg-surface/95 sticky bottom-0 z-20 mt-auto border-t backdrop-blur-md"
+          >
+            <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
+              <span className="min-w-0 flex-1">
+                <span className="spec block leading-none">Att betala · inkl. moms</span>
+                <span className="display text-ink mt-1 block truncate text-[1.5rem] leading-none">
+                  {formatOre(price.totalOre, locale)}
+                </span>
               </span>
-            </span>
-            {empty ? (
-              <span className="border-rule text-ink-3 inline-flex h-11 shrink-0 items-center rounded-sm border px-4 text-center text-[0.8125rem]">
-                Skriv något först
-              </span>
-            ) : (
-              <ButtonLink href="/designer/order" variant="primary" className="h-11 shrink-0">
-                Gå vidare <ArrowRight size={16} aria-hidden />
-              </ButtonLink>
-            )}
+              {empty ? (
+                <span className="border-rule text-ink-3 inline-flex h-11 shrink-0 items-center rounded-sm border px-4 text-center text-[0.8125rem]">
+                  Skriv något först
+                </span>
+              ) : (
+                <ButtonLink href="/designer/order" variant="primary" className="h-11 shrink-0">
+                  Gå vidare <ArrowRight size={16} aria-hidden />
+                </ButtonLink>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* The space the summary comes to rest above. */}
+        <div aria-hidden="true" className="hidden lg:block lg:h-[var(--run-off)]" />
       </section>
     </div>
   );
