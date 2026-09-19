@@ -56,34 +56,17 @@
     "restoredAction": "Start over instead",
     "preview": {
       "label": "Preview of the sign",
-      "aria": "Sign in {wood}, {width} by {height} millimetres",
-      "download": "Download image",
-      "downloadSvg": "Download SVG",
-      "downloading": "Preparing …",
-      "downloadFailed": "The image could not be generated. The written specification goes with the order regardless.",
-      "zoom": "View larger",
-      "actual": "Actual size",
-      "actualHint": "Compare it against something to hand",
-      "close": "Close"
+      "aria": "Sign in {wood}, {width} by {height} millimetres"
     },
     "sections": {
       "shape": "Size and shape",
-      "wood": "Timber",
-      "text": "Lettering",
-      "carve": "Cut and finish",
-      "decor": "Decoration",
-      "artwork": "Your own artwork",
-      "price": "Price"
+      "wood": "Timber"
     },
     "size": {
       "width": "Width",
       "height": "Height",
-      "thickness": "Thickness",
-      "presets": "Common sizes",
       "shape": "Shape",
-      "edge": "Edge",
-      "dimensions": "Dimensions",
-      "form": "Shape and edge"
+      "edge": "Edge"
     },
     "shapes": {
       "rect": "Square-cut",
@@ -97,39 +80,10 @@
       "roundover": "Rounded"
     },
     "wood": {
-      "label": "Choose a timber",
-      "hardness": "Hardness",
-      "pricePerDm2": "Material cost"
+      "label": "Choose a timber"
     },
     "text": {
-      "blockLabel": "Line {n}",
-      "content": "Text",
-      "placeholder": "Type something …",
-      "font": "Face",
-      "capHeight": "Text size",
-      "lineHeight": "Line spacing",
-      "letterSpacing": "Letter spacing",
-      "align": "Alignment",
-      "wrap": "How the text runs",
-      "curvature": "How much it bends",
-      "radius": "Radius",
-      "position": "Placement",
-      "positionX": "Across",
-      "positionY": "Up and down",
-      "add": "Add a line",
-      "remove": "Remove",
-      "removed": "The line was removed.",
-      "undo": "Undo",
-      "edit": "Edit",
-      "done": "Done",
-      "empty": "Empty line",
-      "capsOnly": "This face has capitals only."
-    },
-    "wraps": {
-      "straight": "Straight",
-      "arcUp": "Arch up",
-      "arcDown": "Arch down",
-      "circle": "Circle"
+      "align": "Alignment"
     },
     "aligns": {
       "left": "Left",
@@ -139,7 +93,6 @@
     "carve": {
       "method": "How the text is cut",
       "finish": "Finish",
-      "paintColour": "Colour in the letters",
       "hanging": "How it goes up",
       "methods": {
         "vcarve": "Carved",
@@ -160,48 +113,12 @@
         "keyhole": "Keyhole slots",
         "rope": "Rope",
         "posts": "Posts"
-      },
-      "section": "Cut and finish"
+      }
     },
     "decor": {
-      "border": "Border",
-      "inset": "Distance from the edge",
-      "corners": "Corners",
-      "borders": {
-        "none": "None",
-        "line": "Single line",
-        "double": "Double line",
-        "inset": "Recessed panel",
-        "notch": "Broken"
-      },
-      "cornerStyles": {
-        "none": "None",
-        "diamond": "Diamond",
-        "leaf": "Leaf",
-        "drilled": "Drilled dots"
-      },
-      "section": "Border and corners"
-    },
-    "artwork": {
-      "title": "Your own artwork",
-      "lede": "An SVG file can be cut in as a shape in the timber.",
-      "upload": "Choose an SVG file",
-      "replace": "Replace file",
-      "remove": "Remove artwork",
-      "width": "Width",
-      "rotation": "Rotation",
-      "positionX": "From the left",
-      "positionY": "From the top",
-      "errors": {
-        "tooLarge": "That file is too big. Keep it under 512 kB — a clean vector file is almost always far smaller.",
-        "notSvg": "That does not look like an SVG file.",
-        "unparseable": "The file could not be read. Try exporting it again from your drawing program.",
-        "empty": "There is no cuttable shape in that file. Text inside an SVG has to be converted to paths first."
-      },
-      "none": "None"
+      "border": "Border"
     },
     "price": {
-      "title": "Price",
       "total": "Total",
       "incVat": "incl. VAT",
       "exVat": "excl. VAT",
@@ -221,24 +138,45 @@
     },
     "order": {
       "cta": "Continue",
-      "ctaBlocked": "Sort out the points above first",
-      "reassure": "Next comes your contact details. It is still not an order.",
       "ctaEmpty": "Write something first"
     },
-    "reset": "Start over",
-    "resetConfirm": "Start again from scratch? What you have drawn will be lost.",
-    "mobile": {
-      "edit": "Adjust",
-      "close": "Done",
-      "priceLabel": "Price"
+    "board": {
+      "empty": "Click to write",
+      "hintEmpty": "Click the sign to write on it",
+      "hintIdle": "Click a line of text to change it",
+      "hintSelected": "Drag to move · the corner resizes",
+      "addBlock": "Add text",
+      "blockFull": "There is no room for another line",
+      "spec": "{width} × {height} mm · {wood}"
     },
-    "steps": {
-      "text": "Text",
-      "shape": "Size",
-      "material": "Wood and finish",
-      "detail": "Details"
+    "block": {
+      "label": "Text on the sign",
+      "placeholder": "What should it say?",
+      "remove": "Remove this text",
+      "newLine": "New line",
+      "smaller": "Smaller",
+      "larger": "Larger",
+      "faceTooWide": "The text will not fit on the sign in this face",
+      "choiceBlocked": "The text will not fit on a sign like that"
     },
-    "examples": "Examples:"
+    "presets": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "wide": "Wide",
+      "custom": "Custom size",
+      "standard": "Standard sizes"
+    },
+    "actions": {
+      "undo": "Undo",
+      "redo": "Redo",
+      "reset": "Start over"
+    },
+    "borders": {
+      "none": "None",
+      "line": "Single",
+      "double": "Double"
+    }
   },
   "order": {
     "title": "Send the drawing",

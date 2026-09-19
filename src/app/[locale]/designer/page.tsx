@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Designer } from '@/components/designer/Designer';
+import { SignDesigner } from '@/components/sign/SignDesigner';
 
 export async function generateMetadata({
   params,
@@ -15,5 +15,5 @@ export async function generateMetadata({
 export default async function DesignerPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <Designer />;
+  return <SignDesigner />;
 }

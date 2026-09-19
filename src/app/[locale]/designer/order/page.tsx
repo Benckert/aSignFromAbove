@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { OrderForm } from '@/components/designer/OrderForm';
+import { OrderForm } from '@/components/sign/OrderForm';
 
 export async function generateMetadata({
   params,

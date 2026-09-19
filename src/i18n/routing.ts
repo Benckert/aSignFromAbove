@@ -26,18 +26,6 @@ export const routing = defineRouting({
       sv: '/designa-skylt/bestall',
       en: '/design-your-sign/order',
     },
-    /*
-      The rebuilt designer, running alongside the one it is meant to replace.
-
-      Kept at its own address rather than behind a flag so that the two can be
-      opened side by side and compared on the same sign. It is not in the
-      sitemap and it asks not to be indexed; when it wins, it takes over
-      '/designer' and this entry goes.
-    */
-    '/designer/next': {
-      sv: '/designa-skylt/ny',
-      en: '/design-your-sign/new',
-    },
     '/furniture': {
       sv: '/mobler',
       en: '/furniture',

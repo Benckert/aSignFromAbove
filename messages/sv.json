@@ -56,34 +56,17 @@
     "restoredAction": "Börja om istället",
     "preview": {
       "label": "Förhandsvisning av skylten",
-      "aria": "Skylt i {wood}, {width} × {height} millimeter",
-      "download": "Ladda ner bild",
-      "downloadSvg": "Ladda ner SVG",
-      "downloading": "Förbereder …",
-      "downloadFailed": "Bilden kunde inte skapas. Specifikationen följer ändå med beställningen.",
-      "zoom": "Visa större",
-      "actual": "Faktisk storlek",
-      "actualHint": "Jämför med något du har till hands",
-      "close": "Stäng"
+      "aria": "Skylt i {wood}, {width} × {height} millimeter"
     },
     "sections": {
       "shape": "Storlek och form",
-      "wood": "Träslag",
-      "text": "Text",
-      "carve": "Fräsning och yta",
-      "decor": "Dekor",
-      "artwork": "Egen bild",
-      "price": "Pris"
+      "wood": "Träslag"
     },
     "size": {
       "width": "Bredd",
       "height": "Höjd",
-      "thickness": "Tjocklek",
-      "presets": "Vanliga storlekar",
       "shape": "Form",
-      "edge": "Kant",
-      "dimensions": "Mått",
-      "form": "Form och kant"
+      "edge": "Kant"
     },
     "shapes": {
       "rect": "Rak",
@@ -97,39 +80,10 @@
       "roundover": "Rundad"
     },
     "wood": {
-      "label": "Välj träslag",
-      "hardness": "Hårdhet",
-      "pricePerDm2": "Materialpris"
+      "label": "Välj träslag"
     },
     "text": {
-      "blockLabel": "Textrad {n}",
-      "content": "Text",
-      "placeholder": "Skriv något …",
-      "font": "Stil",
-      "capHeight": "Textstorlek",
-      "lineHeight": "Radavstånd",
-      "letterSpacing": "Bokstavsavstånd",
-      "align": "Justering",
-      "wrap": "Hur texten löper",
-      "curvature": "Hur mycket den böjs",
-      "radius": "Radie",
-      "position": "Placering",
-      "positionX": "I sidled",
-      "positionY": "I höjdled",
-      "add": "Lägg till textrad",
-      "remove": "Ta bort",
-      "removed": "Textraden togs bort.",
-      "undo": "Ångra",
-      "edit": "Redigera",
-      "done": "Klar",
-      "empty": "Tom rad",
-      "capsOnly": "Stilen har bara versaler."
-    },
-    "wraps": {
-      "straight": "Rak",
-      "arcUp": "Båge upp",
-      "arcDown": "Båge ner",
-      "circle": "Cirkel"
+      "align": "Justering"
     },
     "aligns": {
       "left": "Vänster",
@@ -139,7 +93,6 @@
     "carve": {
       "method": "Hur texten skärs",
       "finish": "Ytbehandling",
-      "paintColour": "Färg i bokstäverna",
       "hanging": "Hur den sätts upp",
       "methods": {
         "vcarve": "Skuren",
@@ -160,48 +113,12 @@
         "keyhole": "Nyckelhål",
         "rope": "Rep",
         "posts": "Stolpar"
-      },
-      "section": "Fräsning och yta"
+      }
     },
     "decor": {
-      "border": "Ram",
-      "inset": "Avstånd från kanten",
-      "corners": "Hörn",
-      "borders": {
-        "none": "Ingen",
-        "line": "Linje",
-        "double": "Dubbel",
-        "inset": "Nedsänkt fält",
-        "notch": "Bruten"
-      },
-      "cornerStyles": {
-        "none": "Inga",
-        "diamond": "Romb",
-        "leaf": "Blad",
-        "drilled": "Punkter"
-      },
-      "section": "Ram och hörn"
-    },
-    "artwork": {
-      "title": "Egen bild",
-      "lede": "En SVG-fil kan fräsas in som en form i träet.",
-      "upload": "Välj SVG-fil",
-      "replace": "Byt fil",
-      "remove": "Ta bort bild",
-      "width": "Bredd",
-      "rotation": "Vridning",
-      "positionX": "Från vänster",
-      "positionY": "Från överkant",
-      "errors": {
-        "tooLarge": "Filen är för stor. Håll dig under 512 kB — en ren vektorfil är nästan alltid mycket mindre.",
-        "notSvg": "Det där ser inte ut som en SVG-fil.",
-        "unparseable": "Filen gick inte att läsa. Prova att exportera om den från ritprogrammet.",
-        "empty": "Filen innehåller ingen form som går att fräsa. Text i en SVG behöver konverteras till banor först."
-      },
-      "none": "Ingen"
+      "border": "Ram"
     },
     "price": {
-      "title": "Pris",
       "total": "Att betala",
       "incVat": "inkl. moms",
       "exVat": "exkl. moms",
@@ -221,24 +138,45 @@
     },
     "order": {
       "cta": "Gå vidare",
-      "ctaBlocked": "Rätta till punkterna ovan först",
-      "reassure": "Nästa steg är dina kontaktuppgifter. Det är fortfarande ingen beställning.",
       "ctaEmpty": "Skriv en text först"
     },
-    "reset": "Börja om",
-    "resetConfirm": "Vill du börja om från början? Det du ritat försvinner.",
-    "mobile": {
-      "edit": "Ändra",
-      "close": "Klar",
-      "priceLabel": "Pris"
+    "board": {
+      "empty": "Klicka för att skriva",
+      "hintEmpty": "Klicka på skylten för att skriva",
+      "hintIdle": "Klicka på en text för att ändra den",
+      "hintSelected": "Dra för att flytta · hörnet ändrar storleken",
+      "addBlock": "Lägg till text",
+      "blockFull": "Skylten rymmer inte fler textrader",
+      "spec": "{width} × {height} mm · {wood}"
     },
-    "steps": {
-      "text": "Text",
-      "shape": "Storlek",
-      "material": "Trä och yta",
-      "detail": "Detaljer"
+    "block": {
+      "label": "Text på skylten",
+      "placeholder": "Vad ska det stå?",
+      "remove": "Ta bort texten",
+      "newLine": "Ny rad",
+      "smaller": "Mindre",
+      "larger": "Större",
+      "faceTooWide": "Texten får inte plats på skylten i den här stilen",
+      "choiceBlocked": "Texten får inte plats på en sådan skylt"
     },
-    "examples": "Exempel:"
+    "presets": {
+      "small": "Liten",
+      "medium": "Mellan",
+      "large": "Stor",
+      "wide": "Bred",
+      "custom": "Egna mått",
+      "standard": "Färdiga mått"
+    },
+    "actions": {
+      "undo": "Ångra",
+      "redo": "Gör om",
+      "reset": "Börja om"
+    },
+    "borders": {
+      "none": "Ingen",
+      "line": "Enkel",
+      "double": "Dubbel"
+    }
   },
   "order": {
     "title": "Skicka ritningen",

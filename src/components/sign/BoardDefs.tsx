@@ -1,5 +1,5 @@
 import type { Wood } from '@/config/woods';
-import type { CarveMethod } from '@/lib/designer/types';
+import type { CarveMethod } from '@/lib/sign/model';
 
 /**
  * The SVG filters and gradients that make a rectangle look like a piece of
@@ -32,7 +32,7 @@ interface Props {
   uid: string;
 }
 
-export function WoodDefs({ wood, method, uid }: Props) {
+export function BoardDefs({ wood, method, uid }: Props) {
   // Bevel width in millimetres. A V-carved letter has a visibly wider bevel
   // than a flat-bottomed pocket, because its walls slope.
   const bevel = method === 'vcarve' ? 1.1 : method === 'pocket' ? 0.5 : 0.9;

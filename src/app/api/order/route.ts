@@ -1,7 +1,7 @@
 import { signOrderSchema } from '@/lib/forms/schemas';
 import { handleSubmission } from '@/lib/forms/handler';
-import { describeDesign } from '@/lib/designer/spec';
-import { priceSign } from '@/lib/designer/pricing';
+import { describeSign } from '@/lib/sign/spec';
+import { priceSign } from '@/lib/sign/pricing';
 import { site } from '@/config/site';
 
 /**
@@ -31,15 +31,6 @@ export async function POST(request: Request) {
         });
       }
 
-      if (input.design.artwork) {
-        // Attached as a file and never inlined anywhere, so it stays inert.
-        attachments.push({
-          filename: `${ref}-${input.design.artwork.fileName.replace(/[^\w.-]/g, '_')}`,
-          content: Buffer.from(input.design.artwork.svg, 'utf8').toString('base64'),
-          contentType: 'image/svg+xml',
-        });
-      }
-
       const lines = [
         `SKYLTFÖRFRÅGAN ${ref}`,
         '',
@@ -52,7 +43,7 @@ export async function POST(request: Request) {
         `Nyhetsbrev: ${input.newsletter ? 'JA — lägg till i listan' : 'nej'}`,
         '',
         input.message ? `MEDDELANDE\n${input.message}\n` : '',
-        describeDesign(input.design),
+        describeSign(input.design),
         '',
         `Pris att bekräfta: ${(price.totalOre / 100).toLocaleString('sv-SE')} kr inkl. moms.`,
         '',

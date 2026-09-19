@@ -43,60 +43,32 @@ const contactBlock = {
   website: z.literal('').optional(),
 };
 
-/* ── Artwork ──────────────────────────────────────────────────────────── */
-
-/**
- * The server's own check on an uploaded drawing.
- *
- * The browser already ran this SVG through DOMPurify, but that is the
- * attacker's own machine and proves nothing. The server never renders this
- * markup and never inlines it into an email body — it travels as a file
- * attachment — so this is a second, blunter gate: refuse anything carrying the
- * constructs that make an SVG active.
- */
-const DANGEROUS = [
-  /<script/i,
-  /<foreignobject/i,
-  /<use\b/i,
-  /<image\b/i,
-  /\bon[a-z]+\s*=/i,
-  /javascript:/i,
-  /<!entity/i,
-  /<!doctype/i,
-  /xlink:href/i,
-  /href\s*=/i,
-];
-
-export const artworkSchema = z
-  .object({
-    svg: z.string().max(512_000),
-    fileName: z.string().max(120),
-    aspect: z.number().finite().positive().max(100),
-    widthMm: z.number().finite().min(1).max(1200),
-    x: z.number().finite().min(0).max(1),
-    y: z.number().finite().min(0).max(1),
-    rotation: z.number().finite().min(-360).max(360),
-  })
-  .refine((a) => a.svg.includes('<svg'), { message: 'Not an SVG' })
-  .refine((a) => !DANGEROUS.some((re) => re.test(a.svg)), {
-    message: 'The artwork contains markup that cannot be accepted',
-  });
-
 /* ── Sign design ──────────────────────────────────────────────────────── */
 
+/**
+ * The sign as it arrives from the browser.
+ *
+ * Bounds rather than rules. This says a cap height is a finite number between
+ * one and six hundred millimetres; it does not say the lettering fits the
+ * board, because that depends on measurements only a browser that has loaded
+ * the faces can take, and a server that tried to re-derive them would be
+ * guessing. What this is for is making sure nothing downstream — the price, the
+ * specification, the email — is ever handed a value it cannot cope with.
+ *
+ * The price is recalculated from this on the server regardless of what the
+ * client showed, so an order that lies about its design gets the price of the
+ * design it actually described.
+ */
 const textBlockSchema = z.object({
   id: z.string().max(40),
-  content: z.string().max(400),
+  text: z.string().max(400),
   fontId: z.string().max(40),
   capHeightMm: z.number().finite().min(1).max(600),
-  letterSpacing: z.number().finite().min(-1).max(2),
-  lineHeight: z.number().finite().min(0.5).max(5),
+  trackingEm: z.number().finite().min(-1).max(2),
+  lineSpacing: z.number().finite().min(0.5).max(5),
   align: z.enum(['left', 'center', 'right']),
-  wrap: z.enum(['straight', 'arcUp', 'arcDown', 'circle']),
-  curvature: z.number().finite().min(-1).max(1),
-  circleRadiusMm: z.number().finite().min(1).max(2000),
-  x: z.number().finite().min(-1).max(2),
-  y: z.number().finite().min(-1).max(2),
+  xMm: z.number().finite().min(-3000).max(3000),
+  yMm: z.number().finite().min(-3000).max(3000),
 });
 
 export const signDesignSchema = z.object({
@@ -109,14 +81,9 @@ export const signDesignSchema = z.object({
   method: z.enum(['vcarve', 'pocket', 'raised']),
   finish: z.enum(['raw', 'oil', 'paint', 'oilPaint']),
   paintColour: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  texts: z.array(textBlockSchema).max(8),
-  artwork: artworkSchema.nullable(),
-  decoration: z.object({
-    border: z.enum(['none', 'line', 'double', 'inset', 'notch']),
-    insetMm: z.number().finite().min(0).max(500),
-    corners: z.enum(['none', 'diamond', 'leaf', 'drilled']),
-  }),
+  border: z.enum(['none', 'line', 'double']),
   hanging: z.enum(['none', 'keyhole', 'rope', 'posts']),
+  blocks: z.array(textBlockSchema).min(1).max(8),
 });
 
 /* ── The three submissions ────────────────────────────────────────────── */

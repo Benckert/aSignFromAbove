@@ -1,20 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { getWood } from '@/config/woods';
-import { isDark, shade } from '@/lib/designer/colour';
-import { signOutlinePath } from '@/lib/designer/geometry';
-import { WoodDefs } from '@/components/designer/WoodDefs';
-import { boardGuides, snapBox, type Guide } from '@/lib/sign/snap';
-import { patchBlock, useSign } from '@/lib/sign/store';
-import { safeArea } from '@/lib/sign/draft';
+import { capLimits } from '@/lib/sign/limits';
+import { safeArea, type Sign, type TextBlock } from '@/lib/sign/model';
+import { blockGuides, boardGuides, snapBox, type Box, type Guide } from '@/lib/sign/snap';
+import { useSign, type BlockBox } from '@/lib/sign/store';
 import { isBlank } from '@/lib/sign/text';
-import { BoardText } from './BoardText';
-import { capLimits, useMeasuredLettering } from './useTextBox';
+import { SignFace } from './SignFace';
 import { cx } from '@/lib/cx';
 
 /**
- * The board, and everything you can do to it with a pointer.
+ * The board, and everything a pointer can do to it.
  *
  * The sign is drawn in a viewBox measured in millimetres, which is what makes
  * the whole interaction honest: a pointer position becomes a position on the
@@ -22,10 +18,11 @@ import { cx } from '@/lib/cx';
  * step and dragging is exact at any size of window. Every number that leaves
  * this component is a millimetre on a real piece of wood.
  *
- * What you can do: drag the lettering to move it, drag the handle at its corner
- * to size it, or select it and nudge with the arrow keys. What you cannot do is
- * stretch it — the handle scales uniformly, because squashing a face narrows
- * its vertical strokes and stroke width is exactly what decides whether the bit
+ * What you can do: click a block to select it, drag it to move it, drag the
+ * handle at its corner to size it, nudge it with the arrow keys, or
+ * double-click bare wood to start another one. What you cannot do is stretch a
+ * block — the handle scales uniformly, because squashing a face narrows its
+ * vertical strokes, and stroke width is exactly what decides whether the bit
  * can enter the letter.
  */
 
@@ -35,8 +32,10 @@ const FRAME_ASPECT = 3 / 2;
 const PAD = 12;
 /** How near a guide has to be to catch, in screen pixels. */
 const SNAP_PIXELS = 7;
+
 interface Drag {
   pointerId: number;
+  id: string;
   mode: 'move' | 'size';
   /** Where in the block the pointer took hold, in mm. */
   grabX: number;
@@ -47,39 +46,45 @@ interface Drag {
   moved: boolean;
 }
 
+export interface Rect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 export interface BoardProps {
   className?: string;
   label: string;
   /**
-   * Where the lettering is on screen, in client coordinates, so that the
-   * controls for it can sit beside it rather than across the room. Null when
-   * there is nothing to point at.
+   * Where the selected block is on screen, in client coordinates, so the
+   * controls for it can sit beside it rather than across the room.
    */
-  onLetteringRect?: (
-    rect: { top: number; left: number; width: number; height: number } | null,
-  ) => void;
-  /** Asked for by a double-click, or by Enter on a selected block. */
+  onSelectedRect?: (rect: Rect | null) => void;
+  /** Asked for by a double-click on a block, or Enter on a selected one. */
   onEdit?: () => void;
   /** Quietens the board's own overlays while the words are being typed. */
   editing?: boolean;
-  /** Shown on the board when there is nothing written yet. */
-  emptyLabel?: string;
+  emptyLabel: string;
 }
 
 export function Board({
   className,
   label,
-  onLetteringRect,
+  onSelectedRect,
   onEdit,
   editing,
-  emptyLabel = 'Klicka för att skriva',
+  emptyLabel,
 }: BoardProps) {
-  const draft = useSign((s) => s.draft);
-  const selected = useSign((s) => s.selected);
+  const sign = useSign((s) => s.sign);
+  const boxes = useSign((s) => s.boxes);
+  const selectedId = useSign((s) => s.selectedId);
   const select = useSign((s) => s.select);
   const live = useSign((s) => s.live);
   const mark = useSign((s) => s.mark);
+  const measured = useSign((s) => s.measured);
   const want = useSign((s) => s.want);
+  const addBlock = useSign((s) => s.addBlock);
 
   const uid = useId().replace(/:/g, '');
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -87,76 +92,47 @@ export function Board({
   const [guides, setGuides] = useState<Guide[]>([]);
   const [readout, setReadout] = useState<string | null>(null);
 
-  const wood = getWood(draft.woodId);
-  const size = useSign((s) => s.size);
-
-  const safe = safeArea(draft);
+  const safe = safeArea(sign);
 
   /* ── The frame ─────────────────────────────────────────────────────── */
 
-  const boardW = draft.widthMm + PAD * 2;
-  const boardH = draft.heightMm + PAD * 2;
+  const boardW = sign.widthMm + PAD * 2;
+  const boardH = sign.heightMm + PAD * 2;
   const frameW = Math.max(boardW, boardH * FRAME_ASPECT);
   const frameH = Math.max(boardH, boardW / FRAME_ASPECT);
   const originX = -PAD - (frameW - boardW) / 2;
   const originY = -PAD - (frameH - boardH) / 2;
 
-  /* ── Where the lettering is ────────────────────────────────────────── */
-
-  /*
-    Where to hang the text so that its box comes out centred on the block's
-    position. Zero until the first measurement, and after that a fixed property
-    of these particular glyphs at this particular size — so correcting for it
-    does not move what is being measured, and one pass settles it.
-  */
-  const anchorXMm = draft.block.xMm - (size?.offsetXMm ?? 0);
-  const anchorYMm = draft.block.yMm - (size?.offsetYMm ?? 0);
-  const measure = useMeasuredLettering(draft.block.capHeightMm, anchorXMm, anchorYMm);
+  /* ── Where each block is ───────────────────────────────────────────── */
 
   /**
-   * The lettering's box, in board millimetres.
+   * Every block's rectangle in board millimetres.
    *
    * The block stores where its centre should be and the measurement says how
-   * big it came out, and the two meet here. Everything else — the selection
-   * frame, the handle, what snaps to what — is derived from this one rectangle,
-   * so there is no second idea of where the text is that could disagree with
-   * the first.
+   * big it came out; the two meet here. The selection frame, the handle and
+   * everything that snaps to anything are all derived from this one map, so
+   * there is no second idea of where a block is that could disagree with the
+   * first.
    *
-   * The centre is not measured, only arranged: the anchor above is chosen so
-   * that the box lands centred on the position. That is what keeps a drag
-   * exact, because a measured centre would always be reporting the frame
-   * before last.
+   * A block nobody has typed into yet still gets a rectangle. Without one an
+   * empty block is a dead end — no words means no box, no box means nothing to
+   * click, and nothing to click means no way back to having words.
    */
-  const textBox = useMemo(() => {
-    if (!size || isBlank(draft.block.text)) return null;
-    return {
-      x: draft.block.xMm - size.widthMm / 2,
-      y: draft.block.yMm - size.heightMm / 2,
-      width: size.widthMm,
-      height: size.heightMm,
-    };
-  }, [size, draft.block.text, draft.block.xMm, draft.block.yMm]);
-
-  /**
-   * Where to point when there is nothing written yet.
-   *
-   * Without this an empty sign is a dead end: no ink means no box, no box
-   * means nothing to click, and nothing to click means the only way back to
-   * having text is a control that no longer exists. So an empty block still
-   * occupies a place on the board, and that place invites a click.
-   */
-  const placeholder = useMemo(
-    () => ({
-      x: safe.x + safe.width * 0.12,
-      y: safe.y + safe.height * 0.34,
-      width: safe.width * 0.76,
-      height: safe.height * 0.32,
-    }),
-    [safe.x, safe.y, safe.width, safe.height],
-  );
-
-  /** The lettering when there is any, and the invitation when there is not. */
-  const frameBox = textBox ?? placeholder;
+  const rects = useMemo(() => {
+    const out = new Map<string, Box>();
+    for (const block of sign.blocks) {
+      const box = boxes[block.id];
+      const width = box?.widthMm ?? safe.width * 0.5;
+      const height = box?.heightMm ?? block.capHeightMm * 1.5;
+      out.set(block.id, {
+        x: block.xMm - width / 2,
+        y: block.yMm - height / 2,
+        width,
+        height,
+      });
+    }
+    return out;
+  }, [sign.blocks, boxes, safe.width]);
 
   /* ── Pointer arithmetic ────────────────────────────────────────────── */
 
@@ -177,25 +153,24 @@ export function Board({
     return width > 0 ? frameW / width : 1;
   }, [frameW]);
 
-  const { min: minCapMm, max: maxCapMm } = capLimits(draft, size);
-
   /* ── Gestures ──────────────────────────────────────────────────────── */
 
-  const startDrag = (event: React.PointerEvent, mode: Drag['mode']) => {
+  const startDrag = (event: React.PointerEvent, block: TextBlock, mode: Drag['mode']) => {
     const at = toBoard(event.clientX, event.clientY);
-    if (!at || !textBox) return;
+    if (!at) return;
     event.stopPropagation();
     (event.target as Element).setPointerCapture(event.pointerId);
-    select(true);
+    select(block.id);
 
-    const dx = at.x - draft.block.xMm;
-    const dy = at.y - draft.block.yMm;
+    const dx = at.x - block.xMm;
+    const dy = at.y - block.yMm;
     drag.current = {
       pointerId: event.pointerId,
+      id: block.id,
       mode,
       grabX: dx,
       grabY: dy,
-      startCap: draft.block.capHeightMm,
+      startCap: block.capHeightMm,
       startDistance: Math.max(Math.hypot(dx, dy), 0.001),
       moved: false,
     };
@@ -203,12 +178,15 @@ export function Board({
 
   const onPointerMove = (event: React.PointerEvent) => {
     const gesture = drag.current;
-    if (!gesture || gesture.pointerId !== event.pointerId || !textBox) return;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+    const block = sign.blocks.find((b) => b.id === gesture.id);
+    const rect = rects.get(gesture.id);
+    if (!block || !rect) return;
     const at = toBoard(event.clientX, event.clientY);
     if (!at) return;
 
-    // The first movement of a gesture is what goes into the history, so that
-    // undo steps over the whole drag rather than each frame of it.
+    // The first movement of a gesture is what goes into the history, so undo
+    // steps over the whole drag rather than each frame of it.
     if (!gesture.moved) {
       gesture.moved = true;
       mark();
@@ -216,46 +194,66 @@ export function Board({
 
     if (gesture.mode === 'move') {
       const wanted = {
-        x: at.x - gesture.grabX - textBox.width / 2,
-        y: at.y - gesture.grabY - textBox.height / 2,
-        width: textBox.width,
-        height: textBox.height,
+        x: at.x - gesture.grabX - rect.width / 2,
+        y: at.y - gesture.grabY - rect.height / 2,
+        width: rect.width,
+        height: rect.height,
       };
+      /*
+        The board's own lines, and the other blocks'. Two lines of a sign
+        sharing a centre is the commonest layout there is, and hitting it
+        exactly is the difference between a sign that looks made and one that
+        looks nearly made.
+      */
+      const others = sign.blocks
+        .filter((b) => b.id !== gesture.id && rects.has(b.id))
+        .flatMap((b) => blockGuides(rects.get(b.id)!));
       const snapped = snapBox(
         wanted,
-        boardGuides({ x: 0, y: 0, width: draft.widthMm, height: draft.heightMm }, safe),
+        [
+          ...boardGuides({ x: 0, y: 0, width: sign.widthMm, height: sign.heightMm }, safe),
+          ...others,
+        ],
         SNAP_PIXELS * mmPerPixel(),
         event.altKey,
       );
       setGuides(snapped.guides);
-      // The centre, because that is what the block is positioned by and what
-      // the guides are lining up — the top-left corner of a word is not a
-      // number anybody is thinking about.
+      // The centre, because that is what a block is positioned by and what the
+      // guides are lining up — the top-left corner of a word is not a number
+      // anybody is thinking about.
       setReadout(
-        `${Math.round(snapped.x + textBox.width / 2)} × ${Math.round(snapped.y + textBox.height / 2)} mm`,
+        `${Math.round(snapped.x + rect.width / 2)} × ${Math.round(snapped.y + rect.height / 2)} mm`,
       );
-      live(
-        patchBlock({
-          xMm: snapped.x + textBox.width / 2,
-          yMm: snapped.y + textBox.height / 2,
-        }),
-      );
+      live((current) => ({
+        ...current,
+        blocks: current.blocks.map((b) =>
+          b.id === gesture.id
+            ? { ...b, xMm: snapped.x + rect.width / 2, yMm: snapped.y + rect.height / 2 }
+            : b,
+        ),
+      }));
       return;
     }
 
     // Uniform scaling only. The handle's distance from the block's centre is
     // the whole gesture, so dragging it diagonally, sideways or up does the
     // same thing — there is no aspect ratio to get wrong.
-    const distance = Math.hypot(at.x - draft.block.xMm, at.y - draft.block.yMm);
-    const wanted = (gesture.startCap * distance) / gesture.startDistance;
-    const capHeightMm = Math.min(Math.max(Math.round(wanted), minCapMm), maxCapMm);
+    const { min, max } = capLimits(sign, block, boxes[block.id] ?? null);
+    const distance = Math.hypot(at.x - block.xMm, at.y - block.yMm);
+    const capHeightMm = Math.min(
+      Math.max(Math.round((gesture.startCap * distance) / gesture.startDistance), min),
+      max,
+    );
     setGuides([]);
     setReadout(`${capHeightMm} mm`);
     // Sizing by hand is a request, not just a result: let go of a long word on
     // a small board and the letters stay where they were put, rather than
     // springing back to a size chosen before the word was there.
-    want(capHeightMm);
-    live(patchBlock({ capHeightMm }));
+    want(gesture.id, capHeightMm);
+    live((current) => ({
+      ...current,
+      blocks: current.blocks.map((b) => (b.id === gesture.id ? { ...b, capHeightMm } : b)),
+    }));
   };
 
   const endDrag = (event: React.PointerEvent) => {
@@ -268,7 +266,12 @@ export function Board({
   /* ── Keyboard ──────────────────────────────────────────────────────── */
 
   const onKeyDown = (event: React.KeyboardEvent) => {
-    if (!selected) return;
+    if (!selectedId) return;
+    if (event.key === 'Enter' && onEdit) {
+      event.preventDefault();
+      onEdit();
+      return;
+    }
     const step = event.shiftKey ? 10 : 1;
     const moves: Record<string, [number, number]> = {
       ArrowLeft: [-step, 0],
@@ -276,50 +279,47 @@ export function Board({
       ArrowUp: [0, -step],
       ArrowDown: [0, step],
     };
-    if (event.key === 'Enter' && onEdit) {
-      event.preventDefault();
-      onEdit();
-      return;
-    }
-
     const move = moves[event.key];
     if (!move) return;
     event.preventDefault();
-    useSign.getState().commit((d) => ({
-      ...d,
-      block: { ...d.block, xMm: d.block.xMm + move[0], yMm: d.block.yMm + move[1] },
+    useSign.getState().commit((current) => ({
+      ...current,
+      blocks: current.blocks.map((b) =>
+        b.id === selectedId ? { ...b, xMm: b.xMm + move[0], yMm: b.yMm + move[1] } : b,
+      ),
     }));
   };
 
-  /* ── Telling the page where the lettering is ───────────────────────── */
+  /* ── Telling the page where the selected block is ──────────────────── */
 
   /*
     The floating controls need this in screen coordinates, and the only honest
-    source for that is the SVG's own matrix — the board is letterboxed inside
-    whatever space the layout gives it, so nothing about the element's own box
-    predicts where a millimetre lands. Measured after layout, and again on
-    anything that could move it.
+    source is the SVG's own matrix — the board is letterboxed inside whatever
+    space the layout gives it, so nothing about the element's own box predicts
+    where a millimetre lands. Measured after layout, and again on anything that
+    could move it.
   */
+  const selectedRect = selectedId ? rects.get(selectedId) : undefined;
   const report = useCallback(() => {
-    if (!onLetteringRect) return;
+    if (!onSelectedRect) return;
     const svg = svgRef.current;
     const matrix = svg?.getScreenCTM();
-    if (!svg || !matrix) {
-      onLetteringRect(null);
+    if (!svg || !matrix || !selectedRect) {
+      onSelectedRect(null);
       return;
     }
-    const topLeft = new DOMPoint(frameBox.x, frameBox.y).matrixTransform(matrix);
+    const topLeft = new DOMPoint(selectedRect.x, selectedRect.y).matrixTransform(matrix);
     const bottomRight = new DOMPoint(
-      frameBox.x + frameBox.width,
-      frameBox.y + frameBox.height,
+      selectedRect.x + selectedRect.width,
+      selectedRect.y + selectedRect.height,
     ).matrixTransform(matrix);
-    onLetteringRect({
+    onSelectedRect({
       left: topLeft.x,
       top: topLeft.y,
       width: bottomRight.x - topLeft.x,
       height: bottomRight.y - topLeft.y,
     });
-  }, [onLetteringRect, frameBox]);
+  }, [onSelectedRect, selectedRect]);
 
   useLayoutEffect(report, [report]);
 
@@ -339,15 +339,8 @@ export function Board({
 
   /* ── Drawing ───────────────────────────────────────────────────────── */
 
-  const woodIsDark = isDark(wood.colour.base);
-  const painted = draft.finish === 'paint' || draft.finish === 'oilPaint';
-  const carveFill = painted
-    ? draft.paintColour
-    : woodIsDark
-      ? shade(wood.colour.light, 0.14)
-      : shade(wood.colour.dark, -0.42);
-  const outlinePath = signOutlinePath(draft.shape, draft.widthMm, draft.heightMm);
-  const handle = textBox ? { x: textBox.x + textBox.width, y: textBox.y + textBox.height } : null;
+  const tick = frameW * 0.022;
+  const hairline = frameW * 0.0022;
 
   return (
     <svg
@@ -363,8 +356,8 @@ export function Board({
       /*
         A group rather than role="application". The stronger role would hand
         every keystroke to this component and silence the screenreader's own
-        navigation, which is a bad trade for what is on offer here — arrow keys
-        that nudge, and controls in the panel that do everything else.
+        navigation, which is a bad trade for what is on offer — arrow keys that
+        nudge, and controls in the panel that do everything else.
       */
       role="group"
       aria-label={label}
@@ -373,69 +366,10 @@ export function Board({
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
-      onPointerDown={() => select(false)}
+      onPointerDown={() => select(null)}
+      onDoubleClick={() => addBlock()}
     >
-      <WoodDefs wood={wood} method={draft.method} uid={uid} />
-      <defs>
-        <clipPath id={`${uid}-shape`}>
-          <path d={outlinePath} />
-        </clipPath>
-      </defs>
-
-      {/* The shadow the board casts behind it. */}
-      <path
-        d={outlinePath}
-        fill="#2b1f12"
-        opacity={0.2}
-        transform="translate(2.5, 4)"
-        style={{ filter: 'blur(3px)' }}
-      />
-
-      <g clipPath={`url(#${uid}-shape)`}>
-        <rect x={0} y={0} width={draft.widthMm} height={draft.heightMm} fill={wood.colour.base} />
-        <rect
-          x={0}
-          y={0}
-          width={draft.widthMm}
-          height={draft.heightMm}
-          fill={wood.colour.dark}
-          filter={`url(#${uid}-grain)`}
-          opacity={0.16 + wood.grainStrength * 0.4}
-        />
-        {(draft.finish === 'oil' || draft.finish === 'oilPaint') && (
-          <rect
-            x={0}
-            y={0}
-            width={draft.widthMm}
-            height={draft.heightMm}
-            fill={`url(#${uid}-oil)`}
-          />
-        )}
-        <rect
-          x={0}
-          y={0}
-          width={draft.widthMm}
-          height={draft.heightMm}
-          fill={`url(#${uid}-light)`}
-        />
-        <rect
-          x={0}
-          y={0}
-          width={draft.widthMm}
-          height={draft.heightMm}
-          fill={`url(#${uid}-vignette)`}
-        />
-
-        <BoardText
-          block={draft.block}
-          anchorXMm={anchorXMm}
-          anchorYMm={anchorYMm}
-          textRef={measure}
-          widthMm={size?.widthMm}
-          fill={carveFill}
-          filter={painted ? `url(#${uid}-painted)` : `url(#${uid}-engrave)`}
-        />
-      </g>
+      <SignFace sign={sign} uid={uid} boxes={boxes} onMeasure={measured} />
 
       {/*
         The hairline round the blank, and the thing the page measures to find
@@ -444,104 +378,124 @@ export function Board({
       */}
       <path
         data-board=""
-        d={outlinePath}
+        d={`M 0 0 H ${sign.widthMm} V ${sign.heightMm} H 0 Z`}
         fill="none"
-        stroke={shade(wood.colour.dark, -0.35)}
-        strokeWidth={0.5}
-        opacity={0.55}
+        stroke="none"
+        pointerEvents="none"
       />
 
       {/* ── What you can grab ─────────────────────────────────────────── */}
 
-      {!textBox && (
-        <g className="cursor-text" onPointerDown={(e) => e.stopPropagation()} onClick={onEdit}>
-          <rect
-            x={placeholder.x}
-            y={placeholder.y}
-            width={placeholder.width}
-            height={placeholder.height}
-            rx={4}
-            fill="transparent"
-            stroke="#c78a48"
-            strokeWidth={frameW * 0.0025}
-            strokeDasharray={`${frameW * 0.012} ${frameW * 0.009}`}
-            opacity={0.65}
-          />
-          <text
-            x={placeholder.x + placeholder.width / 2}
-            y={placeholder.y + placeholder.height / 2}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize={frameW * 0.032}
-            fill="#e0a869"
-            pointerEvents="none"
-          >
-            {emptyLabel}
-          </text>
-        </g>
-      )}
+      {sign.blocks.map((block) => {
+        const rect = rects.get(block.id);
+        if (!rect) return null;
+        const chosen = block.id === selectedId;
+        const empty = isBlank(block.text);
 
-      {textBox && (
-        <g>
-          {/*
-            The body of the lettering, as one target. Transparent rather than
-            absent: the letters themselves are full of holes, and having to hit
-            the stem of an 'l' to move a word is not a tool, it is a test.
-          */}
-          <rect
-            x={textBox.x}
-            y={textBox.y}
-            width={textBox.width}
-            height={textBox.height}
-            fill="transparent"
-            className="cursor-move"
-            onPointerDown={(event) => startDrag(event, 'move')}
-            onDoubleClick={onEdit}
-          />
+        return (
+          <g key={block.id}>
+            {empty && (
+              /* An invitation, so a block with nothing in it is still a place. */
+              <g pointerEvents="none">
+                <rect
+                  x={rect.x}
+                  y={rect.y}
+                  width={rect.width}
+                  height={rect.height}
+                  rx={4}
+                  fill="transparent"
+                  stroke="#c78a48"
+                  strokeWidth={hairline}
+                  strokeDasharray={`${frameW * 0.012} ${frameW * 0.009}`}
+                  opacity={0.65}
+                />
+                <text
+                  x={rect.x + rect.width / 2}
+                  y={rect.y + rect.height / 2}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={Math.min(frameW * 0.03, rect.height * 0.5)}
+                  fill="#e0a869"
+                >
+                  {emptyLabel}
+                </text>
+              </g>
+            )}
 
-          {selected && (
-            <>
-              <rect
-                x={textBox.x - 2}
-                y={textBox.y - 2}
-                width={textBox.width + 4}
-                height={textBox.height + 4}
-                fill="none"
-                stroke="#c78a48"
-                strokeWidth={frameW * 0.0022}
-                opacity={editing ? 0.9 : 0.6}
-                pointerEvents="none"
-              />
-              {handle && (
-                <>
-                  {/*
-                    A generous invisible target behind a small visible mark. The
-                    mark is the right size for the drawing; the target is the
-                    right size for a fingertip.
-                  */}
-                  <circle
-                    cx={handle.x}
-                    cy={handle.y}
-                    r={Math.max(frameW * 0.035, 8)}
-                    fill="transparent"
-                    className="cursor-nwse-resize"
-                    onPointerDown={(event) => startDrag(event, 'size')}
-                  />
-                  <circle
-                    cx={handle.x}
-                    cy={handle.y}
-                    r={frameW * 0.009}
-                    fill="#f6f1e7"
-                    stroke="#8a5a26"
-                    strokeWidth={0.6}
+            {/*
+              The body of the block, as one target. Transparent rather than
+              absent: letters are full of holes, and having to hit the stem of
+              an 'l' to move a word is not a tool, it is a test.
+            */}
+            <rect
+              x={rect.x}
+              y={rect.y}
+              width={rect.width}
+              height={rect.height}
+              fill="transparent"
+              className={chosen ? 'cursor-move' : 'cursor-pointer'}
+              onPointerDown={(event) => startDrag(event, block, 'move')}
+              onDoubleClick={(event) => {
+                event.stopPropagation();
+                onEdit?.();
+              }}
+            />
+
+            {chosen && (
+              <>
+                {/*
+                  Corner marks rather than a rectangle. The measured box is the
+                  font's box, which stands taller than the letters do — a closed
+                  frame invites you to read that slack as part of the lettering,
+                  where four corners read as what they are, which is a grip.
+                */}
+                {(
+                  [
+                    [rect.x, rect.y, 1, 1],
+                    [rect.x + rect.width, rect.y, -1, 1],
+                    [rect.x, rect.y + rect.height, 1, -1],
+                    [rect.x + rect.width, rect.y + rect.height, -1, -1],
+                  ] as const
+                ).map(([cx0, cy0, sx, sy], index) => (
+                  <path
+                    key={index}
+                    d={`M ${cx0 + sx * tick} ${cy0} H ${cx0} V ${cy0 + sy * tick}`}
+                    fill="none"
+                    stroke="#c78a48"
+                    strokeWidth={hairline * 1.6}
+                    strokeLinecap="round"
+                    opacity={editing ? 0.95 : 0.7}
                     pointerEvents="none"
                   />
-                </>
-              )}
-            </>
-          )}
-        </g>
-      )}
+                ))}
+
+                {/*
+                  A generous invisible target behind a small visible mark. The
+                  mark is the right size for the drawing; the target is the
+                  right size for a fingertip.
+                */}
+                <circle
+                  cx={rect.x + rect.width}
+                  cy={rect.y + rect.height}
+                  r={Math.max(frameW * 0.035, 8)}
+                  fill="transparent"
+                  className="cursor-nwse-resize"
+                  onPointerDown={(event) => startDrag(event, block, 'size')}
+                />
+                <circle
+                  cx={rect.x + rect.width}
+                  cy={rect.y + rect.height}
+                  r={frameW * 0.009}
+                  fill="#f6f1e7"
+                  stroke="#8a5a26"
+                  strokeWidth={0.6}
+                  pointerEvents="none"
+                />
+              </>
+            )}
+          </g>
+        );
+      })}
 
       {/* ── Guides ────────────────────────────────────────────────────── */}
 
@@ -552,17 +506,19 @@ export function Board({
           y1={guide.axis === 'x' ? guide.from : guide.at}
           x2={guide.axis === 'x' ? guide.at : guide.to}
           y2={guide.axis === 'x' ? guide.to : guide.at}
-          stroke={guide.kind === 'centre' ? '#e0a869' : '#a2bfa3'}
+          stroke={
+            guide.kind === 'centre' ? '#e0a869' : guide.kind === 'block' ? '#c9a7d8' : '#a2bfa3'
+          }
           strokeWidth={0.6}
           strokeDasharray="6 4"
           pointerEvents="none"
         />
       ))}
 
-      {readout && textBox && !editing && (
+      {readout && selectedRect && !editing && (
         <text
-          x={textBox.x + textBox.width / 2}
-          y={textBox.y - 6}
+          x={selectedRect.x + selectedRect.width / 2}
+          y={selectedRect.y - 6}
           textAnchor="middle"
           fontSize={frameW * 0.026}
           fill="#f6f1e7"
@@ -577,3 +533,6 @@ export function Board({
     </svg>
   );
 }
+
+/** Re-exported so callers do not have to know where the box type lives. */
+export type { BlockBox, Sign };

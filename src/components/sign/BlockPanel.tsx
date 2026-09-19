@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   AlignCenter,
   AlignLeft,
@@ -9,118 +10,81 @@ import {
   CornerDownLeft,
   Minus,
   Plus,
+  Trash2,
   Type,
 } from 'lucide-react';
 import { CARVING_FONTS, getFont } from '@/config/carving-fonts';
-import { canHold, canHoldAnotherLine, longestFitting, useFacesReady } from '@/lib/sign/fits';
-import { patchBlock, useSign } from '@/lib/sign/store';
-import { capLimits } from './useTextBox';
+import { capLimits } from '@/lib/sign/limits';
+import { canHold, canHoldAnotherLine, longestFitting, useFacesReady } from '@/lib/sign/measure';
+import { MAX_LINES } from '@/lib/sign/model';
+import { useSign } from '@/lib/sign/store';
+import type { Rect } from './Board';
 import { cx } from '@/lib/cx';
 
 /**
- * The controls for the lettering, floating beside the lettering.
+ * The controls for one block of lettering, floating beside that lettering.
  *
- * The thing this replaces was a column of labelled fields four hundred pixels
- * away from the sign, which meant every adjustment was a trip: look at the
- * word, look at the panel, find the row, drag, look back. Words, face and size
- * are properties of the text, so they live on the text. What stays in the side
+ * What this replaces was a column of labelled fields four hundred pixels from
+ * the sign, which made every adjustment a trip: look at the word, look at the
+ * panel, find the row, drag, look back. Words, face, size and alignment are
+ * properties of the text, so they live on the text. What stays in the side
  * panel is what belongs to the board — how big it is, what it is made of, how
  * it is cut.
  *
  * It sits below the lettering by default so it is not covering the thing being
- * changed, and flips above when it would fall off the bottom.
+ * changed, flips above when there is no room below, and is pushed back inside
+ * the board when it fits in neither.
  *
  * On a narrow screen it does not float at all — it drops into the flow beneath
- * the board. A phone's board is about a third of the screen, and any panel
- * floating over it covers the very words being typed; pushing the page down a
- * little is the smaller cost by far.
+ * the board. A phone's board is about a third of the screen, and any panel over
+ * it covers the very words being typed; pushing the page down is the smaller
+ * cost by far.
  */
-
-export interface Rect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
 
 const GAP = 12;
 const WIDTH = 320;
 /** How close to the edge of the stage the panel may come, in pixels. */
 const EDGE = 8;
 
-/**
- * The most lines one sign will carry.
- *
- * Four is where a carved sign stops being a sign: past it the lettering has to
- * shrink so far to fit the board that it reads as a paragraph cut into wood,
- * and anyone who genuinely needs that is describing something the enquiry form
- * handles better than this tool does.
- */
-const MAX_LINES = 4;
-
-export function Lettering({
+export function BlockPanel({
   rect,
   stage,
   editing,
   onEditingChange,
 }: {
-  /** Where the lettering is, in client coordinates. */
+  /** Where the selected block is, in client coordinates. */
   rect: Rect | null;
   /** The positioned ancestor this panel is placed inside. */
   stage: HTMLElement | null;
   editing: boolean;
   onEditingChange: (editing: boolean) => void;
 }) {
-  const draft = useSign((s) => s.draft);
-  const selected = useSign((s) => s.selected);
-  const commit = useSign((s) => s.commit);
-  const measured = useSign((s) => s.size);
-  const want = useSign((s) => s.want);
-  const limits = capLimits(draft, measured);
-
+  const t = useTranslations('designer');
+  // Nothing may be refused before the faces are here to be measured against.
   const facesReady = useFacesReady();
+  const sign = useSign((s) => s.sign);
+  const selectedId = useSign((s) => s.selectedId);
+  const boxes = useSign((s) => s.boxes);
+  const patch = useSign((s) => s.patch);
+  const want = useSign((s) => s.want);
+  const removeBlock = useSign((s) => s.removeBlock);
+
   const field = useRef<HTMLTextAreaElement | null>(null);
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
-  const [facesOpen, setFacesOpen] = useState(false);
-  const block = draft.block;
-  const face = getFont(block.fontId);
-  const size = Math.min(Math.max(block.capHeightMm, limits.min), limits.max);
-  const lines = block.text.split('\n');
-
   /*
-    Which faces this sign could actually be cut in.
-
-    A face the words will not fit in at any cuttable size is not offered, rather
-    than offered and then complained about. Worked out from the words and the
-    board alone, so dragging the lettering around does not set nine text
-    measurements going on every frame.
+    Which block the face list was opened for, rather than merely whether it is
+    open. Select another block and it is closed for that one, without an effect
+    reaching in to close it after the fact — the list belongs to a block, so
+    saying so is both shorter and impossible to get out of step.
   */
-  const unusable = useMemo(() => {
-    const out = new Set<string>();
-    if (!facesReady) return out;
-    for (const option of CARVING_FONTS) {
-      if (option.id === block.fontId) continue;
-      if (!canHold({ ...draft, block: { ...block, fontId: option.id } })) out.add(option.id);
-    }
-    return out;
-    // Position is deliberately not an input: it cannot change whether the
-    // lettering fits, only where inside the board it sits.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    facesReady,
-    block.text,
-    block.fontId,
-    block.trackingEm,
-    block.lineSpacing,
-    draft.widthMm,
-    draft.heightMm,
-    draft.shape,
-  ]);
+  const [facesOpenFor, setFacesOpenFor] = useState<string | null>(null);
 
-  const roomForALine = !facesReady || canHoldAnotherLine(draft);
+  const block = sign.blocks.find((b) => b.id === selectedId) ?? null;
+  const facesOpen = facesOpenFor !== null && facesOpenFor === selectedId;
+  const setFacesOpen = (open: boolean) => setFacesOpenFor(open ? selectedId : null);
 
-  // Focus follows the intent to edit, and selects what is there so that typing
+  // Focus follows the intent to edit, and selects what is there so typing
   // replaces the old words rather than appending to them.
   useEffect(() => {
     if (!editing) return;
@@ -132,7 +96,7 @@ export function Lettering({
 
   useEffect(() => {
     if (!facesOpen) return;
-    const close = (event: KeyboardEvent) => event.key === 'Escape' && setFacesOpen(false);
+    const close = (event: KeyboardEvent) => event.key === 'Escape' && setFacesOpenFor(null);
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
   }, [facesOpen]);
@@ -143,14 +107,14 @@ export function Lettering({
     It used to be guessed from the number of lines, and the guess knew nothing
     about the face list — so opening the list added two hundred pixels the
     placement had never been told about, and the last two faces fell off the
-    bottom of the screen where they could not be clicked at all. Measuring
-    costs one observer and cannot be wrong about anything, including whatever
-    this panel grows next.
+    bottom of the screen where they could not be clicked at all. Measuring costs
+    one observer and cannot be wrong about anything, including whatever this
+    panel grows next.
   */
   useLayoutEffect(() => {
     if (!panel) return;
-    // Observing delivers a first measurement of its own, so there is nothing
-    // to seed here; the estimate above covers the one frame before it arrives.
+    // Observing delivers a first measurement of its own, so there is nothing to
+    // seed here; the estimate below covers the one frame before it arrives.
     const observer = new ResizeObserver(() => setPanelHeight(panel.offsetHeight));
     observer.observe(panel);
     return () => observer.disconnect();
@@ -162,9 +126,46 @@ export function Lettering({
     if (!node) return;
     node.style.height = 'auto';
     node.style.height = `${node.scrollHeight}px`;
-  }, [block.text, selected]);
+  }, [block?.text, selectedId]);
 
-  if (!selected || !rect || !stage) return null;
+  /*
+    Which faces this sign could actually be cut in.
+
+    A face the words will not fit in at any cuttable size is not offered, rather
+    than offered and then complained about. Worked out from the words and the
+    board alone, so dragging the lettering around does not set nine text
+    measurements going on every frame.
+  */
+  const unusable = useMemo(() => {
+    const out = new Set<string>();
+    if (!block || !facesReady) return out;
+    for (const option of CARVING_FONTS) {
+      if (option.id === block.fontId) continue;
+      if (!canHold(sign, { ...block, fontId: option.id })) out.add(option.id);
+    }
+    return out;
+    // Position cannot change whether the lettering fits, only where it sits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    facesReady,
+    block?.text,
+    block?.fontId,
+    block?.trackingEm,
+    block?.lineSpacing,
+    sign.widthMm,
+    sign.heightMm,
+    sign.shape,
+    sign.border,
+  ]);
+
+  if (!block || !rect || !stage) return null;
+
+  const face = getFont(block.fontId);
+  const limits = capLimits(sign, block, boxes[block.id] ?? null);
+  const size = Math.min(Math.max(block.capHeightMm, limits.min), limits.max);
+  const lines = block.text.split('\n');
+  const roomForALine = canHoldAnotherLine(sign, block);
+  const canAddLine = lines.length < MAX_LINES && roomForALine;
 
   /* ── Placing it ────────────────────────────────────────────────────── */
 
@@ -180,13 +181,10 @@ export function Lettering({
     Below the lettering by default, above it when there is no room below, and
     pushed back inside the stage when it fits in neither — in that order,
     because the panel covering the words being typed is the one outcome worth
-    any amount of shuffling to avoid.
-
-    Measured against the stage rather than the window, so it can never end up
-    half off the board. The estimate is only ever used for the single frame
-    before the first measurement lands.
+    any amount of shuffling to avoid. Measured against the stage rather than the
+    window, so it can never end up half off the board.
   */
-  const height = panelHeight ?? 104 + lines.length * 26 + (lines.length > 1 ? 40 : 0);
+  const height = panelHeight ?? 150 + lines.length * 26;
   const below = relative.top + relative.height + GAP;
   const above = relative.top - height - GAP;
   const top =
@@ -202,13 +200,13 @@ export function Lettering({
 
   const step = (by: number) => {
     const next = Math.min(Math.max(size + by, limits.min), limits.max);
-    want(next);
-    commit(patchBlock({ capHeightMm: next }));
+    want(block.id, next);
+    patch(block.id, { capHeightMm: next });
   };
 
   const addLine = () => {
-    if (lines.length >= MAX_LINES || !roomForALine) return;
-    commit(patchBlock({ text: `${block.text}\n` }));
+    if (!canAddLine) return;
+    patch(block.id, { text: `${block.text}\n` });
     onEditingChange(true);
     // Put the caret on the new line rather than wherever it happened to be.
     requestAnimationFrame(() => {
@@ -223,14 +221,13 @@ export function Lettering({
     /*
       One positioned element, not two. The offsets are handed over as custom
       properties because an inline style cannot be made conditional on a media
-      query: on a phone the panel is docked along the bottom of the stage, and
-      only from `lg` up do the measured coordinates take over.
+      query: on a phone the panel is in the flow under the board, and only from
+      `lg` up do the measured coordinates take over.
     */
     <div
       ref={setPanel}
       className={cx(
         'z-40 animate-[fade-in_0.16s_var(--ease-wood)]',
-        // In the flow on a phone, floating over the stage from lg up.
         'mt-3 w-full',
         'lg:absolute lg:top-[var(--y)] lg:left-[var(--x)] lg:mt-0 lg:w-[var(--w)]',
         'border-rule-strong bg-surface/95 shadow-lift rounded-lg border p-2.5 backdrop-blur-md',
@@ -248,13 +245,13 @@ export function Lettering({
         value={block.text}
         /*
           Two limits, both of them silent. A hundred and twenty characters is
-          the most any sign here carries; beyond that, what the board itself
-          can hold — type or paste past either and nothing happens, the way a
-          text field with a length limit behaves. The alternative is letting
-          the words run off the edge of the wood and then explaining why.
+          the most any sign here carries; beyond that, what the board itself can
+          hold — type or paste past either and nothing happens, the way a text
+          field with a length limit behaves. The alternative is letting the
+          words run off the edge of the wood and then explaining why.
         */
         onChange={(e) =>
-          commit(patchBlock({ text: longestFitting(draft, e.target.value.slice(0, 120)) }))
+          patch(block.id, { text: longestFitting(sign, block, e.target.value.slice(0, 120)) })
         }
         onFocus={() => onEditingChange(true)}
         onBlur={() => onEditingChange(false)}
@@ -263,12 +260,12 @@ export function Lettering({
           // other text box — it starts a line — until the sign cannot carry
           // another one.
           if (e.key === 'Escape') e.currentTarget.blur();
-          if (e.key === 'Enter' && (lines.length >= MAX_LINES || !roomForALine)) e.preventDefault();
+          if (e.key === 'Enter' && !canAddLine) e.preventDefault();
         }}
         rows={1}
         spellCheck={false}
-        aria-label="Text på skylten"
-        placeholder="Vad ska det stå?"
+        aria-label={t('block.label')}
+        placeholder={t('block.placeholder')}
         className={cx(
           'text-ink block w-full resize-none rounded-sm bg-transparent px-2 py-1.5 leading-snug',
           'placeholder:text-ink-3 text-[1.125rem] outline-none',
@@ -281,7 +278,7 @@ export function Lettering({
         {/* The face, named in itself. */}
         <button
           type="button"
-          onClick={() => setFacesOpen((open) => !open)}
+          onClick={() => setFacesOpen(!facesOpen)}
           aria-expanded={facesOpen}
           className={cx(
             'flex min-w-0 flex-1 items-center gap-2 rounded-sm border px-2.5 py-1.5 text-left transition',
@@ -298,28 +295,32 @@ export function Lettering({
 
         {/* Size, in the millimetres that go on the drawing. */}
         <div className="border-rule flex shrink-0 items-center rounded-sm border">
-          <Stepper label="Mindre" onClick={() => step(-1)} disabled={size <= limits.min}>
+          <Stepper
+            label={t('block.smaller')}
+            onClick={() => step(-1)}
+            disabled={size <= limits.min}
+          >
             <Minus size={13} aria-hidden />
           </Stepper>
           <span className="text-ink w-[3.75rem] text-center font-mono text-[0.8125rem]">
             {size} mm
           </span>
-          <Stepper label="Större" onClick={() => step(1)} disabled={size >= limits.max}>
+          <Stepper label={t('block.larger')} onClick={() => step(1)} disabled={size >= limits.max}>
             <Plus size={13} aria-hidden />
           </Stepper>
         </div>
       </div>
 
-      {/*
-        A second line is one of the two or three things a sign actually needs —
-        a name and a year, a name and a family. Pressing Enter in a box nobody
-        has told you is multi-line is not a way of offering it.
-      */}
       <div className="mt-1.5 flex items-center gap-1.5">
+        {/*
+          A second line is one of the two or three things a sign actually needs
+          — a name and a year, a name and a family. Pressing Enter in a box
+          nobody has told you is multi-line is not a way of offering it.
+        */}
         <button
           type="button"
           onClick={addLine}
-          disabled={lines.length >= MAX_LINES || !roomForALine}
+          disabled={!canAddLine}
           className={cx(
             'border-rule text-ink-2 hover:border-rule-strong hover:text-ink flex items-center gap-1.5',
             'rounded-sm border px-2.5 py-1.5 text-[0.75rem] transition',
@@ -327,29 +328,29 @@ export function Lettering({
           )}
         >
           <CornerDownLeft size={12} aria-hidden />
-          Ny rad
+          {t('block.newLine')}
         </button>
 
         {lines.length > 1 && (
           <div
             role="radiogroup"
-            aria-label="Justering"
-            className="border-rule ml-auto flex shrink-0 items-center rounded-sm border"
+            aria-label={t('text.align')}
+            className="border-rule flex shrink-0 items-center rounded-sm border"
           >
             {(
               [
-                ['left', 'Vänster', AlignLeft],
-                ['center', 'Centrerad', AlignCenter],
-                ['right', 'Höger', AlignRight],
+                ['left', AlignLeft],
+                ['center', AlignCenter],
+                ['right', AlignRight],
               ] as const
-            ).map(([value, label, Icon]) => (
+            ).map(([value, Icon]) => (
               <button
                 key={value}
                 type="button"
                 role="radio"
                 aria-checked={block.align === value}
-                aria-label={label}
-                onClick={() => commit(patchBlock({ align: value }))}
+                aria-label={t(`aligns.${value}`)}
+                onClick={() => patch(block.id, { align: value })}
                 className={cx(
                   'grid h-8 w-8 place-items-center transition first:rounded-l-sm last:rounded-r-sm',
                   block.align === value
@@ -361,6 +362,19 @@ export function Lettering({
               </button>
             ))}
           </div>
+        )}
+
+        {/* Only offered while there is another block to fall back to. */}
+        {sign.blocks.length > 1 && (
+          <button
+            type="button"
+            onClick={() => removeBlock(block.id)}
+            aria-label={t('block.remove')}
+            title={t('block.remove')}
+            className="text-ink-3 hover:bg-surface-2 hover:text-ink ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-sm transition"
+          >
+            <Trash2 size={13} aria-hidden />
+          </button>
         )}
       </div>
 
@@ -375,9 +389,9 @@ export function Lettering({
                 type="button"
                 disabled={tooWide}
                 // Said once, quietly, for anyone who wonders why it is greyed.
-                title={tooWide ? 'Texten får inte plats på skylten i den här stilen' : undefined}
+                title={tooWide ? t('block.faceTooWide') : undefined}
                 onClick={() => {
-                  commit(patchBlock({ fontId: option.id }));
+                  patch(block.id, { fontId: option.id });
                   setFacesOpen(false);
                 }}
                 className={cx(

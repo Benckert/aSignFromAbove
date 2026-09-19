@@ -1,10 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Check, Minus, Plus } from 'lucide-react';
 import { WOODS } from '@/config/woods';
-import { signOutlinePath } from '@/lib/designer/geometry';
-import type { CarveMethod, Finish, SignShape } from '@/lib/designer/types';
+import type {
+  Border,
+  CarveMethod,
+  EdgeProfile,
+  Finish,
+  Hanging,
+  SignShape,
+} from '@/lib/sign/model';
+import { signOutlinePath } from '@/lib/sign/geometry';
 import { cx } from '@/lib/cx';
 
 /**
@@ -12,10 +20,15 @@ import { cx } from '@/lib/cx';
  *
  * Every one of them is shown as the thing it is. A shape is a drawing of that
  * shape, a size is a rectangle in the right proportion, a cut is a section
- * through the groove it leaves, a timber is that timber's own colour. The
- * words are still there underneath, because a name is how you talk to the
- * workshop about it, but nobody should have to read "urgröpt" and picture a
+ * through the groove it leaves, a timber is that timber's own colour. The words
+ * are still there underneath, because a name is how you talk to the workshop
+ * about it, but nobody should have to read "urgröpt" and picture a
  * flat-bottomed pocket — that is what the picture is for.
+ *
+ * Several of these can be refused. A board too small to carry what is written,
+ * a shape that gives up the corners the words are using, a border that takes
+ * the margin they need: each is offered only while it could actually be
+ * honoured. The caller decides, because only the caller can measure.
  */
 
 /* ── A common shell, so every choice on the page behaves the same ────── */
@@ -27,8 +40,8 @@ function Option({
   detail,
   children,
   className,
-  /** Set when this choice would leave the lettering with nowhere to go. */
   disabled,
+  blockedLabel,
 }: {
   chosen: boolean;
   onClick: () => void;
@@ -36,7 +49,9 @@ function Option({
   detail?: string;
   children?: React.ReactNode;
   className?: string;
+  /** Set when this choice would leave the lettering with nowhere to go. */
   disabled?: boolean;
+  blockedLabel?: string;
 }) {
   return (
     <button
@@ -44,7 +59,7 @@ function Option({
       role="radio"
       aria-checked={chosen}
       disabled={disabled}
-      title={disabled ? 'Texten får inte plats på en sådan skylt' : undefined}
+      title={disabled ? blockedLabel : undefined}
       onClick={onClick}
       className={cx(
         'group relative flex flex-col items-center gap-1.5 rounded-md border p-2.5 text-center transition',
@@ -93,12 +108,17 @@ function Group({
 
 /* ── Size ─────────────────────────────────────────────────────────────── */
 
-const SIZES = [
-  { label: 'Liten', widthMm: 300, heightMm: 150 },
-  { label: 'Mellan', widthMm: 400, heightMm: 220 },
-  { label: 'Stor', widthMm: 600, heightMm: 300 },
-  { label: 'Bred', widthMm: 800, heightMm: 250 },
-] as const;
+export interface Size {
+  widthMm: number;
+  heightMm: number;
+}
+
+const SIZES: (Size & { key: 'small' | 'medium' | 'large' | 'wide' })[] = [
+  { key: 'small', widthMm: 300, heightMm: 150 },
+  { key: 'medium', widthMm: 400, heightMm: 220 },
+  { key: 'large', widthMm: 600, heightMm: 300 },
+  { key: 'wide', widthMm: 800, heightMm: 250 },
+];
 
 export function SizeChoice({
   widthMm,
@@ -108,54 +128,58 @@ export function SizeChoice({
 }: {
   widthMm: number;
   heightMm: number;
-  onChange: (size: { widthMm: number; heightMm: number }) => void;
+  onChange: (size: Size) => void;
   /** Whether a board of this size could still carry the lettering. */
-  canHold?: (size: { widthMm: number; heightMm: number }) => boolean;
+  canHold: (size: Size) => boolean;
 }) {
+  const t = useTranslations('designer');
   const matches = SIZES.some((s) => s.widthMm === widthMm && s.heightMm === heightMm);
   const [custom, setCustom] = useState(!matches);
 
   return (
     <Group
-      label="Storlek"
+      label={t('sections.shape')}
       aside={
         <button
           type="button"
           onClick={() => setCustom((open) => !open)}
           className="text-oak-deep hover:text-ink text-[0.75rem] underline-offset-4 transition hover:underline"
         >
-          {custom ? 'Färdiga mått' : 'Egna mått'}
+          {custom ? t('presets.standard') : t('presets.custom')}
         </button>
       }
     >
       {custom ? (
         <div className="grid grid-cols-2 gap-2">
           <Number
-            label="Bredd"
+            label={t('size.width')}
             value={widthMm}
             min={150}
             max={1200}
             step={10}
             onChange={(next) => onChange({ widthMm: next, heightMm })}
+            allowed={(next) => canHold({ widthMm: next, heightMm })}
           />
           <Number
-            label="Höjd"
+            label={t('size.height')}
             value={heightMm}
             min={80}
             max={800}
             step={10}
             onChange={(next) => onChange({ widthMm, heightMm: next })}
+            allowed={(next) => canHold({ widthMm, heightMm: next })}
           />
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Storlek">
+        <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={t('sections.shape')}>
           {SIZES.map((size) => (
             <Option
-              key={size.label}
+              key={size.key}
               chosen={size.widthMm === widthMm && size.heightMm === heightMm}
-              disabled={canHold ? !canHold(size) : false}
+              disabled={!canHold(size)}
+              blockedLabel={t('block.choiceBlocked')}
               onClick={() => onChange({ widthMm: size.widthMm, heightMm: size.heightMm })}
-              label={size.label}
+              label={t(`presets.${size.key}`)}
               detail={`${size.widthMm}×${size.heightMm}`}
             >
               {/* Drawn to its real proportion, inside a box they all share. */}
@@ -188,6 +212,7 @@ function Number({
   max,
   step,
   onChange,
+  allowed,
 }: {
   label: string;
   value: number;
@@ -195,42 +220,49 @@ function Number({
   max: number;
   step: number;
   onChange: (value: number) => void;
+  /** A size the lettering could not survive is not offered, the same as a preset. */
+  allowed: (value: number) => boolean;
 }) {
-  const clamp = (next: number) => onChange(Math.min(Math.max(next, min), max));
+  const nudge = (by: number) => {
+    const next = Math.min(Math.max(value + by, min), max);
+    if (next !== value && allowed(next)) onChange(next);
+  };
+  const canGo = (by: number) => {
+    const next = Math.min(Math.max(value + by, min), max);
+    return next !== value && allowed(next);
+  };
+
   return (
-    <div className="border-rule bg-surface-2 flex items-center justify-between gap-1 rounded-md border px-1 py-1">
-      <button
-        type="button"
-        aria-label={`${label}, mindre`}
-        onClick={() => clamp(value - step)}
-        className="text-ink-2 hover:bg-surface-3 hover:text-ink grid h-7 w-7 shrink-0 place-items-center rounded-sm transition"
-      >
-        <Minus size={13} aria-hidden />
-      </button>
-      <span className="min-w-0 text-center">
-        <span className="spec block leading-none">{label}</span>
-        <span className="text-ink block font-mono text-[0.8125rem] leading-tight">{value} mm</span>
+    <label className="border-rule flex items-center justify-between gap-1 rounded-md border px-1 py-1">
+      <span className="text-ink-3 pl-1.5 text-[0.75rem]">{label}</span>
+      <span className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={() => nudge(-step)}
+          disabled={!canGo(-step)}
+          aria-label={`${label} −`}
+          className="text-ink-2 hover:bg-surface-3 hover:text-ink grid h-7 w-7 place-items-center rounded-sm transition disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <Minus size={12} aria-hidden />
+        </button>
+        <span className="text-ink w-[3.25rem] text-center font-mono text-[0.8125rem]">{value}</span>
+        <button
+          type="button"
+          onClick={() => nudge(step)}
+          disabled={!canGo(step)}
+          aria-label={`${label} +`}
+          className="text-ink-2 hover:bg-surface-3 hover:text-ink grid h-7 w-7 place-items-center rounded-sm transition disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <Plus size={12} aria-hidden />
+        </button>
       </span>
-      <button
-        type="button"
-        aria-label={`${label}, större`}
-        onClick={() => clamp(value + step)}
-        className="text-ink-2 hover:bg-surface-3 hover:text-ink grid h-7 w-7 shrink-0 place-items-center rounded-sm transition"
-      >
-        <Plus size={13} aria-hidden />
-      </button>
-    </div>
+    </label>
   );
 }
 
-/* ── Shape ────────────────────────────────────────────────────────────── */
+/* ── Shape and edge ───────────────────────────────────────────────────── */
 
-const SHAPES: Array<{ value: SignShape; label: string }> = [
-  { value: 'rect', label: 'Rak' },
-  { value: 'rounded', label: 'Rundad' },
-  { value: 'arch', label: 'Välvd' },
-  { value: 'oval', label: 'Oval' },
-];
+const SHAPES: SignShape[] = ['rect', 'rounded', 'arch', 'oval'];
 
 export function ShapeChoice({
   value,
@@ -239,27 +271,74 @@ export function ShapeChoice({
 }: {
   value: SignShape;
   onChange: (shape: SignShape) => void;
-  /** Whether this shape leaves the lettering enough board to sit on. */
-  canHold?: (shape: SignShape) => boolean;
+  canHold: (shape: SignShape) => boolean;
 }) {
+  const t = useTranslations('designer');
   return (
-    <Group label="Form">
-      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Form">
+    <Group label={t('size.shape')}>
+      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={t('size.shape')}>
         {SHAPES.map((shape) => (
           <Option
-            key={shape.value}
-            chosen={shape.value === value}
-            disabled={canHold ? !canHold(shape.value) : false}
-            onClick={() => onChange(shape.value)}
-            label={shape.label}
+            key={shape}
+            chosen={shape === value}
+            disabled={!canHold(shape)}
+            blockedLabel={t('block.choiceBlocked')}
+            onClick={() => onChange(shape)}
+            label={t(`shapes.${shape}`)}
           >
             {/* The same renderer the board uses, at 44 × 26 mm. */}
             <svg viewBox="-1 -1 46 28" className="h-7 w-full" aria-hidden>
               <path
-                d={signOutlinePath(shape.value, 44, 26)}
+                d={signOutlinePath(shape, 44, 26)}
                 className={cx(
                   'transition',
-                  shape.value === value
+                  shape === value
+                    ? 'fill-oak/25 stroke-oak'
+                    : 'fill-surface-3 stroke-rule-strong group-hover:stroke-ink-3',
+                )}
+                strokeWidth={1.2}
+              />
+            </svg>
+          </Option>
+        ))}
+      </div>
+    </Group>
+  );
+}
+
+const EDGES: EdgeProfile[] = ['square', 'chamfer', 'roundover'];
+
+export function EdgeChoice({
+  value,
+  onChange,
+}: {
+  value: EdgeProfile;
+  onChange: (edge: EdgeProfile) => void;
+}) {
+  const t = useTranslations('designer');
+  return (
+    <Group label={t('size.edge')}>
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('size.edge')}>
+        {EDGES.map((edge) => (
+          <Option
+            key={edge}
+            chosen={edge === value}
+            onClick={() => onChange(edge)}
+            label={t(`edges.${edge}`)}
+          >
+            {/* A section through the top corner of the board. */}
+            <svg viewBox="0 0 44 22" className="h-7 w-full" aria-hidden>
+              <path
+                d={
+                  edge === 'square'
+                    ? 'M 2 6 H 42 V 20 H 2 Z'
+                    : edge === 'chamfer'
+                      ? 'M 2 6 H 36 L 42 12 V 20 H 2 Z'
+                      : 'M 2 6 H 34 A 8 8 0 0 1 42 14 V 20 H 2 Z'
+                }
+                className={cx(
+                  'transition',
+                  edge === value
                     ? 'fill-oak/25 stroke-oak'
                     : 'fill-surface-3 stroke-rule-strong group-hover:stroke-ink-3',
                 )}
@@ -284,25 +363,25 @@ export function WoodChoice({
   locale: 'sv' | 'en';
   onChange: (woodId: string) => void;
 }) {
+  const t = useTranslations('designer');
   return (
-    <Group label="Träslag">
-      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Träslag">
+    <Group label={t('sections.wood')}>
+      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={t('wood.label')}>
         {WOODS.map((wood) => (
           <Option
             key={wood.id}
             chosen={wood.id === value}
             onClick={() => onChange(wood.id)}
             label={wood.name[locale]}
-            className="p-1.5"
           >
+            {/* Banded, because a flat swatch of colour is not a timber. */}
             <span
-              className="block h-9 w-full rounded-sm border border-black/25"
+              className={cx(
+                'block h-7 w-full rounded-[3px] border transition',
+                wood.id === value ? 'border-oak' : 'border-rule-strong group-hover:border-ink-3',
+              )}
               style={{
-                // The timber's own three colours, banded along the grain the
-                // way a flat-sawn face bands, so the swatch reads as a piece of
-                // wood rather than as a patch of paint. Four degrees off level,
-                // because nothing in a tree is perfectly straight.
-                backgroundImage: `repeating-linear-gradient(4deg, ${wood.colour.base} 0 3px, ${wood.colour.dark} 3px 4px, ${wood.colour.light} 4px 8px)`,
+                backgroundImage: `repeating-linear-gradient(94deg, ${wood.colour.light} 0 3px, ${wood.colour.base} 3px 7px, ${wood.colour.dark} 7px 9px, ${wood.colour.base} 9px 13px)`,
               }}
             />
           </Option>
@@ -312,20 +391,86 @@ export function WoodChoice({
   );
 }
 
-/* ── Cut ──────────────────────────────────────────────────────────────── */
+/* ── Border ───────────────────────────────────────────────────────────── */
 
-/** A section through the groove each cut leaves, 40 × 18. */
-const PROFILES: Record<CarveMethod, string> = {
-  vcarve: 'M0 4 H14 L20 14 L26 4 H40',
-  pocket: 'M0 4 H13 V13 H27 V4 H40',
-  raised: 'M0 13 H13 V4 H27 V13 H40',
-};
+const BORDERS: Border[] = ['none', 'line', 'double'];
 
-const METHODS: Array<{ value: CarveMethod; label: string }> = [
-  { value: 'vcarve', label: 'Skuren' },
-  { value: 'pocket', label: 'Urgröpt' },
-  { value: 'raised', label: 'Upphöjd' },
-];
+export function BorderChoice({
+  value,
+  shape,
+  onChange,
+  canHold,
+}: {
+  value: Border;
+  shape: SignShape;
+  onChange: (border: Border) => void;
+  canHold: (border: Border) => boolean;
+}) {
+  const t = useTranslations('designer');
+  /*
+    A board in miniature, at the proportions a real one has. The inset is drawn
+    a little deeper than life — a real border sits about three per cent of the
+    width in, which at this size is under a pixel and reads as nothing at all.
+    Exaggerating it is what makes the three swatches tell each other apart,
+    which is the only job they have.
+  */
+  const w = 44;
+  const h = 26;
+  const inset = 3.5;
+  const gap = 2.2;
+
+  return (
+    <Group label={t('decor.border')}>
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('decor.border')}>
+        {BORDERS.map((border) => (
+          <Option
+            key={border}
+            chosen={border === value}
+            disabled={!canHold(border)}
+            blockedLabel={t('block.choiceBlocked')}
+            onClick={() => onChange(border)}
+            label={t(`borders.${border}`)}
+          >
+            <svg viewBox="-1 -1 46 28" className="h-7 w-full" aria-hidden>
+              <path
+                d={signOutlinePath(shape, w, h)}
+                className={cx(
+                  'transition',
+                  border === value
+                    ? 'fill-oak/25 stroke-oak'
+                    : 'fill-surface-3 stroke-rule-strong group-hover:stroke-ink-3',
+                )}
+                strokeWidth={1.2}
+              />
+              {border !== 'none' && (
+                <path
+                  d={signOutlinePath(shape, w - inset * 2, h - inset * 2)}
+                  transform={`translate(${inset} ${inset})`}
+                  fill="none"
+                  className={border === value ? 'stroke-oak' : 'stroke-ink-3'}
+                  strokeWidth={1}
+                />
+              )}
+              {border === 'double' && (
+                <path
+                  d={signOutlinePath(shape, w - (inset + gap) * 2, h - (inset + gap) * 2)}
+                  transform={`translate(${inset + gap} ${inset + gap})`}
+                  fill="none"
+                  className={border === value ? 'stroke-oak' : 'stroke-ink-3'}
+                  strokeWidth={0.6}
+                />
+              )}
+            </svg>
+          </Option>
+        ))}
+      </div>
+    </Group>
+  );
+}
+
+/* ── How it is cut, finished and hung ─────────────────────────────────── */
+
+const METHODS: CarveMethod[] = ['vcarve', 'pocket', 'raised'];
 
 export function CutChoice({
   value,
@@ -334,28 +479,35 @@ export function CutChoice({
   value: CarveMethod;
   onChange: (method: CarveMethod) => void;
 }) {
+  const t = useTranslations('designer');
   return (
-    <Group label="Fräsning">
-      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Fräsning">
+    <Group label={t('carve.method')}>
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('carve.method')}>
         {METHODS.map((method) => (
           <Option
-            key={method.value}
-            chosen={method.value === value}
-            onClick={() => onChange(method.value)}
-            label={method.label}
+            key={method}
+            chosen={method === value}
+            onClick={() => onChange(method)}
+            label={t(`carve.methods.${method}`)}
           >
-            <svg viewBox="0 0 40 18" className="h-6 w-full" aria-hidden>
+            {/* A section through the groove each one leaves. */}
+            <svg viewBox="0 0 44 20" className="h-7 w-full" aria-hidden>
               <path
-                d={PROFILES[method.value]}
+                d={
+                  method === 'vcarve'
+                    ? 'M 2 5 H 15 L 22 16 L 29 5 H 42'
+                    : method === 'pocket'
+                      ? 'M 2 5 H 15 V 15 H 29 V 5 H 42'
+                      : 'M 2 15 H 15 V 5 H 29 V 15 H 42'
+                }
                 fill="none"
-                strokeWidth={1.8}
-                strokeLinejoin="round"
                 className={cx(
                   'transition',
-                  method.value === value
-                    ? 'stroke-oak'
-                    : 'stroke-rule-strong group-hover:stroke-ink-3',
+                  method === value ? 'stroke-oak' : 'stroke-rule-strong group-hover:stroke-ink-3',
                 )}
+                strokeWidth={1.6}
+                strokeLinejoin="round"
+                strokeLinecap="round"
               />
             </svg>
           </Option>
@@ -365,14 +517,7 @@ export function CutChoice({
   );
 }
 
-/* ── Finish ───────────────────────────────────────────────────────────── */
-
-const FINISHES: Array<{ value: Finish; label: string }> = [
-  { value: 'raw', label: 'Obehandlad' },
-  { value: 'oil', label: 'Olja' },
-  { value: 'paint', label: 'Färg i texten' },
-  { value: 'oilPaint', label: 'Färg och olja' },
-];
+const FINISHES: Finish[] = ['raw', 'oil', 'paint', 'oilPaint'];
 
 export function FinishChoice({
   value,
@@ -381,29 +526,44 @@ export function FinishChoice({
   value: Finish;
   onChange: (finish: Finish) => void;
 }) {
+  const t = useTranslations('designer');
   return (
-    <Group label="Yta">
-      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Yta">
+    <Group label={t('carve.finish')}>
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t('carve.finish')}>
         {FINISHES.map((finish) => (
-          <button
-            key={finish.value}
-            type="button"
-            role="radio"
-            aria-checked={finish.value === value}
-            onClick={() => onChange(finish.value)}
-            className={cx(
-              'flex items-center justify-between gap-2 rounded-md border px-3 py-2.5 text-left transition',
-              'text-[0.8125rem] duration-150 ease-[var(--ease-wood)]',
-              finish.value === value
-                ? 'border-oak bg-surface-2 text-ink shadow-sheet'
-                : 'border-rule text-ink-2 hover:border-rule-strong hover:bg-surface-2/60 hover:text-ink',
-            )}
-          >
-            <span className="truncate">{finish.label}</span>
-            {finish.value === value && (
-              <Check size={12} aria-hidden strokeWidth={3} className="text-oak shrink-0" />
-            )}
-          </button>
+          <Option
+            key={finish}
+            chosen={finish === value}
+            onClick={() => onChange(finish)}
+            label={t(`carve.finishes.${finish}`)}
+            className="flex-row items-center justify-start gap-2 px-3 text-left"
+          />
+        ))}
+      </div>
+    </Group>
+  );
+}
+
+const HANGINGS: Hanging[] = ['none', 'keyhole', 'rope', 'posts'];
+
+export function HangingChoice({
+  value,
+  onChange,
+}: {
+  value: Hanging;
+  onChange: (hanging: Hanging) => void;
+}) {
+  const t = useTranslations('designer');
+  return (
+    <Group label={t('carve.hanging')}>
+      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={t('carve.hanging')}>
+        {HANGINGS.map((hanging) => (
+          <Option
+            key={hanging}
+            chosen={hanging === value}
+            onClick={() => onChange(hanging)}
+            label={t(`carve.hangings.${hanging}`)}
+          />
         ))}
       </div>
     </Group>

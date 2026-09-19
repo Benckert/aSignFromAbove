@@ -6,13 +6,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowLeft, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { useDesigner } from '@/lib/designer/store';
-import { priceSign } from '@/lib/designer/pricing';
-import { isOrderable } from '@/lib/designer/constraints';
-import { exportSvg, svgToPng } from '@/lib/designer/export';
+import { useSign } from '@/lib/sign/store';
+import { priceSign } from '@/lib/sign/pricing';
+import { isBlank } from '@/lib/sign/text';
+import { exportSvg, svgToPng } from '@/lib/sign/export';
 import { signOrderContactSchema, type SignOrderContactInput } from '@/lib/forms/schemas';
 import { site } from '@/config/site';
-import { SignPreview } from './SignPreview';
+import { StaticSign } from './StaticSign';
 import { PriceCard } from './PriceCard';
 import { Field, inputClass } from '@/components/ui/Field';
 import { Segmented, Checkbox } from '@/components/ui/Controls';
@@ -37,7 +37,7 @@ export function OrderForm() {
   const e = useTranslations('errors.form');
   const locale = useLocale();
 
-  const design = useDesigner((s) => s.design);
+  const sign = useSign((s) => s.sign);
   const [hydrated, setHydrated] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [reference, setReference] = useState<string | null>(null);
@@ -45,12 +45,14 @@ export function OrderForm() {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    void useDesigner.persist.rehydrate();
+    void useSign.persist.rehydrate();
     setHydrated(true);
   }, []);
 
-  const price = priceSign(design);
-  const orderable = isOrderable(design);
+  const price = priceSign(sign);
+  // A board with nothing written on it is not an order, whatever else has been
+  // chosen about it.
+  const orderable = sign.blocks.some((block) => !isBlank(block.text));
 
   const {
     register,
@@ -103,7 +105,7 @@ export function OrderForm() {
       const response = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, design, previewPng }),
+        body: JSON.stringify({ ...values, design: sign, previewPng }),
       });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'failed');
@@ -117,9 +119,9 @@ export function OrderForm() {
 
   if (status === 'sent') {
     return (
-      <div className="shell max-w-2xl pb-16 pt-10 lg:pb-24 lg:pt-14">
-        <div className="rounded-lg border border-rule bg-surface-2 p-8">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-moss-wash text-moss-deep">
+      <div className="shell max-w-2xl pt-10 pb-16 lg:pt-14 lg:pb-24">
+        <div className="border-rule bg-surface-2 rounded-lg border p-8">
+          <span className="bg-moss-wash text-moss-deep grid h-11 w-11 place-items-center rounded-full">
             <Check size={20} aria-hidden />
           </span>
           <h1 className="display mt-5 text-[1.9rem]">{t('success.title')}</h1>
@@ -143,10 +145,10 @@ export function OrderForm() {
   }
 
   return (
-    <div className="shell pb-12 pt-6 lg:pb-16 lg:pt-8">
+    <div className="shell pt-6 pb-12 lg:pt-8 lg:pb-16">
       <Link
         href="/designer"
-        className="inline-flex items-center gap-1.5 text-[0.875rem] text-ink-2 transition hover:text-ink"
+        className="text-ink-2 hover:text-ink inline-flex items-center gap-1.5 text-[0.875rem] transition"
       >
         <ArrowLeft size={15} aria-hidden /> {t('changeDesign')}
       </Link>
@@ -163,7 +165,12 @@ export function OrderForm() {
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label={t('fields.name')} required error={errors.name && e('required')}>
               {(props) => (
-                <input {...props} {...register('name')} className={inputClass} autoComplete="name" />
+                <input
+                  {...props}
+                  {...register('name')}
+                  className={inputClass}
+                  autoComplete="name"
+                />
               )}
             </Field>
 
@@ -247,10 +254,12 @@ export function OrderForm() {
             amber made it the loudest element on a page whose actual subject is
             the sign.
           */}
-          <div className="rounded-md border border-rule bg-surface-2 p-4">
+          <div className="border-rule bg-surface-2 rounded-md border p-4">
             <Checkbox
               checked={Boolean(withdrawal)}
-              onChange={(v) => setValue('withdrawalAcknowledged', v as true, { shouldValidate: true })}
+              onChange={(v) =>
+                setValue('withdrawalAcknowledged', v as true, { shouldValidate: true })
+              }
               invalid={Boolean(errors.withdrawalAcknowledged)}
             >
               {t('withdrawal.acknowledge')}
@@ -261,7 +270,7 @@ export function OrderForm() {
               onClick={() => setWithdrawalOpen((v) => !v)}
               aria-expanded={withdrawalOpen}
               aria-controls="withdrawal-detail"
-              className="mt-2 ml-6.5 inline-flex items-center gap-1 text-[0.75rem] text-oak-deep transition hover:text-ink"
+              className="text-oak-deep hover:text-ink mt-2 ml-6.5 inline-flex items-center gap-1 text-[0.75rem] transition"
             >
               {t('withdrawal.more')}
               <ChevronDown
@@ -274,7 +283,7 @@ export function OrderForm() {
             <p
               id="withdrawal-detail"
               hidden={!withdrawalOpen}
-              className="ml-6.5 mt-2 text-[0.75rem] leading-relaxed text-ink-2"
+              className="text-ink-2 mt-2 ml-6.5 text-[0.75rem] leading-relaxed"
             >
               {t('withdrawal.body')}
             </p>
@@ -289,9 +298,9 @@ export function OrderForm() {
           />
 
           {status === 'error' && (
-            <div role="alert" className="rounded-md border border-rust/40 bg-rust-wash p-4">
-              <h2 className="text-[0.9375rem] font-semibold text-ink">{t('error.title')}</h2>
-              <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-2">
+            <div role="alert" className="border-rust/40 bg-rust-wash rounded-md border p-4">
+              <h2 className="text-ink text-[0.9375rem] font-semibold">{t('error.title')}</h2>
+              <p className="text-ink-2 mt-1.5 text-[0.8125rem] leading-relaxed">
                 {t('error.body', { email: site.contact.email })}
               </p>
             </div>
@@ -312,10 +321,10 @@ export function OrderForm() {
         {/* What they are about to send. */}
         <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
           <h2 className="label">{t('summary')}</h2>
-          <div className="rounded-lg border border-rule bg-surface-2 p-4">
+          <div className="border-rule bg-surface-2 rounded-lg border p-4">
             {hydrated && (
-              <SignPreview
-                design={design}
+              <StaticSign
+                sign={sign}
                 svgRef={svgRef}
                 label={d('preview.label')}
                 className="h-auto w-full"
