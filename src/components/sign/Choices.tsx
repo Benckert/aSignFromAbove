@@ -27,6 +27,8 @@ function Option({
   detail,
   children,
   className,
+  /** Set when this choice would leave the lettering with nowhere to go. */
+  disabled,
 }: {
   chosen: boolean;
   onClick: () => void;
@@ -34,12 +36,15 @@ function Option({
   detail?: string;
   children?: React.ReactNode;
   className?: string;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       role="radio"
       aria-checked={chosen}
+      disabled={disabled}
+      title={disabled ? 'Texten får inte plats på en sådan skylt' : undefined}
       onClick={onClick}
       className={cx(
         'group relative flex flex-col items-center gap-1.5 rounded-md border p-2.5 text-center transition',
@@ -47,6 +52,7 @@ function Option({
         chosen
           ? 'border-oak bg-surface-2 text-ink shadow-sheet'
           : 'border-rule text-ink-2 hover:border-rule-strong hover:bg-surface-2/60 hover:text-ink',
+        disabled && 'pointer-events-none opacity-30',
         className,
       )}
     >
@@ -98,10 +104,13 @@ export function SizeChoice({
   widthMm,
   heightMm,
   onChange,
+  canHold,
 }: {
   widthMm: number;
   heightMm: number;
   onChange: (size: { widthMm: number; heightMm: number }) => void;
+  /** Whether a board of this size could still carry the lettering. */
+  canHold?: (size: { widthMm: number; heightMm: number }) => boolean;
 }) {
   const matches = SIZES.some((s) => s.widthMm === widthMm && s.heightMm === heightMm);
   const [custom, setCustom] = useState(!matches);
@@ -144,6 +153,7 @@ export function SizeChoice({
             <Option
               key={size.label}
               chosen={size.widthMm === widthMm && size.heightMm === heightMm}
+              disabled={canHold ? !canHold(size) : false}
               onClick={() => onChange({ widthMm: size.widthMm, heightMm: size.heightMm })}
               label={size.label}
               detail={`${size.widthMm}×${size.heightMm}`}
@@ -225,9 +235,12 @@ const SHAPES: Array<{ value: SignShape; label: string }> = [
 export function ShapeChoice({
   value,
   onChange,
+  canHold,
 }: {
   value: SignShape;
   onChange: (shape: SignShape) => void;
+  /** Whether this shape leaves the lettering enough board to sit on. */
+  canHold?: (shape: SignShape) => boolean;
 }) {
   return (
     <Group label="Form">
@@ -236,6 +249,7 @@ export function ShapeChoice({
           <Option
             key={shape.value}
             chosen={shape.value === value}
+            disabled={canHold ? !canHold(shape.value) : false}
             onClick={() => onChange(shape.value)}
             label={shape.label}
           >

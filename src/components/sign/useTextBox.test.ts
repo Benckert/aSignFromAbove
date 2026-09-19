@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { CARVING_FONTS, getFont } from '@/config/carving-fonts';
 import { defaultDraft, safeArea, type Draft } from '@/lib/sign/draft';
 import type { LetteringSize } from '@/lib/sign/store';
-import { capLimits, MIN_CAP_MM } from './useTextBox';
+import { MIN_CAP_MM } from '@/lib/sign/text';
+import { capLimits } from './useTextBox';
 
 /**
  * What can be tested without a browser, which is now most of what matters.

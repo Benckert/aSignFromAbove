@@ -1,12 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { getFont } from '@/config/carving-fonts';
 import { safeArea, type Draft } from '@/lib/sign/draft';
 import { useSign, type LetteringSize } from '@/lib/sign/store';
-
-/** Smallest letters offered, whatever the face says. */
-export const MIN_CAP_MM = 8;
+import { minCapMm } from '@/lib/sign/text';
 
 /**
  * How big the lettering is, asked of the thing that drew it.
@@ -122,15 +119,11 @@ export interface CapLimits {
  * largest size that still fits the safe area, exactly, for this word in this
  * face on this board.
  *
- * The floor is the one estimate left in this designer. A face's narrowest
- * stroke is a property of its outlines, and finding it means measuring the
- * medial axis of every glyph, so the catalogue's declared ratio stands in. It
- * is advisory: a millimetre out costs a slightly conservative floor, not a sign
- * that cannot be cut.
+ * The floor comes from the face and the finest cutter, and is the same one the
+ * rest of the designer uses to decide whether a name will go on a board at all.
  */
 export function capLimits(draft: Draft, size: LetteringSize | null): CapLimits {
-  const face = getFont(draft.block.fontId);
-  const min = Math.max(MIN_CAP_MM, Math.ceil(0.8 / face.strokeRatio));
+  const min = minCapMm(draft.block.fontId);
 
   if (!size || size.widthMm <= 0 || size.heightMm <= 0) {
     return { min, max: Math.max(min, 200) };

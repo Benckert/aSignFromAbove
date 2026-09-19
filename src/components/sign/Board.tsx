@@ -8,7 +8,8 @@ import { WoodDefs } from '@/components/designer/WoodDefs';
 import { boardGuides, snapBox, type Guide } from '@/lib/sign/snap';
 import { patchBlock, useSign } from '@/lib/sign/store';
 import { safeArea } from '@/lib/sign/draft';
-import { BoardText, isBlank } from './BoardText';
+import { isBlank } from '@/lib/sign/text';
+import { BoardText } from './BoardText';
 import { capLimits, useMeasuredLettering } from './useTextBox';
 import { cx } from '@/lib/cx';
 

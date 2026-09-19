@@ -2,6 +2,7 @@
 
 import { getFont } from '@/config/carving-fonts';
 import type { TextBlock } from '@/lib/sign/draft';
+import { isBlank, toLines } from '@/lib/sign/text';
 
 /**
  * The lettering, set by the browser.
@@ -35,18 +36,6 @@ import type { TextBlock } from '@/lib/sign/draft';
  * less that. Measurement is for the selection frame, the snapping and that
  * correction, and all of it happens afterwards.
  */
-
-/** Whether there is anything to carve. */
-export function isBlank(text: string): boolean {
-  return text.trim() === '';
-}
-
-/** Splits a block into lines, dropping trailing blank ones. */
-export function toLines(text: string): string[] {
-  const lines = text.split('\n');
-  while (lines.length > 1 && lines[lines.length - 1].trim() === '') lines.pop();
-  return lines;
-}
 
 export function BoardText({
   block,

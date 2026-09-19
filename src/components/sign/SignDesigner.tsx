@@ -7,13 +7,14 @@ import { getWood } from '@/config/woods';
 import { formatOre, priceSign } from '@/lib/designer/pricing';
 import type { WoodId } from '@/config/woods';
 import { useSign } from '@/lib/sign/store';
+import { canHold, useFacesReady } from '@/lib/sign/fits';
 import { toSignDesign } from '@/lib/sign/draft';
 import { ButtonLink } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Board } from './Board';
 import { Lettering, type Rect } from './Lettering';
 import { CutChoice, FinishChoice, ShapeChoice, SizeChoice, WoodChoice } from './Choices';
-import { isBlank } from './BoardText';
+import { isBlank } from '@/lib/sign/text';
 import { useFitLettering } from './useTextBox';
 import { cx } from '@/lib/cx';
 
@@ -59,6 +60,35 @@ export function SignDesigner() {
 
   const size = useSign((s) => s.size);
   useFitLettering(draft, size);
+
+  /*
+    Which boards and which shapes could still carry what is written.
+
+    A sign has a smallest letter it can be cut at, so a long name in a fine
+    face genuinely will not go on a small board — and the honest thing to do
+    with a choice that cannot be honoured is not to offer it. Recomputed only
+    when the words, the face or the board change; moving the lettering around
+    cannot affect whether it fits.
+  */
+  const facesReady = useFacesReady();
+  const holds = useMemo(() => {
+    return {
+      size: (next: { widthMm: number; heightMm: number }) =>
+        !facesReady || canHold({ ...draft, ...next }),
+      shape: (next: typeof draft.shape) => !facesReady || canHold({ ...draft, shape: next }),
+    };
+    // Position is not an input: it moves the lettering, it does not resize it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    facesReady,
+    draft.block.text,
+    draft.block.fontId,
+    draft.block.trackingEm,
+    draft.block.lineSpacing,
+    draft.widthMm,
+    draft.heightMm,
+    draft.shape,
+  ]);
   const price = useMemo(() => priceSign(toSignDesign(draft)), [draft]);
   const wood = getWood(draft.woodId);
   /*
@@ -238,6 +268,7 @@ export function SignDesigner() {
             <SizeChoice
               widthMm={draft.widthMm}
               heightMm={draft.heightMm}
+              canHold={holds.size}
               /*
               Changing the board carries the lettering with it, in proportion.
               Keeping the millimetres instead would leave a line that sat in the
@@ -258,6 +289,7 @@ export function SignDesigner() {
             />
             <ShapeChoice
               value={draft.shape}
+              canHold={holds.shape}
               onChange={(shape) => commit((d) => ({ ...d, shape }))}
             />
             <WoodChoice

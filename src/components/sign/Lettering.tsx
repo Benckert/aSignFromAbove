@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenter,
   AlignLeft,
@@ -12,6 +12,7 @@ import {
   Type,
 } from 'lucide-react';
 import { CARVING_FONTS, getFont } from '@/config/carving-fonts';
+import { canHold, canHoldAnotherLine, longestFitting, useFacesReady } from '@/lib/sign/fits';
 import { patchBlock, useSign } from '@/lib/sign/store';
 import { capLimits } from './useTextBox';
 import { cx } from '@/lib/cx';
@@ -77,6 +78,7 @@ export function Lettering({
   const want = useSign((s) => s.want);
   const limits = capLimits(draft, measured);
 
+  const facesReady = useFacesReady();
   const field = useRef<HTMLTextAreaElement | null>(null);
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
@@ -85,6 +87,38 @@ export function Lettering({
   const face = getFont(block.fontId);
   const size = Math.min(Math.max(block.capHeightMm, limits.min), limits.max);
   const lines = block.text.split('\n');
+
+  /*
+    Which faces this sign could actually be cut in.
+
+    A face the words will not fit in at any cuttable size is not offered, rather
+    than offered and then complained about. Worked out from the words and the
+    board alone, so dragging the lettering around does not set nine text
+    measurements going on every frame.
+  */
+  const unusable = useMemo(() => {
+    const out = new Set<string>();
+    if (!facesReady) return out;
+    for (const option of CARVING_FONTS) {
+      if (option.id === block.fontId) continue;
+      if (!canHold({ ...draft, block: { ...block, fontId: option.id } })) out.add(option.id);
+    }
+    return out;
+    // Position is deliberately not an input: it cannot change whether the
+    // lettering fits, only where inside the board it sits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    facesReady,
+    block.text,
+    block.fontId,
+    block.trackingEm,
+    block.lineSpacing,
+    draft.widthMm,
+    draft.heightMm,
+    draft.shape,
+  ]);
+
+  const roomForALine = !facesReady || canHoldAnotherLine(draft);
 
   // Focus follows the intent to edit, and selects what is there so that typing
   // replaces the old words rather than appending to them.
@@ -173,7 +207,7 @@ export function Lettering({
   };
 
   const addLine = () => {
-    if (lines.length >= MAX_LINES) return;
+    if (lines.length >= MAX_LINES || !roomForALine) return;
     commit(patchBlock({ text: `${block.text}\n` }));
     onEditingChange(true);
     // Put the caret on the new line rather than wherever it happened to be.
@@ -212,7 +246,16 @@ export function Lettering({
       <textarea
         ref={field}
         value={block.text}
-        onChange={(e) => commit(patchBlock({ text: e.target.value.slice(0, 120) }))}
+        /*
+          Two limits, both of them silent. A hundred and twenty characters is
+          the most any sign here carries; beyond that, what the board itself
+          can hold — type or paste past either and nothing happens, the way a
+          text field with a length limit behaves. The alternative is letting
+          the words run off the edge of the wood and then explaining why.
+        */
+        onChange={(e) =>
+          commit(patchBlock({ text: longestFitting(draft, e.target.value.slice(0, 120)) }))
+        }
         onFocus={() => onEditingChange(true)}
         onBlur={() => onEditingChange(false)}
         onKeyDown={(e) => {
@@ -220,7 +263,7 @@ export function Lettering({
           // other text box — it starts a line — until the sign cannot carry
           // another one.
           if (e.key === 'Escape') e.currentTarget.blur();
-          if (e.key === 'Enter' && lines.length >= MAX_LINES) e.preventDefault();
+          if (e.key === 'Enter' && (lines.length >= MAX_LINES || !roomForALine)) e.preventDefault();
         }}
         rows={1}
         spellCheck={false}
@@ -276,7 +319,7 @@ export function Lettering({
         <button
           type="button"
           onClick={addLine}
-          disabled={lines.length >= MAX_LINES}
+          disabled={lines.length >= MAX_LINES || !roomForALine}
           className={cx(
             'border-rule text-ink-2 hover:border-rule-strong hover:text-ink flex items-center gap-1.5',
             'rounded-sm border px-2.5 py-1.5 text-[0.75rem] transition',
@@ -325,10 +368,14 @@ export function Lettering({
         <div className="border-rule mt-2 grid max-h-[13rem] grid-cols-2 gap-1 overflow-y-auto border-t pt-2">
           {CARVING_FONTS.map((option) => {
             const chosen = option.id === block.fontId;
+            const tooWide = unusable.has(option.id);
             return (
               <button
                 key={option.id}
                 type="button"
+                disabled={tooWide}
+                // Said once, quietly, for anyone who wonders why it is greyed.
+                title={tooWide ? 'Texten får inte plats på skylten i den här stilen' : undefined}
                 onClick={() => {
                   commit(patchBlock({ fontId: option.id }));
                   setFacesOpen(false);
@@ -336,6 +383,7 @@ export function Lettering({
                 className={cx(
                   'flex items-center justify-between gap-1 rounded-sm px-2.5 py-2 text-left text-[1rem] transition',
                   chosen ? 'bg-surface-3 text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink',
+                  tooWide && 'pointer-events-none opacity-30',
                 )}
                 style={{ fontFamily: option.cssFamily }}
               >
